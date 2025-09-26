@@ -39,10 +39,10 @@
   --color-surface-border: #2a4a6f;
   --color-surface-divider: #1f3d62;
 
-  /* Text Colors */
-  --color-text-primary: #e8f1f5;
-  --color-text-secondary: #a8c2d3;
-  --color-text-tertiary: #7693a8;
+  /* Text Colors - Brightened for better visibility */
+  --color-text-primary: #f0f8fc;
+  --color-text-secondary: #b8d2e3;
+  --color-text-tertiary: #8fa3b8;
   --color-text-inverse: #0a1628;
   --color-text-accent: #4dadc7;
 

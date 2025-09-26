@@ -164,7 +164,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       {showMentions && filteredPersonas.length > 0 && (
         <div className="absolute bottom-full left-0 right-0 mb-2 mx-4">
           <div className="rounded-lg py-2 max-h-48 overflow-y-auto mention-dropdown">
-            <div className="px-3 py-1 text-xs text-gray-500 font-medium">
+            <div className="px-3 py-1 text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
               Mention a participant
             </div>
             {filteredPersonas.map((persona, index) => (
@@ -176,9 +176,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                   index === selectedMentionIndex ? 'selected' : ''
                 }`}
               >
-                <AtSign className="h-4 w-4 text-gray-400" />
+                <AtSign className="h-4 w-4" style={{ color: 'var(--color-text-tertiary)' }} />
                 <span className="text-sm">{persona.name}</span>
-                <span className="text-xs text-gray-500">{persona.role}</span>
+                <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{persona.role}</span>
               </button>
             ))}
           </div>
@@ -215,7 +215,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           >
             <Code className="h-4 w-4" />
           </Button>
-          <div className="w-px h-4 bg-gray-300 mx-1" />
+          <div className="w-px h-4 mx-1" style={{ backgroundColor: 'var(--color-surface-divider)' }} />
           <Button
             variant="ghost"
             size="sm"
@@ -266,7 +266,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             placeholder={placeholder}
             disabled={disabled}
             rows={1}
-            className="flex-1 resize-none rounded-lg px-3 py-2 text-sm focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed message-input"
+            className="flex-1 resize-none rounded-lg px-3 py-2 text-sm focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed message-input border"
+            style={{ backgroundColor: 'var(--color-surface-secondary)', borderColor: 'var(--color-surface-border)', color: 'var(--color-text-primary)' }}
             style={{ minHeight: '38px', maxHeight: '120px' }}
             onInput={(e) => {
               const target = e.target as HTMLTextAreaElement
@@ -285,13 +286,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         </div>
 
         {/* Helper Text */}
-        <div className="mt-2 text-xs text-gray-500">
+        <div className="mt-2 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
           <span>Press </span>
-          <kbd className="px-1 py-0.5 bg-gray-100 rounded">Enter</kbd>
+          <kbd className="px-1 py-0.5 rounded" style={{ backgroundColor: 'var(--color-secondary-800)', color: 'var(--color-secondary-200)' }}>Enter</kbd>
           <span> to send, </span>
-          <kbd className="px-1 py-0.5 bg-gray-100 rounded">Shift+Enter</kbd>
+          <kbd className="px-1 py-0.5 rounded" style={{ backgroundColor: 'var(--color-secondary-800)', color: 'var(--color-secondary-200)' }}>Shift+Enter</kbd>
           <span> for new line, </span>
-          <kbd className="px-1 py-0.5 bg-gray-100 rounded">@</kbd>
+          <kbd className="px-1 py-0.5 rounded" style={{ backgroundColor: 'var(--color-secondary-800)', color: 'var(--color-secondary-200)' }}>@</kbd>
           <span> to mention</span>
         </div>
       </div>

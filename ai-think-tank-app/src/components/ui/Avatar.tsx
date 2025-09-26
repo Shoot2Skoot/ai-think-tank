@@ -39,7 +39,7 @@ export const Avatar: React.FC<AvatarProps> = ({
     <div
       className={cn(
         'relative inline-flex items-center justify-center overflow-hidden rounded-full',
-        'bg-primary-900 bg-opacity-20',
+        'bg-primary-800',
         sizes[size],
         className
       )}

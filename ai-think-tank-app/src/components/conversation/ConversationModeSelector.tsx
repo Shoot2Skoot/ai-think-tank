@@ -25,31 +25,31 @@ const modeConfig: Record<ConversationType, {
     label: 'Ideation',
     icon: Lightbulb,
     description: 'Creative brainstorming and ideas',
-    color: 'text-yellow-600 hover:bg-yellow-50'
+    color: 'text-yellow-400 hover:bg-yellow-900 hover:bg-opacity-20'
   },
   refinement: {
     label: 'Refinement',
     icon: Search,
     description: 'Polish and improve concepts',
-    color: 'text-purple-600 hover:bg-purple-50'
+    color: 'text-purple-400 hover:bg-purple-900 hover:bg-opacity-20'
   },
   debate: {
     label: 'Debate',
     icon: MessageSquare,
     description: 'Critical discussion and analysis',
-    color: 'text-red-600 hover:bg-red-50'
+    color: 'text-red-400 hover:bg-red-900 hover:bg-opacity-20'
   },
   brainstorm: {
     label: 'Brainstorm',
     icon: Brain,
     description: 'Free-flowing creative exploration',
-    color: 'text-green-600 hover:bg-green-50'
+    color: 'text-green-400 hover:bg-green-900 hover:bg-opacity-20'
   },
   review: {
     label: 'Review',
     icon: Hash,
     description: 'Systematic evaluation and feedback',
-    color: 'text-indigo-600 hover:bg-indigo-50'
+    color: 'text-indigo-400 hover:bg-indigo-900 hover:bg-opacity-20'
   },
   casual: {
     label: 'Casual',
@@ -65,7 +65,7 @@ export const ConversationModeSelector: React.FC<ConversationModeSelectorProps> =
   disabled = false
 }) => {
   return (
-    <div className="border-b border-surface-border bg-opacity-10 bg-primary-900 px-4 py-2">
+    <div className="border-b px-4 py-2" style={{ borderColor: 'var(--color-surface-border)', backgroundColor: 'var(--color-bg-secondary)' }}>
       <div className="flex items-center space-x-2">
         <span className="text-xs font-medium text-text-tertiary uppercase tracking-wider">Mode:</span>
         <div className="flex items-center space-x-1">
@@ -82,7 +82,7 @@ export const ConversationModeSelector: React.FC<ConversationModeSelectorProps> =
                 className={cn(
                   'group relative flex items-center space-x-1 px-3 py-1.5 rounded-md text-sm font-medium transition-all',
                   isActive
-                    ? `${config.color.split(' ')[0]} bg-surface-primary shadow-sm border border-surface-border`
+                    ? `${config.color.split(' ')[0]} bg-primary-900 bg-opacity-30 shadow-sm border border-primary-600`
                     : `text-text-secondary ${config.color.split(' ')[1]} hover:text-text-primary`,
                   disabled && 'opacity-50 cursor-not-allowed'
                 )}
