@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/Badge'
 import { ModelSelector, ModelBadge } from './ModelSelector'
 import { getProviderColor, getExperienceColor } from '@/lib/utils'
 import { getModelLabel } from '@/lib/models'
+import { generateAvatarUrl } from '@/utils/avatar-generator'
 import type { Persona, Provider } from '@/types'
 
 interface PersonaCardProps {
@@ -55,7 +56,18 @@ export const PersonaCard: React.FC<PersonaCardProps> = ({
         className="cursor-pointer"
       >
         <div className="flex items-start space-x-3">
-          <Avatar fallback={template.name} size="sm" />
+          <div
+            className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center"
+            style={{ backgroundColor: template.color || '#6366f1' }}
+          >
+            <Avatar
+              generatedUrl={generateAvatarUrl(template)}
+              fallback={template.name}
+              size="sm"
+              className="bg-transparent"
+              style={{ transform: 'scale(0.8)' }}
+            />
+          </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-text-primary truncate">
               {template.name}

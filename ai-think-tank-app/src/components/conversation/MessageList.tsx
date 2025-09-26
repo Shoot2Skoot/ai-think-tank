@@ -9,6 +9,7 @@ import { SeenIndicator } from './SeenIndicator'
 import { MessageEditor } from './MessageEditor'
 import { MessageActions } from './MessageActions'
 import { Edit3 } from 'lucide-react'
+import { generateAvatarUrl, generateUserAvatarUrl } from '@/utils/avatar-generator'
 import type { Message, Persona } from '@/types'
 
 interface MessageListProps {
@@ -82,17 +83,18 @@ export const MessageList: React.FC<MessageListProps> = ({
           <div className="w-10 flex-shrink-0">
             {showAvatar && !isSystem && (
               <div
-                className="rounded-full inline-flex items-center justify-center"
+                className="w-8 h-8 rounded-full inline-flex items-center justify-center overflow-hidden"
                 style={{
-                  background: isUser ? '#2563eb' : (persona?.color || 'transparent'),
-                  padding: isUser || persona?.color ? '3.75px' : '0'
+                  background: isUser ? '#2563eb' : (persona?.color || '#6366f1')
                 }}
               >
                 <Avatar
+                  generatedUrl={isUser ? generateUserAvatarUrl('You') : (persona ? generateAvatarUrl(persona) : undefined)}
                   src={persona?.avatar_url}
                   fallback={isUser ? 'You' : persona?.name || 'AI'}
                   size="sm"
-                  className={isUser ? 'bg-blue-600' : ''}
+                  className="bg-transparent"
+                  style={{ transform: 'scale(0.75)' }}
                 />
               </div>
             )}

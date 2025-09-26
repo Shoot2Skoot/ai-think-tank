@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { getProviderColor, getExperienceColor } from '@/lib/utils'
 import { getModelLabel } from '@/lib/models'
+import { generateAvatarUrl } from '@/utils/avatar-generator'
 import type { Persona } from '@/types'
 
 interface PersonaSelectorProps {
@@ -36,7 +37,18 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
         <div className="flex items-center space-x-2">
           {selectedPersona ? (
             <>
-              <Avatar src={selectedPersona.avatar} fallback={selectedPersona.name} size="sm" />
+              <div
+                className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center"
+                style={{ backgroundColor: selectedPersona.color || '#6366f1' }}
+              >
+                <Avatar
+                  generatedUrl={generateAvatarUrl(selectedPersona)}
+                  fallback={selectedPersona.name}
+                  size="xs"
+                  className="bg-transparent"
+                  style={{ transform: 'scale(0.8)' }}
+                />
+              </div>
               <span className="truncate">{selectedPersona.name}</span>
             </>
           ) : (
@@ -90,7 +102,18 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
                 onClick={() => handleSelect(persona.id)}
               >
                 <div className="flex items-start space-x-3">
-                  <Avatar src={persona.avatar} fallback={persona.name} size="md" />
+                  <div
+                    className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center"
+                    style={{ backgroundColor: persona.color || '#6366f1' }}
+                  >
+                    <Avatar
+                      generatedUrl={generateAvatarUrl(persona)}
+                      fallback={persona.name}
+                      size="sm"
+                      className="bg-transparent"
+                      style={{ transform: 'scale(0.8)' }}
+                    />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-text-primary">{persona.name}</p>
                     <p className="text-sm text-text-secondary">{persona.role}</p>

@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Circle, Coffee, Music, Code, Sparkles, Brain
 import { useConversationStore } from '@/stores/conversation-store'
 import { personaService } from '@/services/persona-service'
 import { supabase } from '@/lib/supabase'
+import { generateAvatarUrl } from '@/utils/avatar-generator'
 import type { Persona, Message } from '@/types'
 
 interface PersonaPresencePanelProps {
@@ -126,30 +127,21 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
 
   const renderAvatar = (persona: Persona, size: 'small' | 'medium' = 'medium') => {
     const sizeClasses = size === 'small' ? 'w-8 h-8' : 'w-10 h-10'
-    const textSize = size === 'small' ? 'text-xs' : 'text-sm'
 
-    // Try to get avatar from persona object - check both avatar and avatar_url fields
-    const avatarUrl = (persona as any).avatar || (persona as any).avatar_url
+    // Generate DiceBear avatar URL based on demographics
+    const generatedUrl = generateAvatarUrl(persona)
 
-    if (avatarUrl) {
-      return (
-        <div className={`${sizeClasses} rounded-full overflow-hidden`}>
-          <img
-            src={avatarUrl}
-            alt={persona.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )
-    }
-
-    // Fallback to initials if no avatar found
     return (
       <div
-        className={`${sizeClasses} rounded-full flex items-center justify-center text-white font-medium ${textSize}`}
+        className={`${sizeClasses} rounded-full overflow-hidden flex items-center justify-center`}
         style={{ backgroundColor: persona.color || '#6366f1' }}
       >
-        {getInitials(persona.name)}
+        <img
+          src={generatedUrl}
+          alt={persona.name}
+          className="w-full h-full object-cover"
+          style={{ transform: 'scale(0.8)' }}
+        />
       </div>
     )
   }

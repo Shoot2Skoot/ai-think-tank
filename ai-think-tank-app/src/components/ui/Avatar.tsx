@@ -6,6 +6,7 @@ interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   alt?: string
   fallback?: string
   size?: 'xs' | 'sm' | 'md' | 'lg'
+  generatedUrl?: string  // For DiceBear generated avatars
 }
 
 export const Avatar: React.FC<AvatarProps> = ({
@@ -14,6 +15,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   alt,
   fallback,
   size = 'md',
+  generatedUrl,
   ...props
 }) => {
   const sizes = {
@@ -35,6 +37,9 @@ export const Avatar: React.FC<AvatarProps> = ({
       .toUpperCase()
   }
 
+  // Use generated URL if provided, otherwise use src
+  const avatarUrl = generatedUrl || src
+
   return (
     <div
       className={cn(
@@ -45,9 +50,9 @@ export const Avatar: React.FC<AvatarProps> = ({
       )}
       {...props}
     >
-      {src ? (
+      {avatarUrl ? (
         <img
-          src={src}
+          src={avatarUrl}
           alt={alt || ''}
           className="h-full w-full object-cover"
         />
