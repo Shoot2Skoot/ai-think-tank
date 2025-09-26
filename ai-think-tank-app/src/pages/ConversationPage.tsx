@@ -12,6 +12,7 @@ import { useConversationStore } from '@/stores/conversation-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useAIReactions } from '@/hooks/useAIReactions'
 import { conversationManager } from '@/services/conversation/conversation-manager'
+import { supabase } from '@/lib/supabase'
 import type { ConversationType } from '@/types'
 
 export const ConversationPage: React.FC = () => {
@@ -40,7 +41,6 @@ export const ConversationPage: React.FC = () => {
   const [streamingContent, setStreamingContent] = useState<Record<string, string>>({})
   const [conversationMode, setConversationMode] = useState<ConversationType>('planning')
   const [typingPersonaIds, setTypingPersonaIds] = useState<string[]>([])
-  const [pinnedMessageIds, setPinnedMessageIds] = useState<string[]>([])
   const [replyToMessageId, setReplyToMessageId] = useState<string | null>(null)
 
   // Load conversations list on mount
@@ -129,19 +129,38 @@ export const ConversationPage: React.FC = () => {
     }
   }
 
-  const handlePinMessage = (messageId: string) => {
-    setPinnedMessageIds(prev => {
-      const newPinnedIds = prev.includes(messageId)
-        ? prev.filter(id => id !== messageId)
-        : [...prev, messageId]
+  const handlePinMessage = async (messageId: string) => {
+    if (!user?.id || !activeConversation?.id) return
 
-      // Update conversation manager with pinned messages
-      if (activeConversation?.id) {
-        conversationManager.setPinnedMessages(activeConversation.id, newPinnedIds)
-      }
+    const message = messages.find(m => m.id === messageId)
+    if (!message) return
 
-      return newPinnedIds
-    })
+    const isPinned = message.is_pinned || false
+
+    try {
+      // Update the database
+      const { error } = await supabase
+        .from('messages')
+        .update({
+          is_pinned: !isPinned,
+          pinned_at: !isPinned ? new Date().toISOString() : null,
+          pinned_by: !isPinned ? user.id : null
+        })
+        .eq('id', messageId)
+
+      if (error) throw error
+
+      // Update local state by reloading the conversation
+      await loadConversation(activeConversation.id)
+
+      // Update conversation manager with pinned message IDs
+      const pinnedIds = messages
+        .filter(m => m.id === messageId ? !isPinned : m.is_pinned)
+        .map(m => m.id)
+      conversationManager.setPinnedMessages(activeConversation.id, pinnedIds)
+    } catch (error) {
+      console.error('Failed to pin/unpin message:', error)
+    }
   }
 
   const handleReplyMessage = (messageId: string) => {
@@ -210,7 +229,7 @@ export const ConversationPage: React.FC = () => {
           conversationId={activeConversation?.id}
           onPinMessage={handlePinMessage}
           onReplyMessage={handleReplyMessage}
-          pinnedMessageIds={pinnedMessageIds}
+          pinnedMessageIds={messages.filter(m => m.is_pinned).map(m => m.id)}
         />
 
         {/* Input */}

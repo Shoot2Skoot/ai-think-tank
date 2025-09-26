@@ -91,6 +91,9 @@ export interface Message {
   created_at: string
   metadata?: any
   reactions?: MessageReaction[]
+  is_pinned?: boolean
+  pinned_at?: string
+  pinned_by?: string
 }
 
 export interface MessageReaction {

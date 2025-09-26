@@ -410,14 +410,13 @@ export class ConversationManager {
     const result: BaseMessage[] = []
 
     // Add pinned messages context at the beginning if any
-    if (pinnedIds.length > 0) {
-      const pinnedMessages = messages.filter(m => pinnedIds.includes(m.id))
-      if (pinnedMessages.length > 0) {
-        const pinnedContext = pinnedMessages.map(m =>
-          `[PINNED] ${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`
-        ).join('\n')
-        result.push(new SystemMessage(`Important pinned messages for context:\n${pinnedContext}`))
-      }
+    // First check for database-persisted pinned messages
+    const pinnedMessages = messages.filter(m => m.is_pinned || pinnedIds.includes(m.id))
+    if (pinnedMessages.length > 0) {
+      const pinnedContext = pinnedMessages.map(m =>
+        `[PINNED] ${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`
+      ).join('\n')
+      result.push(new SystemMessage(`Important pinned messages for context:\n${pinnedContext}`))
     }
 
     // Add regular messages

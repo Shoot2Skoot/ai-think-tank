@@ -120,6 +120,14 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
       // Get cost breakdown
       const costBreakdown = await conversationManager.getConversationCost(conversationId)
 
+      // Update conversation manager with pinned messages
+      if (messages) {
+        const pinnedIds = messages.filter(m => m.is_pinned).map(m => m.id)
+        if (pinnedIds.length > 0) {
+          conversationManager.setPinnedMessages(conversationId, pinnedIds)
+        }
+      }
+
       set({
         activeConversation: conversation,
         personas: personas || [],
