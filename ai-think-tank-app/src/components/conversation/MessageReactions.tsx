@@ -24,7 +24,8 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
   className,
   isMessageHovered = false
 }) => {
-  const [quickReactions, setQuickReactions] = useState<string[]>([])  const [showQuickReactions, setShowQuickReactions] = useState(false)
+  const [quickReactions, setQuickReactions] = useState<string[]>([])
+  const [showQuickReactions, setShowQuickReactions] = useState(false)
 
   useEffect(() => {
     // Load quick reactions
@@ -59,66 +60,72 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
   }
 
   return (
-    <div
-      className={cn("flex items-center gap-1 mt-1", className)}
-    >
-      {/* Existing reactions */}
-      <div className="flex flex-wrap gap-1">
-        {reactions.map(reaction => (
-          <button
-            key={reaction.emoji}
-            onClick={() => handleReactionClick(reaction.emoji)}
-            className={cn(
-              "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-sm transition-all",
-              "hover:scale-110",
-              reaction.reacted_by_user
-                ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 ring-1 ring-blue-500"
-                : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
-            )}
-            title={getReactionTooltip(reaction)}
-          >
-            <span>{reaction.emoji}</span>
-            {reaction.count > 1 && (
-              <span className="text-xs font-medium">{reaction.count}</span>
-            )}
-          </button>
-        ))}
-      </div>
+    <>
+      {/* Existing reactions - only show if there are reactions */}
+      {reactions.length > 0 && (
+        <div className={cn("flex flex-wrap gap-1 mt-1", className)}>
+          {reactions.map(reaction => (
+            <button
+              key={reaction.emoji}
+              onClick={() => handleReactionClick(reaction.emoji)}
+              className={cn(
+                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-sm transition-all",
+                "hover:scale-110",
+                reaction.reacted_by_user
+                  ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 ring-1 ring-blue-500"
+                  : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+              )}
+              title={getReactionTooltip(reaction)}
+            >
+              <span>{reaction.emoji}</span>
+              {reaction.count > 1 && (
+                <span className="text-xs font-medium">{reaction.count}</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
 
-      {/* Quick reactions on hover */}
-      {isMessageHovered && quickReactions.length > 0 && (
-        <div className="flex items-center gap-0.5 ml-1 animate-fadeIn">
+      {/* Floating reaction bar on hover - absolute positioned */}
+      {isMessageHovered && (
+        <div
+          className="absolute top-full mt-1 left-0 flex items-center gap-1 px-2 py-1 rounded-lg shadow-lg border animate-fadeIn z-10 pointer-events-auto"
+          style={{
+            backgroundColor: 'var(--color-surface-primary)',
+            borderColor: 'var(--color-surface-border)'
+          }}
+          onMouseEnter={(e) => e.stopPropagation()}
+          onMouseLeave={(e) => e.stopPropagation()}
+        >
+          {/* Quick reactions */}
           {quickReactions
             .filter(emoji => !reactions.find(r => r.emoji === emoji))
-            .slice(0, 3)
+            .slice(0, 5)
             .map(emoji => (
               <button
                 key={emoji}
                 onClick={() => handleReactionClick(emoji)}
                 className="p-1 rounded transition-all hover:scale-110"
-                style={{ ':hover': { backgroundColor: 'var(--color-surface-hover)' }}}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-hover)'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 title={`React with ${emoji}`}
               >
-                <span className="text-lg opacity-60 hover:opacity-100">{emoji}</span>
+                <span className="text-lg">{emoji}</span>
               </button>
             ))}
+
+          {/* Add reaction button */}
+          <ReactionPicker
+            onSelect={handleReactionClick}
+            trigger={
+              <div className="p-1 rounded transition-all hover:bg-opacity-20">
+                <Smile className="h-4 w-4" style={{ color: 'var(--color-text-tertiary)' }} />
+              </div>
+            }
+          />
         </div>
       )}
-
-      {/* Add reaction button */}
-      {isMessageHovered && (
-        <ReactionPicker
-          onSelect={handleReactionClick}
-          trigger={
-            <div className="p-1 rounded transition-all opacity-60 hover:opacity-100">
-              <Smile className="h-4 w-4" style={{ color: 'var(--color-text-tertiary)' }} />
-            </div>
-          }
-        />
-      )}
-    </div>
+    </>
   )
 }
 

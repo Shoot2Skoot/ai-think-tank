@@ -170,7 +170,7 @@ export const MessageList: React.FC<MessageListProps> = ({
                 onCancel={() => setEditingMessageId(null)}
               />
             ) : (
-              <>
+              <div className="relative">
                 <MessageContent content={content} mentions={mentions} />
                 {message.cost && (
                   <span className="text-xs mt-1 inline-block message-timestamp">
@@ -199,7 +199,7 @@ export const MessageList: React.FC<MessageListProps> = ({
                   onReact={(emoji) => handleReaction(message.id, emoji)}
                   isMessageHovered={hoveredMessageId === message.id}
                 />
-              </>
+              </div>
             )}
           </div>
           {!isEditing && (
