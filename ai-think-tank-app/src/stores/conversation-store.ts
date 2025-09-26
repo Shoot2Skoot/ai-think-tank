@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { conversationManager } from '@/services/conversation/conversation-manager'
 import { supabase } from '@/lib/supabase'
+import { personaAvatarMap } from '@/utils/persona-avatars'
 import type {
   Conversation,
   Message,
@@ -31,6 +32,8 @@ interface ConversationState {
   updateCostBreakdown: () => Promise<void>
   setStreamCallback: (callback: (chunk: string) => void) => void
   clearError: () => void
+  addPersonaToConversation: (personaName: string) => Promise<void>
+  removePersonaFromConversation: (personaId: string) => Promise<void>
 }
 
 export const useConversationStore = create<ConversationState>((set, get) => ({
@@ -264,6 +267,132 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
   },
 
   clearError: () => set({ error: null }),
+
+  addPersonaToConversation: async (personaName) => {
+    const { activeConversation } = get()
+    if (!activeConversation) {
+      set({ error: 'No active conversation' })
+      return
+    }
+
+    set({ loading: true, error: null })
+    try {
+      // Get persona template data
+      const { data: template, error: templateError } = await supabase
+        .from('persona_templates')
+        .select('*')
+        .eq('name', personaName)
+        .single()
+
+      if (templateError) throw templateError
+
+      // Create new persona for this conversation
+      const newPersona = {
+        conversation_id: activeConversation.id,
+        name: personaName,
+        role: template.role || 'AI Assistant',
+        model: template.default_model || 'gpt-4',
+        provider: template.default_provider || 'openai',
+        system_prompt: template.system_prompt,
+        avatar: personaAvatarMap[personaName],
+        color: template.color || '#6366f1',
+        created_at: new Date().toISOString()
+      }
+
+      const { data: persona, error: personaError } = await supabase
+        .from('personas')
+        .insert(newPersona)
+        .select()
+        .single()
+
+      if (personaError) throw personaError
+
+      // Add join message
+      const joinMessage = {
+        conversation_id: activeConversation.id,
+        persona_id: persona.id,
+        content: `${personaName} has joined the conversation`,
+        message_type: 'system',
+        created_at: new Date().toISOString()
+      }
+
+      const { data: message, error: messageError } = await supabase
+        .from('messages')
+        .insert(joinMessage)
+        .select()
+        .single()
+
+      if (messageError) throw messageError
+
+      // Update local state
+      set((state) => ({
+        personas: [...state.personas, persona],
+        messages: [...state.messages, message],
+        loading: false
+      }))
+    } catch (error: any) {
+      set({
+        error: error.message || 'Failed to add persona',
+        loading: false
+      })
+      throw error
+    }
+  },
+
+  removePersonaFromConversation: async (personaId) => {
+    const { activeConversation, personas } = get()
+    if (!activeConversation) {
+      set({ error: 'No active conversation' })
+      return
+    }
+
+    const personaToRemove = personas.find(p => p.id === personaId)
+    if (!personaToRemove) {
+      set({ error: 'Persona not found' })
+      return
+    }
+
+    set({ loading: true, error: null })
+    try {
+      // Add leave message before removing
+      const leaveMessage = {
+        conversation_id: activeConversation.id,
+        persona_id: personaId,
+        content: `${personaToRemove.name} has left the conversation`,
+        message_type: 'system',
+        created_at: new Date().toISOString()
+      }
+
+      const { data: message, error: messageError } = await supabase
+        .from('messages')
+        .insert(leaveMessage)
+        .select()
+        .single()
+
+      if (messageError) throw messageError
+
+      // Remove persona from database
+      const { error: deleteError } = await supabase
+        .from('personas')
+        .delete()
+        .eq('id', personaId)
+
+      if (deleteError) throw deleteError
+
+      // Update local state
+      set((state) => ({
+        personas: state.personas.filter(p => p.id !== personaId),
+        messages: [...state.messages, message],
+        loading: false
+      }))
+    } catch (error: any) {
+      set({
+        error: error.message || 'Failed to remove persona',
+        loading: false
+      })
+      throw error
+    }
+  },
 
   // Private methods (not exposed in interface)
   subscribeToConversation: (conversationId: string) => {

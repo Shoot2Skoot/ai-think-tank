@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Circle, Coffee, Music, Code, Sparkles, Brain, Heart, Star } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Circle, Coffee, Music, Code, Sparkles, Brain, Heart, Star, Plus, X } from 'lucide-react'
 import { personaAvatarMap } from '@/utils/persona-avatars'
+import { useConversationStore } from '@/stores/conversation-store'
 import type { Persona, Message } from '@/types'
 
 interface PersonaPresencePanelProps {
@@ -33,6 +34,7 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
   isCollapsed,
   onToggleCollapse
 }) => {
+  const { addPersonaToConversation, removePersonaFromConversation } = useConversationStore()
   const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null)
   const [personaStatuses] = useState<Record<string, typeof funStatuses[0]>>(() => {
     const statuses: Record<string, typeof funStatuses[0]> = {}
@@ -193,6 +195,15 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
                 </div>
                 <Circle className="absolute bottom-0 right-0 w-2.5 h-2.5 fill-gray-400 text-gray-400" />
               </div>
+
+              {/* Add button on hover */}
+              <button
+                onClick={() => addPersonaToConversation(persona.name)}
+                className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 bg-green-500 rounded-full p-0.5 transition-all"
+                title="Add to conversation"
+              >
+                <Plus className="w-2.5 h-2.5 text-white" />
+              </button>
             </div>
           ))}
         </div>
@@ -234,7 +245,7 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
                 return (
                   <div
                     key={persona.id}
-                    className={`px-3 py-2.5 flex items-center space-x-2 hover:bg-primary-900 hover:bg-opacity-10 cursor-pointer transition-colors ${
+                    className={`px-3 py-2.5 flex items-center space-x-2 hover:bg-primary-900 hover:bg-opacity-10 cursor-pointer transition-colors group ${
                       index < onlinePersonas.length - 1 ? 'border-b' : ''
                     }`}
                     style={{ borderColor: 'var(--color-surface-border)' }}
@@ -250,11 +261,23 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
                         <span className="font-medium text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
                           {persona.name}
                         </span>
-                        {stats && stats.messageCount > 0 && (
-                          <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                            {stats.messageCount} msgs
-                          </span>
-                        )}
+                        <div className="flex items-center space-x-1">
+                          {stats && stats.messageCount > 0 && (
+                            <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                              {stats.messageCount} msgs
+                            </span>
+                          )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              removePersonaFromConversation(persona.id)
+                            }}
+                            className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-red-500 hover:bg-opacity-20 transition-all ml-1"
+                            title="Remove from conversation"
+                          >
+                            <X className="w-3 h-3 text-red-500" />
+                          </button>
+                        </div>
                       </div>
 
                       {status && (
@@ -283,7 +306,7 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
               {offlinePersonas.map((persona: any, index) => (
                 <div
                   key={persona.id}
-                  className={`px-3 py-2 flex items-center space-x-2 hover:bg-primary-900 hover:bg-opacity-5 cursor-pointer transition-colors opacity-50 ${
+                  className={`px-3 py-2 flex items-center space-x-2 hover:bg-primary-900 hover:bg-opacity-5 transition-colors opacity-50 group ${
                     index < offlinePersonas.length - 1 ? 'border-b' : ''
                   }`}
                   style={{ borderColor: 'var(--color-surface-border)' }}
@@ -304,6 +327,14 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
                       {persona.name}
                     </span>
                   </div>
+
+                  <button
+                    onClick={() => addPersonaToConversation(persona.name)}
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-green-500 hover:bg-opacity-20 transition-all"
+                    title="Add to conversation"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-green-500" />
+                  </button>
                 </div>
               ))}
             </div>
