@@ -5,6 +5,7 @@ import { ModelBadge } from './ModelSelector'
 import { TypingIndicator } from './TypingIndicator'
 import { MessageContent } from './MessageContent'
 import { TimeDivider } from './TimeDivider'
+import { SeenIndicator } from './SeenIndicator'
 import type { Message, Persona } from '@/types'
 
 interface MessageListProps {
@@ -13,6 +14,7 @@ interface MessageListProps {
   streamingContent: Record<string, string>
   loading?: boolean
   typingPersonas?: Persona[]
+  seenStatus?: Record<string, string[]> // messageId -> personaIds who have seen it
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -20,7 +22,8 @@ export const MessageList: React.FC<MessageListProps> = ({
   personas,
   streamingContent,
   loading,
-  typingPersonas = []
+  typingPersonas = [],
+  seenStatus = {}
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -76,6 +79,19 @@ export const MessageList: React.FC<MessageListProps> = ({
               <span className="text-xs text-gray-500 mt-1 inline-block">
                 Cost: ${message.cost.toFixed(4)}
               </span>
+            )}
+            {/* Seen indicator */}
+            {seenStatus[message.id] && (
+              <SeenIndicator
+                seenBy={seenStatus[message.id]
+                  .map(id => personas.find(p => p.id === id))
+                  .filter((p): p is Persona => p !== undefined)}
+                isLastMessage={index === messages.length - 1}
+                messageStatus={
+                  seenStatus[message.id].length > 0 ? 'seen' :
+                  index === messages.length - 1 ? 'delivered' : 'sent'
+                }
+              />
             )}
           </div>
         </div>
