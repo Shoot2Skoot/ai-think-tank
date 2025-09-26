@@ -40,12 +40,18 @@ Available participants you can mention: ${personaNames}
 
   // Check if a message contains mentions to specific personas
   const getMessageMentions = useCallback((message: Message): string[] => {
-    const mentionPattern = /@(\w+)/g
-    const matches = message.content.match(mentionPattern) || []
+    const mentions: string[] = []
 
-    return matches
-      .map(match => match.slice(1))
-      .filter(name => personas.some(p => p.name.toLowerCase() === name.toLowerCase()))
+    // Check for each persona name specifically
+    personas.forEach(persona => {
+      const escapedName = persona.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const regex = new RegExp(`@${escapedName}(?![A-Za-z])`, 'gi')
+      if (regex.test(message.content)) {
+        mentions.push(persona.name)
+      }
+    })
+
+    return mentions
   }, [personas])
 
   // Determine if a persona should respond based on mentions

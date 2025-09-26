@@ -51,8 +51,16 @@ export const MessageList: React.FC<MessageListProps> = ({
     const showAvatar = !isSameAuthor || index === 0
     const isEditing = editingMessageId === message.id
 
-    // Extract mentions from content
-    const mentions = content.match(/@(\w+)/g)?.map(m => m.slice(1)) || []
+    // Extract mentions from content - only match actual persona names
+    const mentions: string[] = []
+    personas.forEach(persona => {
+      // Create regex for this specific persona name
+      const escapedName = persona.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const regex = new RegExp(`@${escapedName}(?![A-Za-z])`, 'gi')
+      if (regex.test(content)) {
+        mentions.push(persona.name)
+      }
+    })
 
     const handleSaveEdit = (newContent: string) => {
       if (onEditMessage) {

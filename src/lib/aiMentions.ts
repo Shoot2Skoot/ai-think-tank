@@ -21,27 +21,23 @@ export function parseAIMentions(
   const mentions: string[] = []
   let nextSpeaker: string | undefined
 
-  // Pattern 1: Direct @mentions in text (e.g., "@Alice what do you think?")
-  const mentionPattern = /@(\w+)/g
+  // Pattern 1: Direct @mentions in text - match against actual persona names
   let processedContent = response
 
-  // Find all @mentions
-  const matches = response.match(mentionPattern)
-  if (matches) {
-    matches.forEach(match => {
-      const name = match.slice(1) // Remove @
-      const persona = availablePersonas.find(
-        p => p.name.toLowerCase() === name.toLowerCase()
-      )
-      if (persona) {
-        mentions.push(persona.name)
-        // If it's a question directed at someone, they should respond next
-        if (response.includes(`${match}`) && response.includes('?')) {
-          nextSpeaker = persona.id
-        }
+  // Check for each persona name in the response
+  availablePersonas.forEach(persona => {
+    // Create regex for this specific persona name
+    const escapedName = persona.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const regex = new RegExp(`@${escapedName}(?![A-Za-z])`, 'gi')
+
+    if (regex.test(response)) {
+      mentions.push(persona.name)
+      // If it's a question directed at someone, they should respond next
+      if (response.includes(`@${persona.name}`) && response.includes('?')) {
+        nextSpeaker = persona.id
       }
-    })
-  }
+    }
+  })
 
   // Pattern 2: Structured mention directive (for advanced AI models)
   // Format: [MENTION:PersonaName:OptionalReason]
@@ -125,11 +121,13 @@ export function formatAIResponseWithMentions(
 
   // Ensure mentions are properly formatted
   mentions.forEach(name => {
+    // Escape special regex characters in the name
+    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     // Replace plain name references with @mentions
-    const namePattern = new RegExp(`\\b${name}\\b`, 'gi')
-    formatted = formatted.replace(namePattern, (match) => {
+    const namePattern = new RegExp(`\\b${escapedName}\\b`, 'gi')
+    formatted = formatted.replace(namePattern, (match, offset) => {
       // Don't double-mention
-      if (formatted[formatted.indexOf(match) - 1] === '@') {
+      if (offset > 0 && formatted[offset - 1] === '@') {
         return match
       }
       return `@${match}`

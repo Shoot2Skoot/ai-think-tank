@@ -22,7 +22,10 @@ export const MessageContent: React.FC<MessageContentProps> = ({
 
     let highlighted = text
     mentions.forEach(mention => {
-      const regex = new RegExp(`(@${mention}\\b)`, 'gi')
+      // Escape special regex characters in the mention name
+      const escapedMention = mention.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      // Match @mention including full names with spaces
+      const regex = new RegExp(`(@${escapedMention})(?![A-Za-z])`, 'gi')
       highlighted = highlighted.replace(regex, '**$1**')
     })
     return highlighted

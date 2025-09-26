@@ -72,10 +72,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
     if (lastAtIndex !== -1) {
       const afterAt = beforeCursor.slice(lastAtIndex + 1)
-      // Check if there's no space after @
-      if (!afterAt.includes(' ')) {
+      // Check if there's no space or newline after @ (allow any text including empty string)
+      if (!afterAt.match(/[\s\n]/)) {
         setShowMentions(true)
-        setMentionSearch(afterAt)
+        setMentionSearch(afterAt) // Can be empty string to show all personas
       } else {
         setShowMentions(false)
         setMentionSearch('')
@@ -113,17 +113,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const handleSend = () => {
     if (!message.trim() || loading || disabled) return
 
-    // Extract mentioned persona if any
-    const mentionMatch = message.match(/@(\w+)/g)
+    // Extract mentioned persona if any - match against actual persona names
     let mentionedPersona: string | undefined
 
-    if (mentionMatch) {
-      const mentionedName = mentionMatch[0].slice(1) // Remove @
-      const persona = personas.find(p =>
-        p.name.toLowerCase() === mentionedName.toLowerCase()
-      )
-      if (persona) {
+    // Check for each persona name specifically
+    for (const persona of personas) {
+      const escapedName = persona.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const regex = new RegExp(`@${escapedName}(?![A-Za-z])`, 'gi')
+      if (regex.test(message)) {
         mentionedPersona = persona.id
+        break // Take first matched persona
       }
     }
 
@@ -220,7 +219,20 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setMessage(prev => prev + '@')}
+            onClick={() => {
+              const newMessage = message + '@'
+              setMessage(newMessage)
+              setCursorPosition(newMessage.length)
+              setShowMentions(true)
+              setMentionSearch('')
+              // Focus the textarea
+              setTimeout(() => {
+                if (textareaRef.current) {
+                  textareaRef.current.focus()
+                  textareaRef.current.setSelectionRange(newMessage.length, newMessage.length)
+                }
+              }, 0)
+            }}
             className="p-1"
             disabled={disabled}
           >
