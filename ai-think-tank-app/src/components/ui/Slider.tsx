@@ -15,11 +15,11 @@ export const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
       <div className="w-full">
         {label && (
           <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-text-primary">
               {label}
             </label>
             {showValue && (
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-text-secondary">
                 {value}{valueLabel ? ` ${valueLabel}` : ''}
               </span>
             )}
@@ -33,11 +33,11 @@ export const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
             max={max}
             value={value}
             className={cn(
-              'w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider',
+              'w-full h-2 rounded-lg appearance-none cursor-pointer slider bg-surface-tertiary',
               className
             )}
             style={{
-              background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${percentage}%, #E5E7EB ${percentage}%, #E5E7EB 100%)`
+              background: `linear-gradient(to right, var(--color-primary-400) 0%, var(--color-primary-400) ${percentage}%, var(--color-surface-tertiary) ${percentage}%, var(--color-surface-tertiary) 100%)`
             }}
             {...props}
           />

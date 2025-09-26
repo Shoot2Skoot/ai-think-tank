@@ -102,7 +102,7 @@ export const Popover: React.FC<PopoverProps> = ({
           <div
             ref={popoverRef}
             className={cn(
-              'fixed z-50 bg-white rounded-lg shadow-lg border border-gray-200',
+              'fixed z-50 rounded-lg shadow-lg border bg-surface-primary border-surface-border',
               className
             )}
             style={{
