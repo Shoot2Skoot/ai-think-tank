@@ -1,0 +1,13 @@
+{
+  "imports": {
+    "@langchain/core": "npm:@langchain/core@0.2.18",
+    "@langchain/core/messages": "npm:@langchain/core@0.2.18/messages",
+    "@langchain/core/output_parsers": "npm:@langchain/core@0.2.18/output_parsers",
+    "@langchain/core/language_models/base": "npm:@langchain/core@0.2.18/language_models/base",
+    "@langchain/openai": "npm:@langchain/openai@0.2.5",
+    "@langchain/anthropic": "npm:@langchain/anthropic@0.2.9",
+    "@langchain/google-genai": "npm:@langchain/google-genai@0.0.23",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.39.0",
+    "zod": "npm:zod@3.22.4"
+  }
+}

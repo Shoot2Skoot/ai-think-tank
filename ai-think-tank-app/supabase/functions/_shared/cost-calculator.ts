@@ -1,5 +1,5 @@
 import { TokenUsage, ModelPricingMap, CostRecord } from './types.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
+import { createClient } from '@supabase/supabase-js'
 
 export function calculateCost(
   provider: string,

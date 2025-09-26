@@ -1,7 +1,7 @@
-import { ChatOpenAI } from 'https://esm.sh/@langchain/openai@0.0.28'
-import { ChatAnthropic } from 'https://esm.sh/@langchain/anthropic@0.1.16'
-import { ChatGoogleGenerativeAI } from 'https://esm.sh/@langchain/google-genai@0.0.14'
-import { BaseLanguageModel } from 'https://esm.sh/@langchain/core@0.1.61/language_models/base'
+import { ChatOpenAI } from '@langchain/openai'
+import { ChatAnthropic } from '@langchain/anthropic'
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai'
+import { BaseLanguageModel } from '@langchain/core/language_models/base'
 import { Persona } from './types.ts'
 
 export interface LangChainConfig {
@@ -31,7 +31,7 @@ export function createLangChainProvider(persona: Persona, config?: Partial<LangC
       return new ChatOpenAI({
         modelName: baseConfig.modelName,
         temperature: baseConfig.temperature,
-        maxTokens: baseConfig.maxTokens,
+        maxCompletionTokens: baseConfig.maxTokens,
         streaming: baseConfig.streaming,
         openAIApiKey: apiKey,
         callbacks: baseConfig.callbacks
