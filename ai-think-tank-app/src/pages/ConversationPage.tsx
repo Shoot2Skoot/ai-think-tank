@@ -140,7 +140,7 @@ export const ConversationPage: React.FC = () => {
 
         {/* Conversation Mode Selector */}
         {activeConversation && (
-          <div className="px-4 py-2 bg-primary-900 bg-opacity-20" style={{ borderBottom: '1px solid var(--color-surface-border)' }}>
+          <div className="px-4 py-1 bg-primary-900 bg-opacity-20" style={{ borderBottom: '1px solid var(--color-surface-border)' }}>
             <ConversationModeSelector
               currentMode={conversationMode}
               onModeChange={setConversationMode}

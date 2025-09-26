@@ -65,7 +65,7 @@ export const ConversationModeSelector: React.FC<ConversationModeSelectorProps> =
   disabled = false
 }) => {
   return (
-    <div className="border-b px-4 py-2 bg-primary-900 bg-opacity-20" style={{ borderColor: 'var(--color-surface-border)' }}>
+    <div className="border-b px-4 py-1 bg-primary-900 bg-opacity-20" style={{ borderColor: 'var(--color-surface-border)' }}>
       <div className="flex items-center space-x-2">
         <span className="text-xs font-medium text-text-tertiary uppercase tracking-wider">Mode:</span>
         <div className="flex items-center space-x-1">
