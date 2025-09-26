@@ -82,7 +82,7 @@ export const MessageList: React.FC<MessageListProps> = ({
           <div className="w-10 flex-shrink-0">
             {showAvatar && !isSystem && (
               <div
-                className="rounded-full"
+                className="rounded-full inline-flex items-center justify-center"
                 style={{
                   background: isUser ? '#2563eb' : (persona?.color || 'transparent'),
                   padding: isUser || persona?.color ? '1.5px' : '0'
