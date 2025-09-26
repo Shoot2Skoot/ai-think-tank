@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Circle, Coffee, Music, Code, Sparkles, Brain, Heart, Star, Plus, X } from 'lucide-react'
 import { useConversationStore } from '@/stores/conversation-store'
 import { personaService } from '@/services/persona-service'
+import { supabase } from '@/lib/supabase'
 import type { Persona, Message } from '@/types'
 
 interface PersonaPresencePanelProps {
@@ -47,12 +48,18 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
     return statuses
   })
 
-  // Fetch available persona templates from database
+  // Fetch available personas (templates + user personas) from database
   useEffect(() => {
     const fetchAvailablePersonas = async () => {
       if (activeConversation?.id) {
-        // Get global templates that aren't already in the conversation
-        const available = await personaService.getAvailablePersonas(activeConversation.id)
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser()
+
+        // Get all available personas (templates + user personas not in conversation)
+        const available = await personaService.getAvailablePersonas(
+          activeConversation.id,
+          user?.id
+        )
         setAvailablePersonas(available)
       }
     }

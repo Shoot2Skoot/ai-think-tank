@@ -43,25 +43,37 @@ export class PersonaService {
   }
 
   /**
-   * Get persona templates not in a specific conversation
+   * Get all personas available to add to a conversation (templates + user personas not in conversation)
    */
-  async getAvailablePersonas(conversationId: string): Promise<Persona[]> {
+  async getAvailablePersonas(conversationId: string, userId?: string): Promise<Persona[]> {
     try {
       // Get all global persona templates
-      const globalPersonas = await this.getGlobalPersonas()
+      const globalTemplates = await this.getGlobalPersonas()
+
+      // Get user-specific personas if userId provided
+      let userPersonas: Persona[] = []
+      if (userId) {
+        userPersonas = await this.getUserPersonas(userId)
+      }
+
+      // Combine templates and user personas
+      const allAvailablePersonas = [...globalTemplates, ...userPersonas]
 
       // Get personas already in the conversation via junction table
       const { data: activeRelations, error } = await supabase
         .from('conversation_personas')
-        .select('personas(name)')
+        .select('personas(id, name)')
         .eq('conversation_id', conversationId)
         .eq('is_active', true)
 
       if (error) throw error
 
       // Filter out personas already in the conversation
+      const usedIds = new Set(activeRelations?.map(r => r.personas?.id).filter(Boolean) || [])
       const usedNames = new Set(activeRelations?.map(r => r.personas?.name).filter(Boolean) || [])
-      return globalPersonas.filter(p => !usedNames.has(p.name))
+
+      // Return personas that aren't in the conversation (check both ID and name)
+      return allAvailablePersonas.filter(p => !usedIds.has(p.id) && !usedNames.has(p.name))
     } catch (error) {
       console.error('Error fetching available personas:', error)
       return []
