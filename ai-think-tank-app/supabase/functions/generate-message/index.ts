@@ -5,6 +5,12 @@ import { StringOutputParser } from '@langchain/core/output_parsers'
 import { createLangChainProvider } from '../_shared/langchain-factory.ts'
 import { calculateCost, checkUserBudget, estimateCostFromMessages, logCostToDatabase } from '../_shared/cost-calculator.ts'
 import { ChatRequest, ChatResponse, Persona, TokenUsage, CostRecord } from '../_shared/types.ts'
+import {
+  CacheManager,
+  AnthropicCacheManager,
+  GeminiCacheManager,
+  OpenAICacheManager
+} from '../_shared/cache-manager.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -85,6 +91,9 @@ serve(async (req) => {
       )
     }
 
+    // Initialize cache manager
+    const cacheManager = new CacheManager()
+
     // Create LangChain model with token tracking callback
     let tokenUsage: TokenUsage = {
       promptTokens: 0,
@@ -104,32 +113,70 @@ serve(async (req) => {
             cachedTokens: output.llmOutput.tokenUsage.cachedTokens || 0
           }
         }
+
+        // Check for Anthropic cache usage in metadata
+        if (output?.llmOutput?.usage?.cache_creation_input_tokens) {
+          tokenUsage.cachedTokens = output.llmOutput.usage.cache_creation_input_tokens
+        }
+        if (output?.llmOutput?.usage?.cache_read_input_tokens) {
+          tokenUsage.cachedTokens = (tokenUsage.cachedTokens || 0) + output.llmOutput.usage.cache_read_input_tokens
+        }
       }
     }]
 
-    const model = createLangChainProvider(typedPersona, {
-      streaming: stream,
-      callbacks
-    })
-
-    // Convert messages to LangChain format
-    const langchainMessages = messages.map(msg => {
-      if (msg.role === 'system') {
-        return new SystemMessage(msg.content)
-      } else if (msg.role === 'assistant') {
-        return new AIMessage(msg.content)
-      } else {
-        return new HumanMessage(msg.content)
-      }
-    })
-
-    // Add persona system prompt if available and not already in messages
-    if (typedPersona.system_prompt && !messages.some(m => m.role === 'system')) {
-      langchainMessages.unshift(new SystemMessage(typedPersona.system_prompt))
+    // Prepare cached content for Gemini if applicable
+    let geminiCachedContent = null
+    if (typedPersona.provider === 'gemini' && typedPersona.system_prompt) {
+      const geminiCache = new GeminiCacheManager()
+      const cacheKey = await cacheManager.hashContent(
+        `${typedPersona.id}:${typedPersona.system_prompt}`
+      )
+      geminiCachedContent = await geminiCache.createCachedContent(
+        typedPersona.model,
+        typedPersona.system_prompt,
+        cacheKey,
+        3600 // 1 hour TTL for persona definitions
+      )
     }
 
-    // Generate response
+    const model = createLangChainProvider(typedPersona, {
+      streaming: stream,
+      callbacks,
+      enableCaching: true,
+      cachedContent: geminiCachedContent
+    })
+
+    // Prepare messages based on provider
+    let langchainMessages: any[]
+
+    if (typedPersona.provider === 'anthropic') {
+      // Use Anthropic cache manager to prepare messages with cache control
+      const preparedMessages = AnthropicCacheManager.prepareCachedMessages(
+        messages,
+        typedPersona.system_prompt
+      )
+      langchainMessages = preparedMessages
+    } else {
+      // Convert messages to LangChain format for other providers
+      langchainMessages = messages.map(msg => {
+        if (msg.role === 'system') {
+          return new SystemMessage(msg.content)
+        } else if (msg.role === 'assistant') {
+          return new AIMessage(msg.content)
+        } else {
+          return new HumanMessage(msg.content)
+        }
+      })
+
+      // Add persona system prompt if available and not already in messages
+      if (typedPersona.system_prompt && !messages.some(m => m.role === 'system')) {
+        langchainMessages.unshift(new SystemMessage(typedPersona.system_prompt))
+      }
+    }
+
+    // Generate response (with caching for OpenAI)
     let responseContent = ''
+    let actualCost = 0
 
     if (stream) {
       // For streaming responses, we need to handle differently
@@ -149,8 +196,22 @@ serve(async (req) => {
             await writer.write(new TextEncoder().encode(`data: ${JSON.stringify({ content: chunk })}\n\n`))
           }
 
-          // Calculate final cost
-          const cost = calculateCost(typedPersona.provider, typedPersona.model, tokenUsage)
+          // Calculate final cost with cache savings
+          const baseCost = calculateCost(typedPersona.provider, typedPersona.model, tokenUsage)
+
+          let actualCost = baseCost
+          if (tokenUsage.cachedTokens && tokenUsage.cachedTokens > 0) {
+            const fullCost = calculateCost(typedPersona.provider, typedPersona.model, {
+              ...tokenUsage,
+              promptTokens: tokenUsage.promptTokens + tokenUsage.cachedTokens,
+              cachedTokens: 0
+            })
+            const cacheSavings = fullCost - baseCost
+            cacheManager.trackCostSaving(cacheSavings)
+            actualCost = baseCost
+          }
+
+          const cost = actualCost
 
           // Log usage
           const costRecord: CostRecord = {
@@ -169,11 +230,15 @@ serve(async (req) => {
 
           await logCostToDatabase(costRecord)
 
-          // Send final message with metadata
+          // Log cache metrics
+          await cacheManager.logMetrics(conversationId, userId)
+
+          // Send final message with metadata including cache metrics
           await writer.write(new TextEncoder().encode(`data: ${JSON.stringify({
             done: true,
             usage: tokenUsage,
-            cost
+            cost,
+            cacheMetrics: cacheManager.getMetrics()
           })}\n\n`))
 
           await writer.close()
@@ -192,12 +257,42 @@ serve(async (req) => {
         },
       })
     } else {
-      // Non-streaming response
-      const response = await model.invoke(langchainMessages)
-      responseContent = response.content as string
+      // Non-streaming response with OpenAI caching if applicable
+      if (typedPersona.provider === 'openai') {
+        const openaiCache = new OpenAICacheManager()
+        const cacheKey = await cacheManager.hashContent(
+          JSON.stringify({ messages: langchainMessages, model: typedPersona.model })
+        )
 
-      // Calculate cost
-      const cost = calculateCost(typedPersona.provider, typedPersona.model, tokenUsage)
+        const response = await openaiCache.getCachedOrGenerate(
+          cacheKey,
+          async () => await model.invoke(langchainMessages),
+          300 // 5 minutes TTL for conversation context
+        )
+        responseContent = response.content as string
+      } else {
+        const response = await model.invoke(langchainMessages)
+        responseContent = response.content as string
+      }
+
+      // Calculate cost with cache savings
+      const baseCost = calculateCost(typedPersona.provider, typedPersona.model, tokenUsage)
+
+      // Calculate cache savings if applicable
+      if (tokenUsage.cachedTokens && tokenUsage.cachedTokens > 0) {
+        const fullCost = calculateCost(typedPersona.provider, typedPersona.model, {
+          ...tokenUsage,
+          promptTokens: tokenUsage.promptTokens + tokenUsage.cachedTokens,
+          cachedTokens: 0
+        })
+        const cacheSavings = fullCost - baseCost
+        cacheManager.trackCostSaving(cacheSavings)
+        actualCost = baseCost
+      } else {
+        actualCost = baseCost
+      }
+
+      const cost = actualCost
 
       // Log usage
       const costRecord: CostRecord = {
@@ -216,14 +311,18 @@ serve(async (req) => {
 
       await logCostToDatabase(costRecord)
 
-      // Prepare response
+      // Log cache metrics
+      await cacheManager.logMetrics(conversationId, userId)
+
+      // Prepare response with cache metrics
       const chatResponse: ChatResponse = {
         content: responseContent,
         usage: tokenUsage,
         cost,
         provider: typedPersona.provider,
         model: typedPersona.model,
-        personaId: personaId
+        personaId: personaId,
+        cacheMetrics: cacheManager.getMetrics()
       }
 
       return new Response(JSON.stringify(chatResponse), {

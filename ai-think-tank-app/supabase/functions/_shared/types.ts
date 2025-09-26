@@ -54,6 +54,13 @@ export interface ChatResponse {
   model: string
   personaId?: string
   nextSpeaker?: string
+  cacheMetrics?: {
+    hits: number
+    misses: number
+    hitRate: number
+    totalCost: number
+    savedCost: number
+  }
 }
 
 export interface TokenUsage {

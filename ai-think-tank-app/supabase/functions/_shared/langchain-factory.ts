@@ -3,6 +3,7 @@ import { ChatAnthropic } from '@langchain/anthropic'
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai'
 import { BaseLanguageModel } from '@langchain/core/language_models/base'
 import { Persona } from './types.ts'
+import { AnthropicCacheManager, GeminiCacheManager } from './cache-manager.ts'
 
 export interface LangChainConfig {
   modelName: string
@@ -10,6 +11,8 @@ export interface LangChainConfig {
   maxTokens: number
   streaming?: boolean
   callbacks?: any[]
+  enableCaching?: boolean
+  cachedContent?: any // For Gemini cached content reference
 }
 
 export function createLangChainProvider(persona: Persona, config?: Partial<LangChainConfig>): BaseLanguageModel {
@@ -18,7 +21,9 @@ export function createLangChainProvider(persona: Persona, config?: Partial<LangC
     temperature: persona.temperature,
     maxTokens: persona.max_tokens,
     streaming: config?.streaming ?? false,
-    callbacks: config?.callbacks ?? []
+    callbacks: config?.callbacks ?? [],
+    enableCaching: config?.enableCaching ?? true,
+    cachedContent: config?.cachedContent
   }
 
   switch (persona.provider) {
@@ -28,6 +33,7 @@ export function createLangChainProvider(persona: Persona, config?: Partial<LangC
         throw new Error('OPENAI_API_KEY not configured')
       }
 
+      // OpenAI uses application-level caching, handled in generate-message
       return new ChatOpenAI({
         modelName: baseConfig.modelName,
         maxCompletionTokens: baseConfig.maxTokens,
@@ -43,12 +49,20 @@ export function createLangChainProvider(persona: Persona, config?: Partial<LangC
         throw new Error('ANTHROPIC_API_KEY not configured')
       }
 
+      // Add cache control headers if caching is enabled
+      const clientOptions = baseConfig.enableCaching
+        ? {
+            defaultHeaders: AnthropicCacheManager.getCacheHeaders()
+          }
+        : undefined
+
       return new ChatAnthropic({
         modelName: baseConfig.modelName,
         maxTokens: baseConfig.maxTokens,
         streaming: baseConfig.streaming,
         anthropicApiKey: apiKey,
-        callbacks: baseConfig.callbacks
+        callbacks: baseConfig.callbacks,
+        clientOptions
       })
     }
 
@@ -58,13 +72,22 @@ export function createLangChainProvider(persona: Persona, config?: Partial<LangC
         throw new Error('GEMINI_API_KEY not configured')
       }
 
-      return new ChatGoogleGenerativeAI({
+      const model = new ChatGoogleGenerativeAI({
         model: baseConfig.modelName,
         maxOutputTokens: baseConfig.maxTokens,
         streaming: baseConfig.streaming,
         apiKey: apiKey,
         callbacks: baseConfig.callbacks
       })
+
+      // Bind cached content if provided
+      if (baseConfig.cachedContent) {
+        return model.bind({
+          cachedContent: baseConfig.cachedContent
+        })
+      }
+
+      return model
     }
 
     default:
