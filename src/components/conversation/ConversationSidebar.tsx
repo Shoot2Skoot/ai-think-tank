@@ -1,9 +1,25 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy
+} from '@dnd-kit/sortable'
 import { Hash, Plus, ChevronDown, ChevronRight, Search, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Badge } from '@/components/ui/Badge'
+import { DraggableConversationItem } from './DraggableConversationItem'
 import { formatRelativeTime, cn } from '@/lib/utils'
 import type { Conversation } from '@/types'
 
@@ -14,6 +30,7 @@ interface ConversationSidebarProps {
   isCollapsed?: boolean
   onToggleCollapse?: () => void
   unreadCounts?: Record<string, number>
+  onReorderConversations?: (conversations: Conversation[]) => void
 }
 
 export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
@@ -22,17 +39,32 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
   onNewConversation,
   isCollapsed = false,
   onToggleCollapse,
-  unreadCounts = {}
+  unreadCounts = {},
+  onReorderConversations
 }) => {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(['active', 'recent'])
   )
+  const [orderedConversations, setOrderedConversations] = useState(conversations)
+
+  // Setup drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  // Update ordered conversations when prop changes
+  React.useEffect(() => {
+    setOrderedConversations(conversations)
+  }, [conversations])
 
   // Group conversations
-  const activeConversations = conversations.filter(c => c.is_active)
-  const recentConversations = conversations.filter(c => !c.is_active).slice(0, 10)
+  const activeConversations = orderedConversations.filter(c => c.is_active)
+  const recentConversations = orderedConversations.filter(c => !c.is_active).slice(0, 10)
 
   // Filter by search term
   const filterConversations = (convos: Conversation[]) => {
@@ -41,6 +73,27 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
       c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.topic?.toLowerCase().includes(searchTerm.toLowerCase())
     )
+  }
+
+  // Handle drag end
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (active.id !== over?.id) {
+      setOrderedConversations((items) => {
+        const oldIndex = items.findIndex(i => i.id === active.id)
+        const newIndex = items.findIndex(i => i.id === over?.id)
+
+        const newOrder = arrayMove(items, oldIndex, newIndex)
+
+        // Notify parent of reorder
+        if (onReorderConversations) {
+          onReorderConversations(newOrder)
+        }
+
+        return newOrder
+      })
+    }
   }
 
   const toggleCategory = (category: string) => {
@@ -144,11 +197,25 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
           <span className="text-gray-400">({filteredConvos.length})</span>
         </button>
         {isExpanded && (
-          <div className="mt-1 space-y-0.5">
-            {filteredConvos.map(conversation => (
-              <ConversationItem key={conversation.id} conversation={conversation} />
-            ))}
-          </div>
+          <SortableContext
+            items={filteredConvos.map(c => c.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="mt-1 space-y-0.5">
+              {filteredConvos.map(conversation => (
+                <DraggableConversationItem
+                  key={conversation.id}
+                  conversation={conversation}
+                  isActive={conversation.id === activeConversationId}
+                  unreadCount={unreadCounts[conversation.id] || 0}
+                  memberCount={(conversation.personas?.length || 0) + 1}
+                  formatChannelName={formatChannelName}
+                  onClick={() => navigate(`/conversation/${conversation.id}`)}
+                  isCollapsed={isCollapsed}
+                />
+              ))}
+            </div>
+          </SortableContext>
         )}
       </div>
     )
@@ -238,16 +305,22 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
 
       {/* Conversations List */}
       <div className="flex-1 overflow-y-auto p-2">
-        <CategorySection
-          title="Active"
-          conversations={activeConversations}
-          category="active"
-        />
-        <CategorySection
-          title="Recent"
-          conversations={recentConversations}
-          category="recent"
-        />
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <CategorySection
+            title="Active"
+            conversations={activeConversations}
+            category="active"
+          />
+          <CategorySection
+            title="Recent"
+            conversations={recentConversations}
+            category="recent"
+          />
+        </DndContext>
       </div>
 
       {/* Footer Stats */}
