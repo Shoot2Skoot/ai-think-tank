@@ -130,8 +130,8 @@ export const generateAvatarUrl = (persona: Persona): string => {
   }
   params.append("backgroundType", "solid");
 
-  // Set radius to 50% for perfect circle cropping
-  params.append("radius", "50");
+  // Set radius to 10 for rounded corners (controlled from API)
+  params.append("radius", "10");
 
   // Apply gender-based parameters if available
   if (persona.demographics?.gender) {
