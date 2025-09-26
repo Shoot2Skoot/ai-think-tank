@@ -114,26 +114,26 @@ async function runTests() {
   // Test 2: Calculate Costs - Calculate Actual Cost
   const costCalcTest = await testFunction('calculate-costs', {
     provider: 'openai',
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-5-mini',
     usage: {
       promptTokens: 100,
       completionTokens: 50,
       totalTokens: 150,
       cachedTokens: 0
     }
-  }, 'Calculate cost for OpenAI GPT-3.5-turbo usage');
+  }, 'Calculate cost for OpenAI GPT-5-mini usage');
   testResults.total++;
   if (costCalcTest.success) testResults.passed++; else testResults.failed++;
 
   // Test 3: Calculate Costs - Estimate from Messages
   const costEstimateTest = await testFunction('calculate-costs', {
     provider: 'anthropic',
-    model: 'claude-3-haiku-20240307',
+    model: 'claude-3-7-sonnet-20250219',
     messages: [
       { role: 'system', content: 'You are a helpful assistant.' },
       { role: 'user', content: 'What is the weather like today?' }
     ]
-  }, 'Estimate cost from messages for Anthropic Claude Haiku');
+  }, 'Estimate cost from messages for Anthropic Claude Sonnet 3.7');
   testResults.total++;
   if (costEstimateTest.success) testResults.passed++; else testResults.failed++;
 

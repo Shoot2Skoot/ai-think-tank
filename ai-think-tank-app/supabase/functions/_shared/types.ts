@@ -114,66 +114,111 @@ export interface UserBudget {
 }
 
 export const ModelPricingMap: Record<string, ModelPricing> = {
-  // OpenAI Models
-  'openai:gpt-4-turbo-preview': {
+  // OpenAI Models - Current generation (prices per million tokens)
+  'openai:gpt-5': {
     provider: 'openai',
-    model: 'gpt-4-turbo-preview',
-    inputPricePerMillion: 10,
-    outputPricePerMillion: 30
+    model: 'gpt-5',
+    inputPricePerMillion: 1.25,
+    outputPricePerMillion: 10,
+    cachedInputPricePerMillion: 0.125
   },
-  'openai:gpt-4': {
+  'openai:gpt-5-mini': {
     provider: 'openai',
-    model: 'gpt-4',
-    inputPricePerMillion: 30,
-    outputPricePerMillion: 60
+    model: 'gpt-5-mini',
+    inputPricePerMillion: 0.25,
+    outputPricePerMillion: 2,
+    cachedInputPricePerMillion: 0.025
   },
-  'openai:gpt-3.5-turbo': {
+  'openai:gpt-5-nano': {
     provider: 'openai',
-    model: 'gpt-3.5-turbo',
-    inputPricePerMillion: 0.5,
-    outputPricePerMillion: 1.5
+    model: 'gpt-5-nano',
+    inputPricePerMillion: 0.05,
+    outputPricePerMillion: 0.4,
+    cachedInputPricePerMillion: 0.005
+  },
+  'openai:gpt-4.1': {
+    provider: 'openai',
+    model: 'gpt-4.1',
+    inputPricePerMillion: 2,
+    outputPricePerMillion: 8,
+    cachedInputPricePerMillion: 0.5
+  },
+  'openai:gpt-4.1-mini': {
+    provider: 'openai',
+    model: 'gpt-4.1-mini',
+    inputPricePerMillion: 0.4,
+    outputPricePerMillion: 1.6,
+    cachedInputPricePerMillion: 0.1
+  },
+  'openai:gpt-4.1-nano': {
+    provider: 'openai',
+    model: 'gpt-4.1-nano',
+    inputPricePerMillion: 0.1,
+    outputPricePerMillion: 0.4,
+    cachedInputPricePerMillion: 0.025
+  },
+  'openai:o4-mini': {
+    provider: 'openai',
+    model: 'o4-mini',
+    inputPricePerMillion: 1.1,
+    outputPricePerMillion: 4.4,
+    cachedInputPricePerMillion: 0.275
+  },
+  'openai:o3': {
+    provider: 'openai',
+    model: 'o3',
+    inputPricePerMillion: 2,
+    outputPricePerMillion: 8,
+    cachedInputPricePerMillion: 0.5
   },
 
-  // Anthropic Models
-  'anthropic:claude-3-opus-20240229': {
+  // Anthropic Models - Current generation
+  'anthropic:claude-opus-4-1-20250805': {
     provider: 'anthropic',
-    model: 'claude-3-opus-20240229',
+    model: 'claude-opus-4-1-20250805',
     inputPricePerMillion: 15,
     outputPricePerMillion: 75,
     cachedInputPricePerMillion: 1.5
   },
-  'anthropic:claude-3-sonnet-20240229': {
+  'anthropic:claude-opus-4-20250514': {
     provider: 'anthropic',
-    model: 'claude-3-sonnet-20240229',
+    model: 'claude-opus-4-20250514',
+    inputPricePerMillion: 15,
+    outputPricePerMillion: 75,
+    cachedInputPricePerMillion: 1.5
+  },
+  'anthropic:claude-sonnet-4-20250514': {
+    provider: 'anthropic',
+    model: 'claude-sonnet-4-20250514',
     inputPricePerMillion: 3,
     outputPricePerMillion: 15,
     cachedInputPricePerMillion: 0.3
   },
-  'anthropic:claude-3-haiku-20240307': {
+  'anthropic:claude-3-7-sonnet-20250219': {
     provider: 'anthropic',
-    model: 'claude-3-haiku-20240307',
-    inputPricePerMillion: 0.25,
-    outputPricePerMillion: 1.25,
-    cachedInputPricePerMillion: 0.025
+    model: 'claude-3-7-sonnet-20250219',
+    inputPricePerMillion: 3,
+    outputPricePerMillion: 15,
+    cachedInputPricePerMillion: 0.3
   },
 
-  // Gemini Models
-  'gemini:gemini-pro': {
+  // Gemini Models - Current generation
+  'gemini:gemini-2.5-pro': {
     provider: 'gemini',
-    model: 'gemini-pro',
+    model: 'gemini-2.5-pro',
     inputPricePerMillion: 1.25,
     outputPricePerMillion: 10
   },
-  'gemini:gemini-1.5-pro': {
+  'gemini:gemini-2.5-flash': {
     provider: 'gemini',
-    model: 'gemini-1.5-pro',
-    inputPricePerMillion: 3.5,
-    outputPricePerMillion: 10.5
+    model: 'gemini-2.5-flash',
+    inputPricePerMillion: 0.3,
+    outputPricePerMillion: 2.5
   },
-  'gemini:gemini-1.5-flash': {
+  'gemini:gemini-2.5-flash-lite': {
     provider: 'gemini',
-    model: 'gemini-1.5-flash',
-    inputPricePerMillion: 0.35,
-    outputPricePerMillion: 1.05
+    model: 'gemini-2.5-flash-lite',
+    inputPricePerMillion: 0.1,
+    outputPricePerMillion: 0.4
   }
 }
