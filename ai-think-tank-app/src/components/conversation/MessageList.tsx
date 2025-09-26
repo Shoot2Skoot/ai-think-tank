@@ -44,6 +44,7 @@ export const MessageList: React.FC<MessageListProps> = ({
   const renderMessage = (message: Message & { edited_at?: string }, index: number) => {
     const persona = personas.find(p => p.id === message.persona_id)
     const isUser = message.role === 'user'
+    const isSystem = message.role === 'system'
     const isOwn = isUser && currentUserId === message.user_id
     const content = streamingContent[message.id] || message.content
     const prevMessage = index > 0 ? messages[index - 1] : null
@@ -79,7 +80,7 @@ export const MessageList: React.FC<MessageListProps> = ({
       >
         <div className="flex items-start space-x-3">
           <div className="w-10 flex-shrink-0">
-            {showAvatar && (
+            {showAvatar && !isSystem && (
               <Avatar
                 src={persona?.avatar}
                 fallback={isUser ? 'You' : persona?.name || 'AI'}
@@ -87,12 +88,17 @@ export const MessageList: React.FC<MessageListProps> = ({
                 className={isUser ? 'bg-blue-600' : ''}
               />
             )}
+            {showAvatar && isSystem && (
+              <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center">
+                <span className="text-white text-xs font-bold">S</span>
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             {showAvatar && (
               <div className="flex items-baseline space-x-2 mb-0.5">
                 <span className="font-semibold text-sm message-author">
-                  {isUser ? 'You' : persona?.name || 'Unknown'}
+                  {isSystem ? 'System' : isUser ? 'You' : persona?.name || 'AI Assistant'}
                 </span>
                 {persona && !isUser && (
                   <ModelBadge provider={persona.provider} model={persona.model} />

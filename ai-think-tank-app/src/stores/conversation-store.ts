@@ -179,11 +179,9 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         personaId
       )
 
-      // Add message to local state
-      set((state) => ({
-        messages: [...state.messages, message],
-        loading: false
-      }))
+      // Don't add message to local state - let subscription handle it
+      // This prevents duplicates
+      set({ loading: false })
 
       // Update cost breakdown
       await get().updateCostBreakdown()
@@ -210,11 +208,9 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         personaId
       )
 
-      // Add message to local state
-      set((state) => ({
-        messages: [...state.messages, message],
-        loading: false
-      }))
+      // Don't add message to local state - let subscription handle it
+      // This prevents duplicates
+      set({ loading: false })
 
       // Update cost breakdown
       await get().updateCostBreakdown()
@@ -351,10 +347,11 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
 
       if (junctionError) throw junctionError
 
-      // Add join message
+      // Add join message (as system, not persona)
       const joinMessage = {
         conversation_id: activeConversation.id,
-        persona_id: persona.id,
+        persona_id: null,  // System message, not from a persona
+        user_id: null,  // System message
         content: `${personaName} has joined the conversation`,
         role: 'system',
         created_at: new Date().toISOString()
@@ -368,10 +365,9 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
 
       if (messageError) throw messageError
 
-      // Update local state
+      // Update local state (don't add message - let subscription handle it)
       set((state) => ({
         personas: [...state.personas, persona],
-        messages: [...state.messages, message],
         loading: false
       }))
     } catch (error: any) {
@@ -398,10 +394,11 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
 
     set({ loading: true, error: null })
     try {
-      // Add leave message before removing
+      // Add leave message before removing (as system, not persona)
       const leaveMessage = {
         conversation_id: activeConversation.id,
-        persona_id: personaId,
+        persona_id: null,  // System message, not from a persona
+        user_id: null,  // System message
         content: `${personaToRemove.name} has left the conversation`,
         role: 'system',
         created_at: new Date().toISOString()
@@ -427,10 +424,9 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
 
       if (deleteError) throw deleteError
 
-      // Update local state
+      // Update local state (don't add message - let subscription handle it)
       set((state) => ({
         personas: state.personas.filter(p => p.id !== personaId),
-        messages: [...state.messages, message],
         loading: false
       }))
     } catch (error: any) {
@@ -455,10 +451,18 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
           filter: `conversation_id=eq.${conversationId}`
         },
         (payload) => {
-          // Add new message to state
-          set((state) => ({
-            messages: [...state.messages, payload.new as Message]
-          }))
+          // Add new message to state if it doesn't already exist
+          const newMessage = payload.new as Message
+          set((state) => {
+            // Check if message already exists (by ID)
+            const messageExists = state.messages.some(m => m.id === newMessage.id)
+            if (messageExists) {
+              return state  // Don't add duplicate
+            }
+            return {
+              messages: [...state.messages, newMessage]
+            }
+          })
         }
       )
       .on(
