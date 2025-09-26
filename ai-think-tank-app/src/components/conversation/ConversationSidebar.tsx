@@ -123,31 +123,32 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
       <button
         onClick={() => navigate(`/conversation/${conversation.id}`)}
         className={cn(
-          'w-full text-left px-2 py-1.5 rounded hover:bg-gray-100 flex items-center space-x-2 group',
-          isActive && 'bg-blue-50 hover:bg-blue-50',
+          'w-full text-left px-2 py-1.5 rounded flex items-center space-x-2 group',
+          'hover:bg-opacity-10 hover:bg-primary-400',
+          isActive && 'bg-primary-900 bg-opacity-20 hover:bg-primary-900 hover:bg-opacity-20',
           hasUnread && 'font-semibold'
         )}
       >
         <Hash className={cn(
           'h-4 w-4 flex-shrink-0',
-          isActive ? 'text-blue-600' : hasUnread ? 'text-gray-700' : 'text-gray-400'
+          isActive ? 'text-primary-400' : hasUnread ? 'text-text-primary' : 'text-text-tertiary'
         )} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2">
             <p className={cn(
               'text-sm truncate',
-              isActive ? 'font-semibold text-blue-900' : hasUnread ? 'font-semibold text-gray-900' : 'text-gray-900'
+              isActive ? 'font-semibold text-primary-300' : hasUnread ? 'font-semibold text-text-primary' : 'text-text-primary'
             )}>
               {formatChannelName(conversation.title)}
             </p>
             {!isCollapsed && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-text-secondary">
                 {memberCount}
               </span>
             )}
           </div>
           {!isCollapsed && conversation.topic && (
-            <p className="text-xs text-gray-500 truncate">
+            <p className="text-xs text-text-secondary truncate">
               {conversation.topic}
             </p>
           )}
@@ -160,7 +161,7 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
               </Badge>
             )}
             {conversation.is_active && (
-              <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
+              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: 'var(--color-online)' }} />
             )}
           </div>
         )}
@@ -186,7 +187,7 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
       <div className="mb-4">
         <button
           onClick={() => toggleCategory(category)}
-          className="flex items-center space-x-1 w-full px-2 py-1 text-xs font-semibold text-gray-600 hover:text-gray-900"
+          className="flex items-center space-x-1 w-full px-2 py-1 text-xs font-semibold text-text-secondary hover:text-text-primary transition-colors"
         >
           {isExpanded ? (
             <ChevronDown className="h-3 w-3" />
@@ -194,7 +195,7 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
             <ChevronRight className="h-3 w-3" />
           )}
           <span className="uppercase tracking-wide">{title}</span>
-          <span className="text-gray-400">({filteredConvos.length})</span>
+          <span className="text-text-tertiary">({filteredConvos.length})</span>
         </button>
         {isExpanded && (
           <SortableContext
@@ -223,7 +224,7 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
 
   if (isCollapsed) {
     return (
-      <div className="w-16 bg-gray-50 border-r flex flex-col items-center py-4 space-y-4">
+      <div className="w-16 border-r flex flex-col items-center py-4 space-y-4" style={{ backgroundColor: 'var(--color-bg-secondary)', borderColor: 'var(--color-surface-border)' }}>
         <Button
           variant="ghost"
           size="sm"
@@ -248,14 +249,14 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
                 key={conversation.id}
                 onClick={() => navigate(`/conversation/${conversation.id}`)}
                 className={cn(
-                  'w-full p-2 rounded hover:bg-gray-200 flex justify-center',
-                  conversation.id === activeConversationId && 'bg-blue-100'
+                  'w-full p-2 rounded hover:bg-primary-900 hover:bg-opacity-20 flex justify-center transition-colors',
+                  conversation.id === activeConversationId && 'bg-primary-900 bg-opacity-20'
                 )}
                 title={conversation.title}
               >
                 <Hash className={cn(
                   'h-4 w-4',
-                  conversation.id === activeConversationId ? 'text-blue-600' : 'text-gray-500'
+                  conversation.id === activeConversationId ? 'text-primary-400' : 'text-text-tertiary'
                 )} />
               </button>
             ))}
@@ -265,11 +266,11 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
   }
 
   return (
-    <div className="w-64 bg-gray-50 border-r flex flex-col">
+    <div className="w-64 border-r flex flex-col" style={{ backgroundColor: 'var(--color-bg-secondary)', borderColor: 'var(--color-surface-border)' }}>
       {/* Header */}
-      <div className="px-4 py-3 border-b bg-white">
+      <div className="px-4 py-3 border-b" style={{ backgroundColor: 'var(--color-surface-primary)', borderColor: 'var(--color-surface-border)' }}>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-gray-900">Conversations</h2>
+          <h2 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>Conversations</h2>
           <div className="flex items-center space-x-1">
             <Button
               variant="ghost"
@@ -292,7 +293,7 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-2 top-2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-2 top-2 h-4 w-4" style={{ color: 'var(--color-text-tertiary)' }} />
           <Input
             type="text"
             placeholder="Search conversations..."
@@ -324,7 +325,7 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
       </div>
 
       {/* Footer Stats */}
-      <div className="px-4 py-2 border-t text-xs text-gray-500">
+      <div className="px-4 py-2 border-t text-xs" style={{ color: 'var(--color-text-secondary)', borderColor: 'var(--color-surface-border)' }}>
         <div className="flex justify-between">
           <span>{activeConversations.length} active</span>
           <span>{conversations.length} total</span>

@@ -125,7 +125,7 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
                 required
               />
               {config.title && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-text-secondary mt-1">
                   Will be formatted as: #{formatToChannelName(config.title)}
                 </p>
               )}
@@ -171,7 +171,7 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
           />
 
           <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">
+            <h3 className="text-sm font-medium text-text-primary mb-2">
               Select Personas (Choose at least 2)
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
@@ -243,7 +243,7 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
       </div>
 
       {config.personas.length < 2 && (
-        <p className="text-sm text-red-600 text-center">
+        <p className="text-sm text-center" style={{ color: 'var(--color-error)' }}>
           Please select at least 2 personas to start a conversation
         </p>
       )}

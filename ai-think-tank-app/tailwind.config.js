@@ -7,19 +7,49 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Legacy color mappings
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+
+        // Deep Ocean Theme Colors
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "var(--color-primary-500)",
+          50: "var(--color-primary-50)",
+          100: "var(--color-primary-100)",
+          200: "var(--color-primary-200)",
+          300: "var(--color-primary-300)",
+          400: "var(--color-primary-400)",
+          500: "var(--color-primary-500)",
+          600: "var(--color-primary-600)",
+          700: "var(--color-primary-700)",
+          800: "var(--color-primary-800)",
+          900: "var(--color-primary-900)",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
+          DEFAULT: "var(--color-secondary-500)",
+          50: "var(--color-secondary-50)",
+          100: "var(--color-secondary-100)",
+          200: "var(--color-secondary-200)",
+          300: "var(--color-secondary-300)",
+          400: "var(--color-secondary-400)",
+          500: "var(--color-secondary-500)",
+          600: "var(--color-secondary-600)",
+          700: "var(--color-secondary-700)",
+          800: "var(--color-secondary-800)",
+          900: "var(--color-secondary-900)",
           foreground: "hsl(var(--secondary-foreground))",
         },
+        // Text colors
+        'text-primary': "var(--color-text-primary)",
+        'text-secondary': "var(--color-text-secondary)",
+        'text-tertiary': "var(--color-text-tertiary)",
+        'text-inverse': "var(--color-text-inverse)",
+        'text-accent': "var(--color-text-accent)",
+
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",

@@ -28,17 +28,17 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
   if (!conversation) return null
 
   return (
-    <div className="border-b bg-white">
+    <div className="border-b" style={{ backgroundColor: 'var(--color-surface-primary)', borderColor: 'var(--color-surface-border)' }}>
       {/* Main Header */}
       <div className="px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <Hash className="h-5 w-5 text-gray-500" />
+          <Hash className="h-5 w-5" style={{ color: 'var(--color-text-tertiary)' }} />
           <div>
-            <h1 className="font-semibold text-gray-900">
+            <h1 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
               {conversation.title}
             </h1>
             {conversation.topic && (
-              <p className="text-sm text-gray-500">{conversation.topic}</p>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{conversation.topic}</p>
             )}
           </div>
           <Button
@@ -72,7 +72,9 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={onEndConversation}
-                className="text-red-600 hover:text-red-700"
+                style={{ color: 'var(--color-error)' }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -83,11 +85,11 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
 
       {/* Expandable Details */}
       {showDetails && (
-        <div className="px-4 py-3 border-t bg-gray-50">
+        <div className="px-4 py-3 border-t" style={{ backgroundColor: 'var(--color-bg-secondary)', borderColor: 'var(--color-surface-divider)' }}>
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-2">
-              <Users className="h-4 w-4 text-gray-500" />
-              <span className="text-sm text-gray-600">
+              <Users className="h-4 w-4" style={{ color: 'var(--color-text-tertiary)' }} />
+              <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                 {personas.length} participants
               </span>
             </div>
@@ -97,24 +99,24 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
                   key={persona.id}
                   fallback={persona.name}
                   size="xs"
-                  className="ring-2 ring-white"
+                  className="ring-2" style={{ '--tw-ring-color': 'var(--color-surface-primary)' } as React.CSSProperties}
                 />
               ))}
               {personas.length > 5 && (
-                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-300 ring-2 ring-white">
-                  <span className="text-xs text-gray-700">
+                <div className="flex items-center justify-center w-6 h-6 rounded-full ring-2" style={{ backgroundColor: 'var(--color-surface-tertiary)', '--tw-ring-color': 'var(--color-surface-primary)' } as React.CSSProperties}>
+                  <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>
                     +{personas.length - 5}
                   </span>
                 </div>
               )}
             </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <div className="flex items-center space-x-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
               <span>Mode:</span>
               <Badge size="sm" variant="secondary">
                 {conversation.mode === 'auto' ? 'Automatic' : 'Manual'}
               </Badge>
             </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <div className="flex items-center space-x-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
               <span>Type:</span>
               <Badge size="sm" variant="secondary">
                 {conversation.conversation_type}
