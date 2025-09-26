@@ -147,61 +147,11 @@ async function runTests() {
     if (budgetTest.success) testResults.passed++; else testResults.failed++;
   }
 
-  // Test 5: Cache Management - Set Cache
-  console.log('\n\n🔍 TEST GROUP 2: Cache Management Function');
-  console.log('==========================================');
+  // Cache management function removed - stateless Edge functions make in-memory caching pointless
+  // Database queries are already fast and Supabase has built-in caching
 
-  const cacheKey = `test-${Date.now()}`;
-  const cacheSetTest = await testFunction('manage-cache', {
-    action: 'set',
-    key: cacheKey,
-    value: {
-      test: 'data',
-      timestamp: new Date().toISOString(),
-      nested: {
-        property: 'value'
-      }
-    },
-    ttl: 60000, // 1 minute
-    userId: USER_ID
-  }, 'Set cache entry with 1 minute TTL');
-  testResults.total++;
-  if (cacheSetTest.success) testResults.passed++; else testResults.failed++;
-
-  // Test 6: Cache Management - Get Cache
-  // Note: This will likely fail as Edge functions are stateless (cache doesn't persist between invocations)
-  const cacheGetTest = await testFunction('manage-cache', {
-    action: 'get',
-    key: cacheKey,
-    userId: USER_ID
-  }, 'Retrieve cached entry (expected to fail - stateless functions)');
-  testResults.total++;
-  // Don't count this as a failure since it's expected behavior
-  if (cacheGetTest.success) {
-    testResults.passed++;
-  } else {
-    console.log('   ℹ️  Expected behavior - Edge functions are stateless');
-  }
-
-  // Test 7: Cache Management - Get Stats
-  const cacheStatsTest = await testFunction('manage-cache', {
-    action: 'stats'
-  }, 'Get cache statistics');
-  testResults.total++;
-  if (cacheStatsTest.success) testResults.passed++; else testResults.failed++;
-
-  // Test 8: Cache Management - Delete Entry
-  const cacheDeleteTest = await testFunction('manage-cache', {
-    action: 'delete',
-    key: cacheKey,
-    userId: USER_ID
-  }, 'Delete specific cache entry');
-  testResults.total++;
-  // This might also fail due to stateless nature, but count it normally
-  if (cacheDeleteTest.success) testResults.passed++; else testResults.failed++;
-
-  // Test 9: Determine Next Speaker - Random Mode
-  console.log('\n\n🔍 TEST GROUP 3: Determine Next Speaker Function');
+  // Test 5: Determine Next Speaker - Random Mode
+  console.log('\n\n🔍 TEST GROUP 2: Determine Next Speaker Function');
   console.log('================================================');
 
   if (PERSONA_IDS.length > 1) {
@@ -215,7 +165,7 @@ async function runTests() {
     testResults.total++;
     if (randomSpeakerTest.success) testResults.passed++; else testResults.failed++;
 
-    // Test 10: Determine Next Speaker - Round-Robin Mode
+    // Test 6: Determine Next Speaker - Round-Robin Mode
     const roundRobinTest = await testFunction('determine-next-speaker', {
       conversationId: CONVERSATION_ID || 'test-conv-123',
       currentSpeaker: PERSONA_IDS[0],
@@ -226,7 +176,7 @@ async function runTests() {
     testResults.total++;
     if (roundRobinTest.success) testResults.passed++; else testResults.failed++;
 
-    // Test 11: Determine Next Speaker - Intelligent Mode (requires valid data)
+    // Test 7: Determine Next Speaker - Intelligent Mode (requires valid data)
     if (CONVERSATION_ID && USER_ID) {
       const intelligentSpeakerTest = await testFunction('determine-next-speaker', {
         conversationId: CONVERSATION_ID,
@@ -242,8 +192,8 @@ async function runTests() {
     console.log('   ⚠️  Skipping multi-persona tests (need multiple persona IDs in TEST_PERSONA_IDS)');
   }
 
-  // Test 12: Generate Message (requires valid persona and conversation)
-  console.log('\n\n🔍 TEST GROUP 4: Generate Message Function');
+  // Test 8: Generate Message (requires valid persona and conversation)
+  console.log('\n\n🔍 TEST GROUP 3: Generate Message Function');
   console.log('==========================================');
 
   if (PERSONA_ID && CONVERSATION_ID && USER_ID) {
