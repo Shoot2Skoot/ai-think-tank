@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Badge } from '@/components/ui/Badge'
 import { DraggableConversationItem } from './DraggableConversationItem'
+import { UserSection } from './UserSection'
 import { formatRelativeTime, cn } from '@/lib/utils'
 import type { Conversation } from '@/types'
 
@@ -261,6 +262,9 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
               </button>
             ))}
         </div>
+
+        {/* User Section - Collapsed */}
+        <UserSection isCollapsed={true} />
       </div>
     )
   }
@@ -331,6 +335,9 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
           <span>{conversations.length} total</span>
         </div>
       </div>
+
+      {/* User Section */}
+      <UserSection />
     </div>
   )
 }
