@@ -161,14 +161,14 @@ export class ConversationManager {
     personaId?: string
   ): Promise<Message> {
     try {
-      // Create user message
+      // Create message - if personaId is provided, it's an assistant message
       const { data: message, error } = await supabase
         .from('messages')
         .insert({
           conversation_id: conversationId,
           user_id: userId,
           persona_id: personaId,
-          role: 'user',
+          role: personaId ? 'assistant' : 'user',
           content
         })
         .select()
