@@ -288,11 +288,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         {/* Helper Text */}
         <div className="mt-2 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
           <span>Press </span>
-          <kbd className="px-1 py-0.5 rounded" style={{ backgroundColor: 'var(--color-secondary-800)', color: 'var(--color-secondary-200)' }}>Enter</kbd>
+          <kbd className="px-1 py-0.5 rounded" style={{ backgroundColor: 'var(--color-secondary-600)', color: 'var(--color-secondary-100)' }}>Enter</kbd>
           <span> to send, </span>
-          <kbd className="px-1 py-0.5 rounded" style={{ backgroundColor: 'var(--color-secondary-800)', color: 'var(--color-secondary-200)' }}>Shift+Enter</kbd>
+          <kbd className="px-1 py-0.5 rounded" style={{ backgroundColor: 'var(--color-secondary-600)', color: 'var(--color-secondary-100)' }}>Shift+Enter</kbd>
           <span> for new line, </span>
-          <kbd className="px-1 py-0.5 rounded" style={{ backgroundColor: 'var(--color-secondary-800)', color: 'var(--color-secondary-200)' }}>@</kbd>
+          <kbd className="px-1 py-0.5 rounded" style={{ backgroundColor: 'var(--color-secondary-600)', color: 'var(--color-secondary-100)' }}>@</kbd>
           <span> to mention</span>
         </div>
       </div>
