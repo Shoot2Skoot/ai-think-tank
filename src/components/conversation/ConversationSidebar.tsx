@@ -13,6 +13,7 @@ interface ConversationSidebarProps {
   onNewConversation: () => void
   isCollapsed?: boolean
   onToggleCollapse?: () => void
+  unreadCounts?: Record<string, number>
 }
 
 export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
@@ -20,7 +21,8 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
   activeConversationId,
   onNewConversation,
   isCollapsed = false,
-  onToggleCollapse
+  onToggleCollapse,
+  unreadCounts = {}
 }) => {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
@@ -51,36 +53,63 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
     setExpandedCategories(newExpanded)
   }
 
+  // Format conversation name to channel style
+  const formatChannelName = (title: string) => {
+    return '#' + title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+  }
+
   const ConversationItem = ({ conversation }: { conversation: Conversation }) => {
     const isActive = conversation.id === activeConversationId
+    const unreadCount = unreadCounts[conversation.id] || 0
+    const hasUnread = unreadCount > 0 && !isActive
+
+    // Get member count (personas + user)
+    const memberCount = (conversation.personas?.length || 0) + 1
 
     return (
       <button
         onClick={() => navigate(`/conversation/${conversation.id}`)}
         className={cn(
           'w-full text-left px-2 py-1.5 rounded hover:bg-gray-100 flex items-center space-x-2 group',
-          isActive && 'bg-blue-50 hover:bg-blue-50'
+          isActive && 'bg-blue-50 hover:bg-blue-50',
+          hasUnread && 'font-semibold'
         )}
       >
         <Hash className={cn(
           'h-4 w-4 flex-shrink-0',
-          isActive ? 'text-blue-600' : 'text-gray-400'
+          isActive ? 'text-blue-600' : hasUnread ? 'text-gray-700' : 'text-gray-400'
         )} />
         <div className="flex-1 min-w-0">
-          <p className={cn(
-            'text-sm truncate',
-            isActive ? 'font-semibold text-blue-900' : 'text-gray-900'
-          )}>
-            {conversation.title}
-          </p>
+          <div className="flex items-center space-x-2">
+            <p className={cn(
+              'text-sm truncate',
+              isActive ? 'font-semibold text-blue-900' : hasUnread ? 'font-semibold text-gray-900' : 'text-gray-900'
+            )}>
+              {formatChannelName(conversation.title)}
+            </p>
+            {!isCollapsed && (
+              <span className="text-xs text-gray-500">
+                {memberCount}
+              </span>
+            )}
+          </div>
           {!isCollapsed && conversation.topic && (
             <p className="text-xs text-gray-500 truncate">
               {conversation.topic}
             </p>
           )}
         </div>
-        {!isCollapsed && conversation.is_active && (
-          <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
+        {!isCollapsed && (
+          <div className="flex items-center space-x-1">
+            {hasUnread && (
+              <Badge size="sm" variant="danger" className="px-1.5 py-0">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </Badge>
+            )}
+            {conversation.is_active && (
+              <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
+            )}
+          </div>
         )}
       </button>
     )

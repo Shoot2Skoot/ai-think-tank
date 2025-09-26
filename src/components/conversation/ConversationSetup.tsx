@@ -55,12 +55,22 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
     setConfig(prev => ({ ...prev, personas }))
   }, [selectedTemplates])
 
+  // Format title to channel name format
+  const formatToChannelName = (title: string) => {
+    return title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+  }
+
   const handleCreateConversation = async () => {
     if (!user || !config.title || config.personas.length < 2) return
 
     setLoading(true)
     try {
-      await createConversation(user.id, config)
+      // Format title to channel format
+      const formattedConfig = {
+        ...config,
+        title: formatToChannelName(config.title)
+      }
+      await createConversation(user.id, formattedConfig)
       clearSelections()
       // The store will set activeConversation, which contains the ID
       const conversationId = useConversationStore.getState().activeConversation?.id
@@ -77,7 +87,12 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
   const handleQuickStart = async (quickConfig: ConversationConfig) => {
     setLoading(true)
     try {
-      await createConversation(user!.id, quickConfig)
+      // Format title to channel format
+      const formattedConfig = {
+        ...quickConfig,
+        title: formatToChannelName(quickConfig.title)
+      }
+      await createConversation(user!.id, formattedConfig)
       const conversationId = useConversationStore.getState().activeConversation?.id
       if (conversationId) {
         onComplete(conversationId)
@@ -101,13 +116,20 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
       content: (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Conversation Title"
-              placeholder="e.g., New Feature Planning"
-              value={config.title}
-              onChange={(e) => setConfig({ ...config, title: e.target.value })}
-              required
-            />
+            <div>
+              <Input
+                label="Conversation Title"
+                placeholder="e.g., New Feature Planning"
+                value={config.title}
+                onChange={(e) => setConfig({ ...config, title: e.target.value })}
+                required
+              />
+              {config.title && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Will be formatted as: #{formatToChannelName(config.title)}
+                </p>
+              )}
+            </div>
             <Input
               label="Topic (Optional)"
               placeholder="e.g., User authentication system"
