@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Circle, Coffee, Music, Code, Sparkles, Brain, Heart, Star, Plus, X } from 'lucide-react'
-import { personaAvatarMap } from '@/utils/persona-avatars'
 import { useConversationStore } from '@/stores/conversation-store'
-import type { Persona, Message } from '@/types'
+import { personaService } from '@/services/persona-service'
+import type { Persona, Message, PersonaTemplate } from '@/types'
 
 interface PersonaPresencePanelProps {
   personas: Persona[]
@@ -34,8 +34,9 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
   isCollapsed,
   onToggleCollapse
 }) => {
-  const { addPersonaToConversation, removePersonaFromConversation } = useConversationStore()
+  const { addPersonaToConversation, removePersonaFromConversation, activeConversation } = useConversationStore()
   const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null)
+  const [availablePersonas, setAvailablePersonas] = useState<PersonaTemplate[]>([])
   const [personaStatuses] = useState<Record<string, typeof funStatuses[0]>>(() => {
     const statuses: Record<string, typeof funStatuses[0]> = {}
     personas.forEach(persona => {
@@ -46,6 +47,17 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
     return statuses
   })
 
+  // Fetch available personas from database
+  useEffect(() => {
+    const fetchAvailablePersonas = async () => {
+      if (activeConversation?.id) {
+        const available = await personaService.getAvailablePersonas(activeConversation.id)
+        setAvailablePersonas(available)
+      }
+    }
+    fetchAvailablePersonas()
+  }, [activeConversation?.id, personas])
+
   const { onlinePersonas, offlinePersonas, personaStats } = useMemo(() => {
     const stats: Record<string, PersonaStats> = {}
     const totalMessages = messages.filter(m => m.persona_id !== 'user').length
@@ -54,15 +66,13 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
     const online = personas.filter(p => p.id !== 'user')
 
     // Offline personas are those available but not in the current conversation
-    const currentPersonaNames = new Set(online.map(p => p.name))
-    const offline = Object.keys(personaAvatarMap)
-      .filter(name => !currentPersonaNames.has(name))
-      .map(name => ({
-        id: `offline-${name}`,
-        name,
-        avatar: personaAvatarMap[name],
-        role: 'Available'
-      }))
+    const offline = availablePersonas.map(template => ({
+      id: `offline-${template.id}`,
+      name: template.name,
+      avatar: template.avatar_url || '/avatars/tile000.png',
+      role: template.role || 'Available',
+      color: template.color
+    }))
 
     online.forEach(persona => {
       const personaMessages = messages.filter(m => m.persona_id === persona.id)
@@ -95,8 +105,8 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
     const sizeClasses = size === 'small' ? 'w-8 h-8' : 'w-10 h-10'
     const textSize = size === 'small' ? 'text-xs' : 'text-sm'
 
-    // Try to get avatar from persona object or from the avatar map
-    const avatarUrl = persona.avatar || personaAvatarMap[persona.name]
+    // Try to get avatar from persona object
+    const avatarUrl = persona.avatar
 
     if (avatarUrl) {
       return (

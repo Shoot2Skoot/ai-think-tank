@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { conversationManager } from '@/services/conversation/conversation-manager'
 import { supabase } from '@/lib/supabase'
-import { personaAvatarMap } from '@/utils/persona-avatars'
+import { personaService } from '@/services/persona-service'
 import type {
   Conversation,
   Message,
@@ -280,12 +280,8 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
 
     set({ loading: true, error: null })
     try {
-      // Try to get persona template data, but it's optional
-      const { data: template } = await supabase
-        .from('persona_templates')
-        .select('*')
-        .eq('name', personaName)
-        .maybeSingle()
+      // Try to get persona template data from service
+      const template = await personaService.getPersonaByName(personaName)
 
       // Create new persona for this conversation
       const newPersona: any = {
@@ -297,6 +293,11 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         system_prompt: template?.system_prompt || `You are ${personaName}, a helpful AI assistant participating in this conversation.`,
         temperature: template?.temperature || 0.7,
         max_tokens: template?.max_tokens || 1000,
+        demographics: template?.demographics,
+        background: template?.background,
+        personality: template?.personality,
+        experience_level: template?.experience_level,
+        attitude: template?.attitude,
         created_at: new Date().toISOString()
       }
 
