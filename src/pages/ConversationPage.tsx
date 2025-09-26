@@ -1,32 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import {
-  Send,
-  Users,
-  DollarSign,
-  Settings,
-  Play,
-  Pause,
-  User,
-  Bot
-} from 'lucide-react'
-import { AppLayout } from '@/components/layout/AppLayout'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Avatar } from '@/components/ui/Avatar'
-import { Badge } from '@/components/ui/Badge'
-import { Spinner } from '@/components/ui/Spinner'
 import { Modal } from '@/components/ui/Modal'
 import { ConversationSetup } from '@/components/conversation/ConversationSetup'
-import { CostDisplay } from '@/components/conversation/CostDisplay'
-import { PersonaSelector } from '@/components/conversation/PersonaSelector'
+import { ConversationSidebar } from '@/components/conversation/ConversationSidebar'
+import { ConversationHeader } from '@/components/conversation/ConversationHeader'
+import { MessageList } from '@/components/conversation/MessageList'
+import { MessageInput } from '@/components/conversation/MessageInput'
 import { ConversationModeSelector } from '@/components/conversation/ConversationModeSelector'
-import { ModelBadge } from '@/components/conversation/ModelSelector'
 import { useConversationStore } from '@/stores/conversation-store'
 import { useAuthStore } from '@/stores/auth-store'
-import { formatRelativeTime, getProviderColor, cn } from '@/lib/utils'
-import type { Message, Persona, ConversationType } from '@/types'
+import type { ConversationType } from '@/types'
 
 export const ConversationPage: React.FC = () => {
   const { id } = useParams()
@@ -34,6 +17,7 @@ export const ConversationPage: React.FC = () => {
   const user = useAuthStore((state) => state.user)
   const {
     activeConversation,
+    conversations,
     messages,
     personas,
     costBreakdown,
@@ -41,18 +25,26 @@ export const ConversationPage: React.FC = () => {
     sendMessage,
     triggerResponse,
     loadConversation,
+    loadConversations,
     endConversation,
     setStreamCallback
   } = useConversationStore()
 
-  const [input, setInput] = useState('')
   const [isSetupOpen, setIsSetupOpen] = useState(false)
-  const [selectedPersona, setSelectedPersona] = useState<string | null>(null)
-  const [autoMode, setAutoMode] = useState(true)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [showHeaderDetails, setShowHeaderDetails] = useState(false)
   const [streamingContent, setStreamingContent] = useState<Record<string, string>>({})
   const [conversationMode, setConversationMode] = useState<ConversationType>('planning')
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [typingPersonaIds, setTypingPersonaIds] = useState<string[]>([])
 
+  // Load conversations list on mount
+  useEffect(() => {
+    if (user?.id) {
+      loadConversations(user.id)
+    }
+  }, [user?.id, loadConversations])
+
+  // Load specific conversation when ID changes
   useEffect(() => {
     if (id && id !== 'new') {
       loadConversation(id)
@@ -61,12 +53,14 @@ export const ConversationPage: React.FC = () => {
     }
   }, [id, loadConversation])
 
+  // Update conversation mode when active conversation changes
   useEffect(() => {
     if (activeConversation) {
       setConversationMode(activeConversation.conversation_type)
     }
   }, [activeConversation])
 
+  // Setup streaming callback
   useEffect(() => {
     setStreamCallback((chunk: string) => {
       setStreamingContent((prev) => {
@@ -82,21 +76,31 @@ export const ConversationPage: React.FC = () => {
     })
   }, [messages, setStreamCallback])
 
+  // Simulate typing indicator when loading
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, streamingContent])
+    if (loading && activeConversation?.mode === 'auto') {
+      // Randomly pick 1-2 personas to show as typing
+      const availablePersonas = personas.filter(p => p.id !== 'user')
+      const typingCount = Math.min(Math.floor(Math.random() * 2) + 1, availablePersonas.length)
+      const typing = availablePersonas
+        .sort(() => Math.random() - 0.5)
+        .slice(0, typingCount)
+        .map(p => p.id)
+      setTypingPersonaIds(typing)
+    } else {
+      setTypingPersonaIds([])
+    }
+  }, [loading, activeConversation?.mode, personas])
 
-  const handleSendMessage = async () => {
-    if (!input.trim() || !user || !activeConversation) return
+  const handleSendMessage = async (message: string, mentionedPersona?: string) => {
+    if (!message.trim() || !user || !activeConversation) return
 
-    await sendMessage(input, user.id, selectedPersona || undefined)
-    setInput('')
-    setSelectedPersona(null)
-  }
+    await sendMessage(message, user.id, mentionedPersona)
 
-  const handleManualTrigger = async (personaId: string) => {
-    if (!activeConversation || activeConversation.mode !== 'manual') return
-    await triggerResponse(personaId)
+    // If in manual mode and a persona was mentioned, trigger their response
+    if (activeConversation.mode === 'manual' && mentionedPersona) {
+      await triggerResponse(mentionedPersona)
+    }
   }
 
   const handleEndConversation = async () => {
@@ -106,203 +110,67 @@ export const ConversationPage: React.FC = () => {
     }
   }
 
-  const renderMessage = (message: Message) => {
-    const persona = personas.find(p => p.id === message.persona_id)
-    const isUser = message.role === 'user'
-    const content = streamingContent[message.id] || message.content
-
-    return (
-      <div
-        key={message.id}
-        className={cn(
-          'flex items-start space-x-3',
-          isUser ? 'justify-end' : 'justify-start'
-        )}
-      >
-        {!isUser && (
-          <Avatar
-            fallback={persona?.name || 'AI'}
-            size="sm"
-            className={persona ? '' : 'bg-gray-300'}
-          />
-        )}
-        <div
-          className={cn(
-            'flex flex-col max-w-2xl',
-            isUser && 'items-end'
-          )}
-        >
-          <div className="flex items-center space-x-2 mb-1">
-            {persona && (
-              <>
-                <span className="text-sm font-medium">{persona.name}</span>
-                <ModelBadge provider={persona.provider} model={persona.model} />
-              </>
-            )}
-            {isUser && (
-              <span className="text-sm font-medium">You</span>
-            )}
-            <span className="text-xs text-gray-500">
-              {formatRelativeTime(message.created_at)}
-            </span>
-          </div>
-          <div
-            className={cn(
-              'rounded-lg px-4 py-2',
-              isUser
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-900'
-            )}
-          >
-            <p className="whitespace-pre-wrap">{content}</p>
-          </div>
-          {message.cost && (
-            <span className="text-xs text-gray-500 mt-1">
-              Cost: ${message.cost.toFixed(4)}
-            </span>
-          )}
-        </div>
-        {isUser && (
-          <Avatar fallback="You" size="sm" className="bg-blue-600" />
-        )}
-      </div>
-    )
-  }
-
-  if (!activeConversation && !isSetupOpen) {
-    return (
-      <AppLayout>
-        <div className="flex items-center justify-center h-96">
-          <Spinner size="lg" />
-        </div>
-      </AppLayout>
-    )
+  const handleNewConversation = () => {
+    setIsSetupOpen(true)
   }
 
   return (
-    <AppLayout>
-      <div className="h-full flex flex-col">
+    <div className="h-screen flex">
+      {/* Sidebar */}
+      <ConversationSidebar
+        conversations={conversations}
+        activeConversationId={activeConversation?.id}
+        onNewConversation={handleNewConversation}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="border-b pb-2">
-          <div className="flex items-center justify-between px-4 py-2">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {activeConversation?.title || 'New Conversation'}
-              </h1>
-              {activeConversation?.topic && (
-                <p className="text-sm text-gray-500">{activeConversation.topic}</p>
-              )}
-            </div>
-            <div className="flex items-center space-x-2">
-              {activeConversation && (
-                <>
-                  <CostDisplay cost={costBreakdown} />
-                  <Badge variant={activeConversation.is_active ? 'success' : 'default'}>
-                    {activeConversation.is_active ? 'Active' : 'Ended'}
-                  </Badge>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setAutoMode(!autoMode)}
-                  >
-                    {autoMode ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-                    {activeConversation.mode === 'auto' ? 'Auto' : 'Manual'}
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={handleEndConversation}
-                  >
-                    End
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+        <ConversationHeader
+          conversation={activeConversation}
+          personas={personas}
+          costBreakdown={costBreakdown}
+          messageCount={messages.length}
+          onEndConversation={handleEndConversation}
+          onToggleDetails={() => setShowHeaderDetails(!showHeaderDetails)}
+          showDetails={showHeaderDetails}
+        />
 
-        {/* Mode Selector */}
+        {/* Conversation Mode Selector */}
         {activeConversation && (
-          <ConversationModeSelector
-            currentMode={conversationMode}
-            onModeChange={setConversationMode}
-            disabled={!activeConversation.is_active}
-          />
-        )}
-
-        {/* Personas Bar */}
-        {personas.length > 0 && (
-          <div className="border-b pb-4 mb-4">
-            <div className="flex items-center space-x-4 overflow-x-auto">
-              <span className="text-sm font-medium text-gray-700">Personas:</span>
-              {personas.map((persona) => (
-                <div
-                  key={persona.id}
-                  className="flex items-center space-x-2 bg-gray-50 rounded-lg px-3 py-2"
-                >
-                  <Avatar fallback={persona.name} size="sm" />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">{persona.name}</span>
-                    <span className="text-xs text-gray-500">{persona.role}</span>
-                  </div>
-                  {activeConversation?.mode === 'manual' && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleManualTrigger(persona.id)}
-                    >
-                      <Bot className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
+          <div className="px-4 py-2 border-b bg-gray-50">
+            <ConversationModeSelector
+              currentMode={conversationMode}
+              onModeChange={setConversationMode}
+              disabled={!activeConversation.is_active}
+            />
           </div>
         )}
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-          {messages.length === 0 ? (
-            <div className="text-center py-12">
-              <Users className="mx-auto h-12 w-12 text-gray-300" />
-              <p className="mt-2 text-sm text-gray-500">
-                Start the conversation by sending a message
-              </p>
-            </div>
-          ) : (
-            messages.map(renderMessage)
-          )}
-          <div ref={messagesEndRef} />
-        </div>
+        <MessageList
+          messages={messages}
+          personas={personas}
+          streamingContent={streamingContent}
+          loading={loading}
+          typingPersonas={typingPersonaIds.map(id => personas.find(p => p.id === id)!).filter(Boolean)}
+        />
 
         {/* Input */}
         {activeConversation?.is_active && (
-          <div className="border-t pt-4">
-            <div className="flex items-end space-x-2">
-              {activeConversation.mode === 'manual' && (
-                <PersonaSelector
-                  personas={personas}
-                  selected={selectedPersona}
-                  onSelect={setSelectedPersona}
-                />
-              )}
-              <div className="flex-1">
-                <Input
-                  type="text"
-                  placeholder="Type your message..."
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                />
-              </div>
-              <Button
-                onClick={handleSendMessage}
-                disabled={!input.trim() || loading}
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          <MessageInput
+            onSendMessage={handleSendMessage}
+            personas={personas}
+            disabled={!activeConversation.is_active}
+            loading={loading}
+            placeholder={
+              activeConversation.mode === 'manual'
+                ? 'Type a message... Use @ to mention a persona'
+                : 'Type a message...'
+            }
+          />
         )}
       </div>
 
@@ -325,6 +193,6 @@ export const ConversationPage: React.FC = () => {
           }}
         />
       </Modal>
-    </AppLayout>
+    </div>
   )
 }

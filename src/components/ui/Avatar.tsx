@@ -5,7 +5,7 @@ interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   src?: string
   alt?: string
   fallback?: string
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg'
 }
 
 export const Avatar: React.FC<AvatarProps> = ({
@@ -17,6 +17,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   ...props
 }) => {
   const sizes = {
+    xs: 'h-6 w-6 text-xs',
     sm: 'h-8 w-8 text-xs',
     md: 'h-10 w-10 text-sm',
     lg: 'h-12 w-12 text-base'

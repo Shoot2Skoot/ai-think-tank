@@ -19,25 +19,25 @@ export const AVAILABLE_MODELS: Record<string, ModelInfo[]> = {
   anthropic: [
     {
       id: 'claude-opus-4-1-20250805',
-      label: 'Claude Opus 4.1',
+      label: 'Opus 4.1',
       provider: 'anthropic',
       pricing: { input: 0.015, output: 0.075, cached_input: 0.0015 }
     },
     {
       id: 'claude-opus-4-20250514',
-      label: 'Claude Opus 4',
+      label: 'Opus 4',
       provider: 'anthropic',
       pricing: { input: 0.015, output: 0.075, cached_input: 0.0015 }
     },
     {
       id: 'claude-sonnet-4-20250514',
-      label: 'Claude Sonnet 4',
+      label: 'Sonnet 4',
       provider: 'anthropic',
       pricing: { input: 0.003, output: 0.015, cached_input: 0.0003 }
     },
     {
       id: 'claude-3-7-sonnet-20250219',
-      label: 'Claude 3.7 Sonnet',
+      label: 'Sonnet 3.7',
       provider: 'anthropic',
       pricing: { input: 0.003, output: 0.015, cached_input: 0.0003 }
     }
@@ -45,19 +45,19 @@ export const AVAILABLE_MODELS: Record<string, ModelInfo[]> = {
   gemini: [
     {
       id: 'gemini-2.5-pro',
-      label: 'Gemini 2.5 Pro',
+      label: '2.5 Pro',
       provider: 'gemini',
       pricing: { input: 0.00125, output: 0.01 } // Using ≤200K pricing
     },
     {
       id: 'gemini-2.5-flash',
-      label: 'Gemini 2.5 Flash',
+      label: '2.5 Flash',
       provider: 'gemini',
       pricing: { input: 0.0003, output: 0.0025 }
     },
     {
       id: 'gemini-2.5-flash-lite',
-      label: 'Gemini 2.5 Flash Lite',
+      label: '2.5 Flash Lite',
       provider: 'gemini',
       pricing: { input: 0.0001, output: 0.0004 }
     }
