@@ -133,7 +133,7 @@ export const MessageList: React.FC<MessageListProps> = ({
       }
     }
 
-    const isPinned = pinnedMessageIds.includes(message.id)
+    const isPinned = message.is_pinned || pinnedMessageIds.includes(message.id)
 
     const contextMenuContent = (
       <>

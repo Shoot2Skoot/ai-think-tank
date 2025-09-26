@@ -136,28 +136,36 @@ export const ConversationPage: React.FC = () => {
     if (!message) return
 
     const isPinned = message.is_pinned || false
+    const newPinnedState = !isPinned
+
+    console.log('Pinning message:', {
+      messageId,
+      currentPinned: isPinned,
+      newPinned: newPinnedState,
+      userId: user.id
+    })
 
     try {
       // Update the database
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('messages')
         .update({
-          is_pinned: !isPinned,
-          pinned_at: !isPinned ? new Date().toISOString() : null,
-          pinned_by: !isPinned ? user.id : null
+          is_pinned: newPinnedState,
+          pinned_at: newPinnedState ? new Date().toISOString() : null,
+          pinned_by: newPinnedState ? user.id : null
         })
         .eq('id', messageId)
+        .select()
 
-      if (error) throw error
+      if (error) {
+        console.error('Database update error:', error)
+        throw error
+      }
+
+      console.log('Database update result:', data)
 
       // Update local state by reloading the conversation
       await loadConversation(activeConversation.id)
-
-      // Update conversation manager with pinned message IDs
-      const pinnedIds = messages
-        .filter(m => m.id === messageId ? !isPinned : m.is_pinned)
-        .map(m => m.id)
-      conversationManager.setPinnedMessages(activeConversation.id, pinnedIds)
     } catch (error) {
       console.error('Failed to pin/unpin message:', error)
     }
