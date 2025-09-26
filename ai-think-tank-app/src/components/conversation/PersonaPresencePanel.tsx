@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { X, ChevronLeft, ChevronRight, MessageCircle, Clock, TrendingUp, Coffee, Music, Code, Sparkles, Brain, Heart, Star } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Circle } from 'lucide-react'
 import type { Persona, Message } from '@/types'
 
 interface PersonaPresencePanelProps {
@@ -16,15 +16,6 @@ interface PersonaStats {
   contributionPercentage: number
 }
 
-const funStatuses = [
-  { icon: Coffee, text: 'Getting coffee', color: 'text-yellow-500' },
-  { icon: Music, text: 'Listening to music', color: 'text-purple-500' },
-  { icon: Code, text: 'Writing code', color: 'text-green-500' },
-  { icon: Sparkles, text: 'Feeling inspired', color: 'text-pink-500' },
-  { icon: Brain, text: 'Deep in thought', color: 'text-blue-500' },
-  { icon: Heart, text: 'Spreading positivity', color: 'text-red-500' },
-  { icon: Star, text: 'Being awesome', color: 'text-yellow-400' }
-]
 
 export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
   personas,
@@ -33,19 +24,13 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
   onToggleCollapse
 }) => {
   const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null)
-  const [personaStatuses] = useState<Record<string, typeof funStatuses[0]>>(() => {
-    const statuses: Record<string, typeof funStatuses[0]> = {}
-    personas.forEach(persona => {
-      if (persona.id !== 'user') {
-        statuses[persona.id] = funStatuses[Math.floor(Math.random() * funStatuses.length)]
-      }
-    })
-    return statuses
-  })
 
-  const personaStats = useMemo(() => {
+  const { onlinePersonas, offlinePersonas, personaStats } = useMemo(() => {
     const stats: Record<string, PersonaStats> = {}
     const totalMessages = messages.filter(m => m.persona_id !== 'user').length
+    const online: Persona[] = []
+    const offline: Persona[] = []
+    const now = new Date()
 
     personas.forEach(persona => {
       if (persona.id === 'user') return
@@ -62,9 +47,16 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
         lastActive,
         contributionPercentage: totalMessages > 0 ? Math.round((messageCount / totalMessages) * 100) : 0
       }
+
+      // Consider online if active in last 30 minutes
+      if (lastActive && (now.getTime() - lastActive.getTime()) < 30 * 60 * 1000) {
+        online.push(persona)
+      } else {
+        offline.push(persona)
+      }
     })
 
-    return stats
+    return { onlinePersonas: online, offlinePersonas: offline, personaStats: stats }
   }, [personas, messages])
 
   const getInitials = (name: string) => {
@@ -77,7 +69,7 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
   }
 
   const renderAvatar = (persona: Persona, size: 'small' | 'medium' = 'medium') => {
-    const sizeClasses = size === 'small' ? 'w-10 h-10' : 'w-12 h-12'
+    const sizeClasses = size === 'small' ? 'w-8 h-8' : 'w-10 h-10'
     const textSize = size === 'small' ? 'text-xs' : 'text-sm'
 
     if (persona.avatar) {
@@ -102,15 +94,11 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
     )
   }
 
-  const getPresenceColor = (lastActive: Date | null) => {
-    if (!lastActive) return 'bg-gray-400'
-
+  const isOnline = (lastActive: Date | null) => {
+    if (!lastActive) return false
     const now = new Date()
     const diffMinutes = (now.getTime() - lastActive.getTime()) / (1000 * 60)
-
-    if (diffMinutes < 5) return 'bg-green-500'
-    if (diffMinutes < 30) return 'bg-yellow-500'
-    return 'bg-gray-400'
+    return diffMinutes < 30
   }
 
   const formatLastActive = (date: Date | null) => {
@@ -144,9 +132,9 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
         </button>
 
         <div className="space-y-3">
-          {personas.filter(p => p.id !== 'user').map(persona => {
+          {/* Online personas */}
+          {onlinePersonas.map(persona => {
             const stats = personaStats[persona.id]
-            const presenceColor = getPresenceColor(stats?.lastActive || null)
 
             return (
               <div key={persona.id} className="relative group">
@@ -157,12 +145,36 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
                   >
                     {renderAvatar(persona, 'small')}
                   </div>
-                  <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${presenceColor}`} />
+                  <Circle className="absolute bottom-0 right-0 w-2.5 h-2.5 fill-green-500 text-green-500" />
                   {stats && stats.messageCount > 0 && (
                     <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                       {stats.messageCount > 99 ? '99+' : stats.messageCount}
                     </div>
                   )}
+                </div>
+              </div>
+            )
+          })}
+
+          {/* Separator if both online and offline exist */}
+          {onlinePersonas.length > 0 && offlinePersonas.length > 0 && (
+            <div className="border-t" style={{ borderColor: 'var(--color-surface-border)' }} />
+          )}
+
+          {/* Offline personas */}
+          {offlinePersonas.map(persona => {
+            const stats = personaStats[persona.id]
+
+            return (
+              <div key={persona.id} className="relative group opacity-60">
+                <div className="relative">
+                  <div
+                    className="cursor-pointer hover:ring-2 hover:ring-primary-500 transition-all rounded-full"
+                    onClick={() => setSelectedPersonaId(persona.id)}
+                  >
+                    {renderAvatar(persona, 'small')}
+                  </div>
+                  <Circle className="absolute bottom-0 right-0 w-2.5 h-2.5 fill-gray-400 text-gray-400" />
                 </div>
               </div>
             )
@@ -173,13 +185,13 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
   }
 
   return (
-    <div className="w-80 border-l flex flex-col" style={{
+    <div className="w-60 border-l flex flex-col" style={{
       backgroundColor: 'var(--color-surface-primary)',
       borderColor: 'var(--color-surface-border)'
     }}>
-      <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--color-surface-border)' }}>
-        <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-          Persona Presence
+      <div className="flex items-center justify-between p-3 border-b" style={{ borderColor: 'var(--color-surface-border)' }}>
+        <h3 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          Personas
         </h3>
         <button
           onClick={onToggleCollapse}
@@ -191,95 +203,106 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4 space-y-4">
-          {personas.filter(p => p.id !== 'user').map(persona => {
-            const stats = personaStats[persona.id]
-            const status = personaStatuses[persona.id]
-            const presenceColor = getPresenceColor(stats?.lastActive || null)
-            const StatusIcon = status?.icon || Coffee
+        {/* Online Section */}
+        {onlinePersonas.length > 0 && (
+          <div>
+            <div className="px-3 py-2 text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
+              Online — {onlinePersonas.length}
+            </div>
+            <div>
+              {onlinePersonas.map((persona, index) => {
+                const stats = personaStats[persona.id]
 
-            return (
-              <div
-                key={persona.id}
-                className="p-3 rounded-lg border cursor-pointer hover:shadow-md transition-all"
-                style={{
-                  backgroundColor: 'var(--color-surface-secondary)',
-                  borderColor: 'var(--color-surface-border)'
-                }}
-                onClick={() => setSelectedPersonaId(persona.id === selectedPersonaId ? null : persona.id)}
-              >
-                <div className="flex items-start space-x-3">
-                  <div className="relative">
-                    {renderAvatar(persona, 'medium')}
-                    <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${presenceColor}`} />
-                  </div>
+                return (
+                  <div
+                    key={persona.id}
+                    className={`px-3 py-2 flex items-center space-x-2 hover:bg-primary-900 hover:bg-opacity-10 cursor-pointer transition-colors ${
+                      index < onlinePersonas.length - 1 ? 'border-b' : ''
+                    }`}
+                    style={{ borderColor: 'var(--color-surface-border)' }}
+                    onClick={() => setSelectedPersonaId(persona.id === selectedPersonaId ? null : persona.id)}
+                  >
+                    <div className="relative">
+                      {renderAvatar(persona, 'small')}
+                      <Circle className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 fill-green-500 text-green-500" />
+                    </div>
 
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                        {persona.name}
-                      </h4>
-                      {stats && stats.messageCount > 0 && (
-                        <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                          {stats.messageCount}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+                          {persona.name}
                         </span>
-                      )}
+                        {stats && stats.messageCount > 0 && (
+                          <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                            {stats.messageCount} msgs
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                        {persona.role}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Offline Section */}
+        {offlinePersonas.length > 0 && (
+          <div className={onlinePersonas.length > 0 ? 'mt-4' : ''}>
+            <div className="px-3 py-2 text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
+              Offline — {offlinePersonas.length}
+            </div>
+            <div>
+              {offlinePersonas.map((persona, index) => {
+                const stats = personaStats[persona.id]
+
+                return (
+                  <div
+                    key={persona.id}
+                    className={`px-3 py-2 flex items-center space-x-2 hover:bg-primary-900 hover:bg-opacity-10 cursor-pointer transition-colors opacity-60 ${
+                      index < offlinePersonas.length - 1 ? 'border-b' : ''
+                    }`}
+                    style={{ borderColor: 'var(--color-surface-border)' }}
+                    onClick={() => setSelectedPersonaId(persona.id === selectedPersonaId ? null : persona.id)}
+                  >
+                    <div className="relative opacity-60">
+                      {renderAvatar(persona, 'small')}
+                      <Circle className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 fill-gray-400 text-gray-400" />
                     </div>
 
-                    {status && (
-                      <div className="flex items-center mt-1 space-x-1">
-                        <StatusIcon className={`w-3 h-3 ${status.color}`} />
-                        <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                          {status.text}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-sm truncate" style={{ color: 'var(--color-text-tertiary)' }}>
+                          {persona.name}
                         </span>
+                        {stats && stats.lastActive && (
+                          <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                            {formatLastActive(stats.lastActive)}
+                          </span>
+                        )}
                       </div>
-                    )}
-
-                    <div className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-                      Active {formatLastActive(stats?.lastActive || null)}
+                      <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                        {persona.role}
+                      </span>
                     </div>
                   </div>
-                </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
-                {selectedPersonaId === persona.id && stats && (
-                  <div className="mt-4 pt-4 border-t space-y-2" style={{ borderColor: 'var(--color-surface-border)' }}>
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center space-x-2">
-                        <MessageCircle className="w-4 h-4" style={{ color: 'var(--color-text-secondary)' }} />
-                        <span style={{ color: 'var(--color-text-secondary)' }}>Messages</span>
-                      </div>
-                      <span style={{ color: 'var(--color-text-primary)' }}>{stats.messageCount}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4" style={{ color: 'var(--color-text-secondary)' }} />
-                        <span style={{ color: 'var(--color-text-secondary)' }}>Avg Response</span>
-                      </div>
-                      <span style={{ color: 'var(--color-text-primary)' }}>{stats.averageResponseTime}s</span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center space-x-2">
-                        <TrendingUp className="w-4 h-4" style={{ color: 'var(--color-text-secondary)' }} />
-                        <span style={{ color: 'var(--color-text-secondary)' }}>Contribution</span>
-                      </div>
-                      <span style={{ color: 'var(--color-text-primary)' }}>{stats.contributionPercentage}%</span>
-                    </div>
-
-                    {persona.description && (
-                      <div className="pt-2 mt-2 border-t" style={{ borderColor: 'var(--color-surface-border)' }}>
-                        <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                          {persona.description}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
+        {/* Empty State */}
+        {onlinePersonas.length === 0 && offlinePersonas.length === 0 && (
+          <div className="p-4 text-center">
+            <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+              No personas in this conversation
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

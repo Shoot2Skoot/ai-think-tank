@@ -4,6 +4,7 @@ import { turnOrchestrator } from '../orchestration/turn-orchestrator'
 import { supabase } from '@/lib/supabase'
 import { getUniqueAvatarUrl, resetUsedAvatars } from '@/utils/avatars'
 import { getUniqueColor, resetUsedColors } from '@/utils/colors'
+import { getAvatarForPersona } from '@/utils/avatar-mapping'
 import type {
   Conversation,
   Persona,
@@ -58,7 +59,7 @@ export class ConversationManager {
             template_id: personaConfig.template_id,
             name: personaConfig.name,
             role: personaConfig.role,
-            avatar: getUniqueAvatarUrl(),
+            avatar: getAvatarForPersona(personaConfig.name, personaConfig.role),
             color: getUniqueColor(),
             model: personaConfig.model,
             provider: personaConfig.provider,
