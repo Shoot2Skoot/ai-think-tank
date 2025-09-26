@@ -36,12 +36,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
       {/* Desktop Sidebar */}
       <div className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
-        <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white pt-5">
+        <div className="flex flex-grow flex-col overflow-y-auto border-r pt-5" style={{ borderColor: 'var(--color-surface-border)', backgroundColor: 'var(--color-surface-primary)' }}>
           <div className="flex flex-shrink-0 items-center px-4">
-            <h1 className="text-xl font-bold text-gray-900">AI Think Tank</h1>
+            <h1 className="text-xl font-bold text-text-primary">AI Think Tank</h1>
           </div>
           <div className="mt-8 flex flex-grow flex-col">
             <nav className="flex-1 space-y-1 px-2 pb-4">
@@ -55,16 +55,16 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                     className={cn(
                       'group flex items-center px-2 py-2 text-sm font-medium rounded-md',
                       isActive
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-primary-900 bg-opacity-20 text-primary-400'
+                        : 'text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 hover:text-text-primary'
                     )}
                   >
                     <Icon
                       className={cn(
                         'mr-3 h-5 w-5',
                         isActive
-                          ? 'text-blue-600'
-                          : 'text-gray-400 group-hover:text-gray-500'
+                          ? 'text-primary-400'
+                          : 'text-text-tertiary group-hover:text-text-secondary'
                       )}
                     />
                     {item.name}
@@ -73,10 +73,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               })}
             </nav>
           </div>
-          <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
+          <div className="flex flex-shrink-0 border-t p-4" style={{ borderColor: 'var(--color-surface-divider)' }}>
             <div className="flex items-center">
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-text-primary">
                   {user?.email}
                 </p>
               </div>
@@ -95,7 +95,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
       {/* Mobile header */}
       <div className="md:hidden">
-        <div className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between bg-white border-b border-gray-200 px-4 py-2">
+        <div className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between border-b px-4 py-2" style={{ backgroundColor: 'var(--color-surface-primary)', borderColor: 'var(--color-surface-border)' }}>
           <h1 className="text-lg font-bold text-gray-900">AI Think Tank</h1>
           <Button
             variant="ghost"
@@ -112,7 +112,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-30 bg-white pt-14">
+          <div className="fixed inset-0 z-30 pt-14" style={{ backgroundColor: 'var(--color-surface-primary)' }}>
             <nav className="px-4 py-2">
               {navigation.map((item) => {
                 const Icon = item.icon
@@ -125,8 +125,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                     className={cn(
                       'flex items-center px-3 py-2 text-base font-medium rounded-md mb-1',
                       isActive
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'bg-primary-900 bg-opacity-20 text-primary-400'
+                        : 'text-text-secondary hover:bg-primary-900 hover:bg-opacity-10'
                     )}
                   >
                     <Icon className="mr-3 h-5 w-5" />
@@ -134,8 +134,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   </Link>
                 )
               })}
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <p className="px-3 text-sm text-gray-500">{user?.email}</p>
+              <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--color-surface-divider)' }}>
+                <p className="px-3 text-sm text-text-secondary">{user?.email}</p>
                 <Button
                   variant="ghost"
                   className="w-full mt-2"
