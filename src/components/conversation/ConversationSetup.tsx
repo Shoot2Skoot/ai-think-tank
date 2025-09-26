@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Avatar } from '@/components/ui/Avatar'
 import { Tabs } from '@/components/ui/Tabs'
 import { QuickStartSetup } from './QuickStartSetup'
-import { ModelBadge } from './ModelSelector'
+import { PersonaCard } from './PersonaCard'
 import { useConversationStore } from '@/stores/conversation-store'
 import { usePersonaStore, getAllPersonasForConversation } from '@/stores/persona-store'
 import { useAuthStore } from '@/stores/auth-store'
@@ -156,38 +156,18 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
               {templates.map((template) => {
                 const isSelected = selectedTemplates.some(t => t.id === template.id)
                 return (
-                  <div
+                  <PersonaCard
                     key={template.id}
-                    onClick={() => isSelected ? deselectTemplate(template.id) : selectTemplate(template)}
-                    className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                      isSelected
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="flex items-start space-x-3">
-                      <Avatar fallback={template.name} size="sm" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {template.name}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {template.role}
-                        </p>
-                        <div className="flex flex-col mt-1 space-y-1">
-                          <ModelBadge provider={template.default_provider} model={template.default_model} />
-                          {template.experience_level && (
-                            <span className={`text-xs ${getExperienceColor(template.experience_level)}`}>
-                              {template.experience_level}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      {isSelected && (
-                        <div className="text-blue-500">✓</div>
-                      )}
-                    </div>
-                  </div>
+                    template={template}
+                    isSelected={isSelected}
+                    onSelect={(template, model) => {
+                      // Store the selected model with the template
+                      const templateWithModel = { ...template, default_model: model || template.default_model }
+                      selectTemplate(templateWithModel)
+                    }}
+                    onDeselect={deselectTemplate}
+                    selectedModel={template.default_model}
+                  />
                 )
               })}
             </div>

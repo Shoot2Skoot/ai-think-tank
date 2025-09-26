@@ -1,6 +1,6 @@
 // Core types for the application
 
-export type Provider = 'openai' | 'anthropic' | 'google'
+export type Provider = 'openai' | 'anthropic' | 'gemini'
 export type ConversationMode = 'auto' | 'manual'
 export type ConversationType = 'planning' | 'ideation' | 'refinement' | 'debate' | 'brainstorm' | 'review' | 'casual'
 export type ExperienceLevel = 'None' | 'Limited' | 'Entry' | 'Senior' | 'Mastery'

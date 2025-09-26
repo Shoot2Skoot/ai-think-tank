@@ -77,7 +77,7 @@ export const ModelBadge: React.FC<{ provider: Provider; model: string }> = ({ pr
     switch (provider) {
       case 'openai': return 'OpenAI'
       case 'anthropic': return 'Anthropic'
-      case 'google': return 'Google'
+      case 'gemini': return 'Gemini'
       default: return provider
     }
   }

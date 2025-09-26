@@ -10,7 +10,7 @@ export interface ModelPricing {
 export interface ModelInfo {
   id: string
   label: string
-  provider: 'openai' | 'anthropic' | 'google'
+  provider: 'openai' | 'anthropic' | 'gemini'
   pricing: ModelPricing
 }
 
@@ -42,23 +42,23 @@ export const AVAILABLE_MODELS: Record<string, ModelInfo[]> = {
       pricing: { input: 0.003, output: 0.015, cached_input: 0.0003 }
     }
   ],
-  google: [
+  gemini: [
     {
       id: 'gemini-2.5-pro',
       label: 'Gemini 2.5 Pro',
-      provider: 'google',
+      provider: 'gemini',
       pricing: { input: 0.00125, output: 0.01 } // Using ≤200K pricing
     },
     {
       id: 'gemini-2.5-flash',
       label: 'Gemini 2.5 Flash',
-      provider: 'google',
+      provider: 'gemini',
       pricing: { input: 0.0003, output: 0.0025 }
     },
     {
       id: 'gemini-2.5-flash-lite',
       label: 'Gemini 2.5 Flash Lite',
-      provider: 'google',
+      provider: 'gemini',
       pricing: { input: 0.0001, output: 0.0004 }
     }
   ],
@@ -115,7 +115,7 @@ export const AVAILABLE_MODELS: Record<string, ModelInfo[]> = {
 }
 
 // Helper to get all models for a provider
-export function getModelsForProvider(provider: 'openai' | 'anthropic' | 'google'): ModelInfo[] {
+export function getModelsForProvider(provider: 'openai' | 'anthropic' | 'gemini'): ModelInfo[] {
   return AVAILABLE_MODELS[provider] || []
 }
 
