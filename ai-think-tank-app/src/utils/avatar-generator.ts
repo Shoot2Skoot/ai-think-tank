@@ -90,8 +90,15 @@ export const generateAvatarUrl = (persona: Persona): string => {
   const params = new URLSearchParams()
   params.append('seed', seed)
 
-  // Set transparent background so we can use persona color as circle background
-  params.append('backgroundColor', 'transparent')
+  // Use persona color as background (convert hex to no-hash format)
+  if (persona.color) {
+    const cleanColor = persona.color.replace('#', '')
+    params.append('backgroundColor', cleanColor)
+  } else {
+    // Default pastel colors if no persona color
+    params.append('backgroundColor', 'b6e3f4,c0aede,d1d4f9')
+  }
+  params.append('backgroundType', 'solid')
 
   // Set radius to 50% for perfect circle cropping
   params.append('radius', '50')
@@ -99,14 +106,20 @@ export const generateAvatarUrl = (persona: Persona): string => {
   // Apply gender-based parameters if available
   if (persona.demographics?.gender) {
     const gender = persona.demographics.gender.toLowerCase()
+    const age = persona.demographics?.age ? parseInt(persona.demographics.age) : 30
+
     if (gender === 'female' || gender === 'woman') {
       // Female characteristics for Miniavs
-      params.append('hair', 'long01,long02,long03,long04,long05')
-      params.append('eyebrows', 'up,eyelashesUp')
+      params.append('hair', 'curly,ponytail,long')
+      params.append('mustacheProbability', '0')
     } else if (gender === 'male' || gender === 'man') {
       // Male characteristics for Miniavs
-      params.append('hair', 'short01,short02,short03,short04,short05,curly01,curly02')
-      params.append('eyebrows', 'down,up')
+      if (age > 50) {
+        params.append('hair', 'balndess,classic01,classic02,elvis,stylish,curly,slaughter')
+      } else {
+        params.append('hair', 'classic01,classic02,elvis,stylish,curly')
+      }
+      params.append('mustacheProbability', '40')
     }
   }
 
@@ -118,7 +131,8 @@ export const generateUserAvatarUrl = (name: string = 'User'): string => {
   const baseUrl = 'https://api.dicebear.com/9.x/miniavs/svg'
   const params = new URLSearchParams()
   params.append('seed', name)
-  params.append('backgroundColor', 'transparent') // Transparent so we can use blue circle
+  params.append('backgroundColor', '2563eb') // Blue background for users
+  params.append('backgroundType', 'solid')
   params.append('radius', '50') // Perfect circle cropping
 
   return `${baseUrl}?${params.toString()}`

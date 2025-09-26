@@ -56,17 +56,11 @@ export const PersonaCard: React.FC<PersonaCardProps> = ({
         className="cursor-pointer"
       >
         <div className="flex items-start space-x-3">
-          <div
-            className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center"
-            style={{ backgroundColor: template.color || '#6366f1' }}
-          >
-            <Avatar
-              generatedUrl={generateAvatarUrl(template)}
-              fallback={template.name}
-              size="sm"
-              className="bg-transparent w-full h-full"
-            />
-          </div>
+          <Avatar
+            generatedUrl={generateAvatarUrl(template)}
+            fallback={template.name}
+            size="md"
+          />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-text-primary truncate">
               {template.name}

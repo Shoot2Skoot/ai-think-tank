@@ -126,22 +126,15 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
   }
 
   const renderAvatar = (persona: Persona, size: 'small' | 'medium' = 'medium') => {
-    const sizeClasses = size === 'small' ? 'w-8 h-8' : 'w-10 h-10'
-
     // Generate DiceBear avatar URL based on demographics
     const generatedUrl = generateAvatarUrl(persona)
 
     return (
-      <div
-        className={`${sizeClasses} rounded-full overflow-hidden flex items-center justify-center`}
-        style={{ backgroundColor: persona.color || '#6366f1' }}
-      >
-        <img
-          src={generatedUrl}
-          alt={persona.name}
-          className="w-full h-full object-cover"
-        />
-      </div>
+      <img
+        src={generatedUrl}
+        alt={persona.name}
+        className={size === 'small' ? 'w-8 h-8' : 'w-10 h-10'}
+      />
     )
   }
 

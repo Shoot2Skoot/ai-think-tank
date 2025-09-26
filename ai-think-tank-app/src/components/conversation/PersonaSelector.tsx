@@ -37,17 +37,11 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
         <div className="flex items-center space-x-2">
           {selectedPersona ? (
             <>
-              <div
-                className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center"
-                style={{ backgroundColor: selectedPersona.color || '#6366f1' }}
-              >
-                <Avatar
-                  generatedUrl={generateAvatarUrl(selectedPersona)}
-                  fallback={selectedPersona.name}
-                  size="xs"
-                  className="bg-transparent w-full h-full"
-                />
-              </div>
+              <Avatar
+                generatedUrl={generateAvatarUrl(selectedPersona)}
+                fallback={selectedPersona.name}
+                size="sm"
+              />
               <span className="truncate">{selectedPersona.name}</span>
             </>
           ) : (
@@ -101,17 +95,11 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
                 onClick={() => handleSelect(persona.id)}
               >
                 <div className="flex items-start space-x-3">
-                  <div
-                    className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center"
-                    style={{ backgroundColor: persona.color || '#6366f1' }}
-                  >
-                    <Avatar
-                      generatedUrl={generateAvatarUrl(persona)}
-                      fallback={persona.name}
-                      size="sm"
-                      className="bg-transparent w-full h-full"
-                    />
-                  </div>
+                  <Avatar
+                    generatedUrl={generateAvatarUrl(persona)}
+                    fallback={persona.name}
+                    size="md"
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-text-primary">{persona.name}</p>
                     <p className="text-sm text-text-secondary">{persona.role}</p>
