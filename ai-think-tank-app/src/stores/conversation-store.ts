@@ -313,7 +313,7 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         conversation_id: activeConversation.id,
         persona_id: persona.id,
         content: `${personaName} has joined the conversation`,
-        message_type: 'system',
+        role: 'system',
         created_at: new Date().toISOString()
       }
 
@@ -360,7 +360,7 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         conversation_id: activeConversation.id,
         persona_id: personaId,
         content: `${personaToRemove.name} has left the conversation`,
-        message_type: 'system',
+        role: 'system',
         created_at: new Date().toISOString()
       }
 
