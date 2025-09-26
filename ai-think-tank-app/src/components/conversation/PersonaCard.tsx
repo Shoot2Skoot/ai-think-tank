@@ -46,8 +46,8 @@ export const PersonaCard: React.FC<PersonaCardProps> = ({
     <div
       className={`relative p-3 rounded-lg border transition-all ${
         isSelected
-          ? 'border-blue-500 bg-blue-50'
-          : 'border-gray-200 hover:border-gray-300'
+          ? 'border-primary-400 bg-primary-900 bg-opacity-20'
+          : 'border-surface-border hover:border-primary-700'
       }`}
     >
       <div
@@ -57,10 +57,10 @@ export const PersonaCard: React.FC<PersonaCardProps> = ({
         <div className="flex items-start space-x-3">
           <Avatar fallback={template.name} size="sm" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">
+            <p className="text-sm font-medium text-text-primary truncate">
               {template.name}
             </p>
-            <p className="text-xs text-gray-500 truncate">
+            <p className="text-xs text-text-secondary truncate">
               {template.role}
             </p>
             <div className="flex flex-col mt-1 space-y-1">
@@ -73,7 +73,7 @@ export const PersonaCard: React.FC<PersonaCardProps> = ({
             </div>
           </div>
           {isSelected && (
-            <div className="text-blue-500">
+            <div className="text-primary-400">
               <Check className="h-5 w-5" />
             </div>
           )}
@@ -82,13 +82,13 @@ export const PersonaCard: React.FC<PersonaCardProps> = ({
 
       {/* Model Selector Section */}
       {isSelected && (
-        <div className="mt-3 pt-3 border-t border-gray-200">
+        <div className="mt-3 pt-3 border-t border-surface-divider">
           <button
             onClick={(e) => {
               e.stopPropagation()
               setShowModelSelector(!showModelSelector)
             }}
-            className="w-full text-left text-xs font-medium text-gray-700 flex items-center justify-between hover:text-gray-900"
+            className="w-full text-left text-xs font-medium text-text-secondary flex items-center justify-between hover:text-text-primary transition-colors"
           >
             <span>Model: {getModelLabel(template.default_provider, currentModel)}</span>
             <ChevronDown className={`h-3 w-3 transition-transform ${showModelSelector ? 'rotate-180' : ''}`} />

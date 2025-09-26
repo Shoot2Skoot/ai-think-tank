@@ -29,7 +29,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
           value={model}
           onChange={(e) => onModelChange(e.target.value)}
           disabled={disabled}
-          className="flex h-10 w-full appearance-none rounded-md border border-gray-300 bg-white px-3 py-2 text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-10 w-full appearance-none rounded-md border px-3 py-2 text-sm pr-10 focus:outline-none focus:ring-2 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 bg-surface-primary border-surface-border text-text-primary focus:ring-primary-400"
         >
           <option value="" disabled>Select a model</option>
           <optgroup label={provider.charAt(0).toUpperCase() + provider.slice(1)}>
@@ -40,11 +40,11 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
             ))}
           </optgroup>
         </select>
-        <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
+        <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-text-tertiary pointer-events-none" />
       </div>
 
       {showCost && currentModel && (
-        <div className="flex items-center space-x-2 text-xs text-gray-600">
+        <div className="flex items-center space-x-2 text-xs text-text-secondary">
           <DollarSign className="h-3 w-3" />
           <span>Input: ${currentModel.pricing.input}/1K tokens</span>
           <span>•</span>
@@ -68,10 +68,10 @@ export const ModelBadge: React.FC<{ provider: Provider; model: string }> = ({ pr
   // Get provider-based color
   const getProviderBadgeColor = (provider: Provider) => {
     switch (provider) {
-      case 'openai': return 'bg-green-100 text-green-700'
-      case 'anthropic': return 'bg-orange-100 text-orange-700'
-      case 'gemini': return 'bg-blue-100 text-blue-700'
-      default: return 'bg-gray-100 text-gray-700'
+      case 'openai': return 'bg-green-500 bg-opacity-20 text-green-400'
+      case 'anthropic': return 'bg-secondary-500 bg-opacity-20 text-secondary-400'
+      case 'gemini': return 'bg-primary-500 bg-opacity-20 text-primary-400'
+      default: return 'bg-primary-900 bg-opacity-20 text-text-primary'
     }
   }
 

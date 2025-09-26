@@ -58,24 +58,24 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
           />
 
           {/* Dropdown */}
-          <div className="absolute bottom-full left-0 mb-2 w-80 max-h-96 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+          <div className="absolute bottom-full left-0 mb-2 w-80 max-h-96 overflow-y-auto rounded-lg shadow-lg z-20 bg-surface-primary border border-surface-border">
             {/* Option to speak as yourself */}
             <div
-              className={`p-3 hover:bg-gray-50 cursor-pointer border-b ${
-                !selected ? 'bg-blue-50' : ''
+              className={`p-3 hover:bg-primary-900 hover:bg-opacity-10 cursor-pointer border-b border-surface-divider ${
+                !selected ? 'bg-primary-900 bg-opacity-20' : ''
               }`}
               onClick={() => handleSelect(null)}
             >
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                  <User className="h-5 w-5 text-gray-600" />
+                <div className="h-10 w-10 rounded-full bg-primary-900 bg-opacity-20 flex items-center justify-center">
+                  <User className="h-5 w-5 text-text-secondary" />
                 </div>
                 <div className="flex-1">
                   <p className="font-medium">Speak as yourself</p>
-                  <p className="text-sm text-gray-500">Your own perspective</p>
+                  <p className="text-sm text-text-secondary">Your own perspective</p>
                 </div>
                 {!selected && (
-                  <div className="text-blue-500">✓</div>
+                  <div className="text-primary-400">✓</div>
                 )}
               </div>
             </div>
@@ -84,22 +84,22 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
             {personas.map((persona) => (
               <div
                 key={persona.id}
-                className={`p-3 hover:bg-gray-50 cursor-pointer border-b last:border-0 ${
-                  selected === persona.id ? 'bg-blue-50' : ''
+                className={`p-3 hover:bg-primary-900 hover:bg-opacity-10 cursor-pointer border-b border-surface-divider last:border-0 ${
+                  selected === persona.id ? 'bg-primary-900 bg-opacity-20' : ''
                 }`}
                 onClick={() => handleSelect(persona.id)}
               >
                 <div className="flex items-start space-x-3">
                   <Avatar fallback={persona.name} size="md" />
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900">{persona.name}</p>
-                    <p className="text-sm text-gray-500">{persona.role}</p>
+                    <p className="font-medium text-text-primary">{persona.name}</p>
+                    <p className="text-sm text-text-secondary">{persona.role}</p>
                     <div className="flex flex-col mt-1 space-y-1">
                       <div className="flex items-center space-x-2">
                         <Badge size="sm" className={getProviderColor(persona.provider)}>
                           {persona.provider}
                         </Badge>
-                        <span className="text-xs font-medium text-gray-600">
+                        <span className="text-xs font-medium text-text-secondary">
                           {getModelLabel(persona.provider, persona.model)}
                         </span>
                       </div>
@@ -109,13 +109,13 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center mt-1 space-x-4 text-xs text-gray-500">
+                    <div className="flex items-center mt-1 space-x-4 text-xs text-text-tertiary">
                       <span>{persona.message_count} messages</span>
                       <span>${persona.total_cost.toFixed(4)}</span>
                     </div>
                   </div>
                   {selected === persona.id && (
-                    <div className="text-blue-500">✓</div>
+                    <div className="text-primary-400">✓</div>
                   )}
                 </div>
               </div>
