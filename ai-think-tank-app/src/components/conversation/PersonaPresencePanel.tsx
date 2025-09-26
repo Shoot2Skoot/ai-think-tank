@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Circle, Coffee, Music, Code, Sparkles, Brain, Heart, Star, Plus, X } from 'lucide-react'
 import { useConversationStore } from '@/stores/conversation-store'
 import { personaService } from '@/services/persona-service'
-import type { Persona, Message, PersonaTemplate } from '@/types'
+import type { Persona, Message } from '@/types'
 
 interface PersonaPresencePanelProps {
   personas: Persona[]
@@ -36,7 +36,7 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
 }) => {
   const { addPersonaToConversation, removePersonaFromConversation, activeConversation } = useConversationStore()
   const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null)
-  const [availablePersonas, setAvailablePersonas] = useState<PersonaTemplate[]>([])
+  const [availablePersonas, setAvailablePersonas] = useState<Persona[]>([])
   const [personaStatuses] = useState<Record<string, typeof funStatuses[0]>>(() => {
     const statuses: Record<string, typeof funStatuses[0]> = {}
     personas.forEach(persona => {
@@ -71,7 +71,8 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
       name: template.name,
       avatar: template.avatar_url || '/avatars/tile000.png',
       role: template.role || 'Available',
-      color: template.color
+      color: template.color,
+      avatar_url: template.avatar_url
     }))
 
     online.forEach(persona => {
@@ -105,8 +106,8 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
     const sizeClasses = size === 'small' ? 'w-8 h-8' : 'w-10 h-10'
     const textSize = size === 'small' ? 'text-xs' : 'text-sm'
 
-    // Try to get avatar from persona object
-    const avatarUrl = persona.avatar
+    // Try to get avatar from persona object - check both avatar and avatar_url fields
+    const avatarUrl = (persona as any).avatar || (persona as any).avatar_url
 
     if (avatarUrl) {
       return (

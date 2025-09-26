@@ -5,12 +5,12 @@ import { Badge } from '@/components/ui/Badge'
 import { ModelSelector, ModelBadge } from './ModelSelector'
 import { getProviderColor, getExperienceColor } from '@/lib/utils'
 import { getModelLabel } from '@/lib/models'
-import type { PersonaTemplate, Provider } from '@/types'
+import type { Persona, Provider } from '@/types'
 
 interface PersonaCardProps {
-  template: PersonaTemplate
+  template: Persona
   isSelected: boolean
-  onSelect: (template: PersonaTemplate, model?: string) => void
+  onSelect: (template: Persona, model?: string) => void
   onDeselect: (templateId: string) => void
   selectedModel?: string
 }
@@ -23,7 +23,7 @@ export const PersonaCard: React.FC<PersonaCardProps> = ({
   selectedModel
 }) => {
   const [showModelSelector, setShowModelSelector] = useState(false)
-  const [currentModel, setCurrentModel] = useState(selectedModel || template.default_model)
+  const [currentModel, setCurrentModel] = useState(selectedModel || template.model)
 
   const handleClick = () => {
     if (isSelected) {
@@ -64,7 +64,7 @@ export const PersonaCard: React.FC<PersonaCardProps> = ({
               {template.role}
             </p>
             <div className="flex flex-col mt-1 space-y-1">
-              <ModelBadge provider={template.default_provider} model={currentModel} />
+              <ModelBadge provider={template.provider} model={currentModel} />
               {template.experience_level && (
                 <span className={`text-xs ${getExperienceColor(template.experience_level)}`}>
                   {template.experience_level}
@@ -90,14 +90,14 @@ export const PersonaCard: React.FC<PersonaCardProps> = ({
             }}
             className="w-full text-left text-xs font-medium text-text-secondary flex items-center justify-between hover:text-text-primary transition-colors"
           >
-            <span>Model: {getModelLabel(template.default_provider, currentModel)}</span>
+            <span>Model: {getModelLabel(template.provider, currentModel)}</span>
             <ChevronDown className={`h-3 w-3 transition-transform ${showModelSelector ? 'rotate-180' : ''}`} />
           </button>
 
           {showModelSelector && (
             <div className="mt-2" onClick={(e) => e.stopPropagation()}>
               <ModelSelector
-                provider={template.default_provider}
+                provider={template.provider}
                 model={currentModel}
                 onModelChange={handleModelChange}
                 showCost={true}

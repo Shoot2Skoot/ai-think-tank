@@ -1,11 +1,11 @@
 import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
-import type { PersonaTemplate, PersonaConfig } from '@/types'
+import type { Persona, PersonaConfig } from '@/types'
 
 interface PersonaState {
   // State
-  templates: PersonaTemplate[]
-  selectedTemplates: PersonaTemplate[]
+  templates: Persona[]
+  selectedTemplates: Persona[]
   customPersonas: PersonaConfig[]
   loading: boolean
   error: string | null
@@ -16,7 +16,7 @@ interface PersonaState {
   loadTemplates: () => Promise<void>
   searchTemplates: (query: string) => void
   filterByCategory: (category: string | null) => void
-  selectTemplate: (template: PersonaTemplate) => void
+  selectTemplate: (template: Persona) => void
   deselectTemplate: (templateId: string) => void
   createCustomPersona: (config: PersonaConfig) => void
   updateCustomPersona: (index: number, config: PersonaConfig) => void
@@ -38,8 +38,10 @@ export const usePersonaStore = create<PersonaState>((set, get) => ({
     set({ loading: true, error: null })
     try {
       const { data: templates, error } = await supabase
-        .from('persona_templates')
+        .from('personas')
         .select('*')
+        .eq('is_template', true)
+        .is('user_id', null)  // Global templates
         .order('usage_count', { ascending: false })
 
       if (error) throw error
@@ -72,8 +74,8 @@ export const usePersonaStore = create<PersonaState>((set, get) => ({
 
     // Update usage count
     supabase
-      .from('persona_templates')
-      .update({ usage_count: template.usage_count + 1 })
+      .from('personas')
+      .update({ usage_count: (template.usage_count || 0) + 1 })
       .eq('id', template.id)
       .then(() => {})
       .catch(console.error)
@@ -151,8 +153,8 @@ export const getAllPersonasForConversation = (state: PersonaState): PersonaConfi
   const fromTemplates: PersonaConfig[] = state.selectedTemplates.map(template => ({
     name: template.name,
     role: template.role,
-    model: template.default_model,
-    provider: template.default_provider,
+    model: template.model,
+    provider: template.provider,
     system_prompt: template.system_prompt,
     demographics: template.demographics,
     background: template.background,
@@ -160,8 +162,8 @@ export const getAllPersonasForConversation = (state: PersonaState): PersonaConfi
     experience_level: template.experience_level,
     attitude: template.attitude,
     template_id: template.id,
-    temperature: 0.7,
-    max_tokens: 1000
+    temperature: template.temperature || 0.7,
+    max_tokens: template.max_tokens || 1000
   }))
 
   // Combine with custom personas

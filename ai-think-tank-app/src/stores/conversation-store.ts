@@ -51,13 +51,16 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
     try {
       const conversation = await conversationManager.createConversation(userId, config)
 
-      // Load personas for the new conversation
-      const { data: personas, error: personaError } = await supabase
-        .from('personas')
-        .select('*')
+      // Load personas for the new conversation using junction table
+      const { data: personaRelations, error: personaError } = await supabase
+        .from('conversation_personas')
+        .select('persona_id, personas(*)')
         .eq('conversation_id', conversation.id)
+        .eq('is_active', true)
 
       if (personaError) throw personaError
+
+      const personas = personaRelations?.map(rel => rel.personas).filter(Boolean) || []
 
       set({
         activeConversation: conversation,
@@ -94,13 +97,16 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
 
       if (convError) throw convError
 
-      // Load personas
-      const { data: personas, error: personaError } = await supabase
-        .from('personas')
-        .select('*')
+      // Load personas using junction table
+      const { data: personaRelations, error: personaError } = await supabase
+        .from('conversation_personas')
+        .select('persona_id, personas(*)')
         .eq('conversation_id', conversationId)
+        .eq('is_active', true)
 
       if (personaError) throw personaError
+
+      const personas = personaRelations?.map(rel => rel.personas).filter(Boolean) || []
 
       // Load messages
       const { data: messages, error: msgError } = await supabase
@@ -283,36 +289,61 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
       // Try to get persona template data from service
       const template = await personaService.getPersonaByName(personaName)
 
-      // Create new persona for this conversation
-      const newPersona: any = {
-        conversation_id: activeConversation.id,
-        name: personaName,
-        role: template?.role || 'AI Assistant',
-        model: template?.default_model || 'gpt-4',
-        provider: template?.default_provider || 'openai',
-        system_prompt: template?.system_prompt || `You are ${personaName}, a helpful AI assistant participating in this conversation.`,
-        temperature: template?.temperature || 0.7,
-        max_tokens: template?.max_tokens || 1000,
-        demographics: template?.demographics,
-        background: template?.background,
-        personality: template?.personality,
-        experience_level: template?.experience_level,
-        attitude: template?.attitude,
-        created_at: new Date().toISOString()
-      }
+      let persona
 
-      // Add template_id if we found a template
-      if (template?.id) {
-        newPersona.template_id = template.id
-      }
-
-      const { data: persona, error: personaError } = await supabase
+      // Check if we already have this persona (non-template) in the database
+      const { data: existingPersona } = await supabase
         .from('personas')
-        .insert(newPersona)
-        .select()
-        .single()
+        .select('*')
+        .eq('name', personaName)
+        .eq('is_template', false)
+        .maybeSingle()
 
-      if (personaError) throw personaError
+      if (existingPersona) {
+        persona = existingPersona
+      } else {
+        // Create new persona instance based on template
+        const newPersona: any = {
+          name: personaName,
+          role: template?.role || 'AI Assistant',
+          model: template?.model || 'gpt-4',
+          provider: template?.provider || 'openai',
+          system_prompt: template?.system_prompt || `You are ${personaName}, a helpful AI assistant participating in this conversation.`,
+          temperature: template?.temperature || 0.7,
+          max_tokens: template?.max_tokens || 1000,
+          demographics: template?.demographics,
+          background: template?.background,
+          personality: template?.personality,
+          experience_level: template?.experience_level,
+          attitude: template?.attitude,
+          avatar_url: template?.avatar_url,
+          color: template?.color,
+          category: template?.category,
+          description: template?.description,
+          expertise_areas: template?.expertise_areas,
+          is_template: false,  // This is a conversation persona, not a template
+          created_at: new Date().toISOString()
+        }
+
+        const { data: createdPersona, error: personaError } = await supabase
+          .from('personas')
+          .insert(newPersona)
+          .select()
+          .single()
+
+        if (personaError) throw personaError
+        persona = createdPersona
+      }
+
+      // Add persona to conversation via junction table
+      const { error: junctionError } = await supabase
+        .from('conversation_personas')
+        .insert({
+          conversation_id: activeConversation.id,
+          persona_id: persona.id
+        })
+
+      if (junctionError) throw junctionError
 
       // Add join message
       const joinMessage = {
@@ -378,11 +409,15 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
 
       if (messageError) throw messageError
 
-      // Remove persona from database
+      // Mark persona as inactive in the conversation (soft delete)
       const { error: deleteError } = await supabase
-        .from('personas')
-        .delete()
-        .eq('id', personaId)
+        .from('conversation_personas')
+        .update({
+          is_active: false,
+          left_at: new Date().toISOString()
+        })
+        .eq('conversation_id', activeConversation.id)
+        .eq('persona_id', personaId)
 
       if (deleteError) throw deleteError
 

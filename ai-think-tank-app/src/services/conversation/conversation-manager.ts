@@ -50,9 +50,55 @@ export class ConversationManager {
       // Create personas for the conversation
       const personas: Persona[] = []
       for (const personaConfig of config.personas) {
-        const personaData: any = {
-            conversation_id: conversation.id,
-            template_id: personaConfig.template_id,
+        let persona: Persona
+
+        // Check if we should use an existing persona or create a new one
+        if (personaConfig.template_id) {
+          // Get the template
+          const { data: template } = await supabase
+            .from('personas')
+            .select('*')
+            .eq('id', personaConfig.template_id)
+            .eq('is_template', true)
+            .single()
+
+          if (template) {
+            // Create persona instance from template
+            const personaData: any = {
+              name: personaConfig.name || template.name,
+              role: personaConfig.role || template.role,
+              model: personaConfig.model || template.model,
+              provider: personaConfig.provider || template.provider,
+              temperature: personaConfig.temperature || template.temperature || 0.7,
+              max_tokens: personaConfig.max_tokens || template.max_tokens || 1000,
+              system_prompt: personaConfig.system_prompt || template.system_prompt || this.generateSystemPrompt(personaConfig),
+              demographics: personaConfig.demographics || template.demographics,
+              background: personaConfig.background || template.background,
+              personality: personaConfig.personality || template.personality,
+              experience_level: personaConfig.experience_level || template.experience_level,
+              attitude: personaConfig.attitude || template.attitude,
+              avatar_url: template.avatar_url,
+              color: template.color,
+              category: template.category,
+              description: template.description,
+              expertise_areas: template.expertise_areas,
+              is_template: false
+            }
+
+            const { data: newPersona, error: personaError } = await supabase
+              .from('personas')
+              .insert(personaData)
+              .select()
+              .single()
+
+            if (personaError) throw personaError
+            persona = newPersona
+          } else {
+            throw new Error(`Template ${personaConfig.template_id} not found`)
+          }
+        } else {
+          // Create custom persona
+          const personaData: any = {
             name: personaConfig.name,
             role: personaConfig.role,
             model: personaConfig.model,
@@ -64,16 +110,29 @@ export class ConversationManager {
             background: personaConfig.background,
             personality: personaConfig.personality,
             experience_level: personaConfig.experience_level,
-            attitude: personaConfig.attitude
+            attitude: personaConfig.attitude,
+            is_template: false
+          }
+
+          const { data: newPersona, error: personaError } = await supabase
+            .from('personas')
+            .insert(personaData)
+            .select()
+            .single()
+
+          if (personaError) throw personaError
+          persona = newPersona
         }
 
-        const { data: persona, error: personaError } = await supabase
-          .from('personas')
-          .insert(personaData)
-          .select()
-          .single()
+        // Link persona to conversation via junction table
+        const { error: junctionError } = await supabase
+          .from('conversation_personas')
+          .insert({
+            conversation_id: conversation.id,
+            persona_id: persona.id
+          })
 
-        if (personaError) throw personaError
+        if (junctionError) throw junctionError
         personas.push(persona)
       }
 
