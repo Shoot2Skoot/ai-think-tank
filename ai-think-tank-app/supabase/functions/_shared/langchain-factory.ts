@@ -48,8 +48,7 @@ export function createLangChainProvider(persona: Persona, config?: Partial<LangC
         maxTokens: baseConfig.maxTokens,
         streaming: baseConfig.streaming,
         anthropicApiKey: apiKey,
-        callbacks: baseConfig.callbacks,
-        anthropicApiVersion: '2023-06-01'
+        callbacks: baseConfig.callbacks
       })
     }
 
@@ -60,7 +59,7 @@ export function createLangChainProvider(persona: Persona, config?: Partial<LangC
       }
 
       return new ChatGoogleGenerativeAI({
-        modelName: baseConfig.modelName,
+        model: baseConfig.modelName,
         maxOutputTokens: baseConfig.maxTokens,
         streaming: baseConfig.streaming,
         apiKey: apiKey,

@@ -78,12 +78,24 @@ export interface CostRecord {
   created_at?: string
 }
 
+export type ConversationType = 'general' | 'technical' | 'creative' | 'analytical' | 'educational'
+export type ConversationMode = 'debate' | 'ideation' | 'refinement' | 'planning' | 'discussion'
+
 export interface TurnOrchestration {
   conversationId: string
   currentSpeaker: string
   availablePersonas: Persona[]
   conversationHistory: Message[]
   orchestrationMode: 'round-robin' | 'intelligent' | 'random'
+  conversationType?: ConversationType
+  conversationMode?: ConversationMode
+}
+
+export interface TurnFactors {
+  relevance: number
+  expertise: number
+  participation_balance: number
+  conversation_flow: number
 }
 
 export interface CacheEntry {
