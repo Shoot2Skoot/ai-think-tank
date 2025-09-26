@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Circle } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Circle, Coffee, Music, Code, Sparkles, Brain, Heart, Star } from 'lucide-react'
 import type { Persona, Message } from '@/types'
 
 interface PersonaPresencePanelProps {
@@ -16,6 +16,15 @@ interface PersonaStats {
   contributionPercentage: number
 }
 
+const funStatuses = [
+  { icon: Coffee, text: 'Getting coffee', color: 'text-yellow-500' },
+  { icon: Music, text: 'Listening to music', color: 'text-purple-500' },
+  { icon: Code, text: 'Writing code', color: 'text-green-500' },
+  { icon: Sparkles, text: 'Feeling inspired', color: 'text-pink-500' },
+  { icon: Brain, text: 'Deep in thought', color: 'text-blue-500' },
+  { icon: Heart, text: 'Spreading positivity', color: 'text-red-500' },
+  { icon: Star, text: 'Being awesome', color: 'text-yellow-400' }
+]
 
 export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
   personas,
@@ -24,17 +33,24 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
   onToggleCollapse
 }) => {
   const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null)
+  const [personaStatuses] = useState<Record<string, typeof funStatuses[0]>>(() => {
+    const statuses: Record<string, typeof funStatuses[0]> = {}
+    personas.forEach(persona => {
+      if (persona.id !== 'user') {
+        statuses[persona.id] = funStatuses[Math.floor(Math.random() * funStatuses.length)]
+      }
+    })
+    return statuses
+  })
 
-  const { onlinePersonas, offlinePersonas, personaStats } = useMemo(() => {
+  const { onlinePersonas, personaStats } = useMemo(() => {
     const stats: Record<string, PersonaStats> = {}
     const totalMessages = messages.filter(m => m.persona_id !== 'user').length
-    const online: Persona[] = []
-    const offline: Persona[] = []
-    const now = new Date()
 
-    personas.forEach(persona => {
-      if (persona.id === 'user') return
+    // Online personas are those in the current conversation
+    const online = personas.filter(p => p.id !== 'user')
 
+    online.forEach(persona => {
       const personaMessages = messages.filter(m => m.persona_id === persona.id)
       const messageCount = personaMessages.length
 
@@ -47,16 +63,9 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
         lastActive,
         contributionPercentage: totalMessages > 0 ? Math.round((messageCount / totalMessages) * 100) : 0
       }
-
-      // Consider online if active in last 30 minutes
-      if (lastActive && (now.getTime() - lastActive.getTime()) < 30 * 60 * 1000) {
-        online.push(persona)
-      } else {
-        offline.push(persona)
-      }
     })
 
-    return { onlinePersonas: online, offlinePersonas: offline, personaStats: stats }
+    return { onlinePersonas: online, personaStats: stats }
   }, [personas, messages])
 
   const getInitials = (name: string) => {
@@ -94,12 +103,6 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
     )
   }
 
-  const isOnline = (lastActive: Date | null) => {
-    if (!lastActive) return false
-    const now = new Date()
-    const diffMinutes = (now.getTime() - lastActive.getTime()) / (1000 * 60)
-    return diffMinutes < 30
-  }
 
   const formatLastActive = (date: Date | null) => {
     if (!date) return 'Never'
@@ -132,7 +135,6 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
         </button>
 
         <div className="space-y-3">
-          {/* Online personas */}
           {onlinePersonas.map(persona => {
             const stats = personaStats[persona.id]
 
@@ -151,30 +153,6 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
                       {stats.messageCount > 99 ? '99+' : stats.messageCount}
                     </div>
                   )}
-                </div>
-              </div>
-            )
-          })}
-
-          {/* Separator if both online and offline exist */}
-          {onlinePersonas.length > 0 && offlinePersonas.length > 0 && (
-            <div className="border-t" style={{ borderColor: 'var(--color-surface-border)' }} />
-          )}
-
-          {/* Offline personas */}
-          {offlinePersonas.map(persona => {
-            const stats = personaStats[persona.id]
-
-            return (
-              <div key={persona.id} className="relative group opacity-60">
-                <div className="relative">
-                  <div
-                    className="cursor-pointer hover:ring-2 hover:ring-primary-500 transition-all rounded-full"
-                    onClick={() => setSelectedPersonaId(persona.id)}
-                  >
-                    {renderAvatar(persona, 'small')}
-                  </div>
-                  <Circle className="absolute bottom-0 right-0 w-2.5 h-2.5 fill-gray-400 text-gray-400" />
                 </div>
               </div>
             )
@@ -203,20 +181,22 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {/* Online Section */}
-        {onlinePersonas.length > 0 && (
+        {/* Active Personas in Conversation */}
+        {onlinePersonas.length > 0 ? (
           <div>
             <div className="px-3 py-2 text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
-              Online — {onlinePersonas.length}
+              In Conversation — {onlinePersonas.length}
             </div>
             <div>
               {onlinePersonas.map((persona, index) => {
                 const stats = personaStats[persona.id]
+                const status = personaStatuses[persona.id]
+                const StatusIcon = status?.icon || Coffee
 
                 return (
                   <div
                     key={persona.id}
-                    className={`px-3 py-2 flex items-center space-x-2 hover:bg-primary-900 hover:bg-opacity-10 cursor-pointer transition-colors ${
+                    className={`px-3 py-2.5 flex items-center space-x-2 hover:bg-primary-900 hover:bg-opacity-10 cursor-pointer transition-colors ${
                       index < onlinePersonas.length - 1 ? 'border-b' : ''
                     }`}
                     style={{ borderColor: 'var(--color-surface-border)' }}
@@ -238,65 +218,23 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
                           </span>
                         )}
                       </div>
-                      <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                        {persona.role}
-                      </span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
 
-        {/* Offline Section */}
-        {offlinePersonas.length > 0 && (
-          <div className={onlinePersonas.length > 0 ? 'mt-4' : ''}>
-            <div className="px-3 py-2 text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)' }}>
-              Offline — {offlinePersonas.length}
-            </div>
-            <div>
-              {offlinePersonas.map((persona, index) => {
-                const stats = personaStats[persona.id]
-
-                return (
-                  <div
-                    key={persona.id}
-                    className={`px-3 py-2 flex items-center space-x-2 hover:bg-primary-900 hover:bg-opacity-10 cursor-pointer transition-colors opacity-60 ${
-                      index < offlinePersonas.length - 1 ? 'border-b' : ''
-                    }`}
-                    style={{ borderColor: 'var(--color-surface-border)' }}
-                    onClick={() => setSelectedPersonaId(persona.id === selectedPersonaId ? null : persona.id)}
-                  >
-                    <div className="relative opacity-60">
-                      {renderAvatar(persona, 'small')}
-                      <Circle className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 fill-gray-400 text-gray-400" />
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-sm truncate" style={{ color: 'var(--color-text-tertiary)' }}>
-                          {persona.name}
-                        </span>
-                        {stats && stats.lastActive && (
-                          <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                            {formatLastActive(stats.lastActive)}
+                      {status && (
+                        <div className="flex items-center mt-0.5 space-x-1">
+                          <StatusIcon className={`w-2.5 h-2.5 ${status.color}`} />
+                          <span className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                            {status.text}
                           </span>
-                        )}
-                      </div>
-                      <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                        {persona.role}
-                      </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )
               })}
             </div>
           </div>
-        )}
-
-        {/* Empty State */}
-        {onlinePersonas.length === 0 && offlinePersonas.length === 0 && (
+        ) : (
+          /* Empty State */
           <div className="p-4 text-center">
             <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
               No personas in this conversation
