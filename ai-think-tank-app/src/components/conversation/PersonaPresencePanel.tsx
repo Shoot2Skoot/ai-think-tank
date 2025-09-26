@@ -88,14 +88,10 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
     const online = personas.filter(p => p.id !== 'user')
 
     // Offline personas are those templates available but not in the current conversation
+    // Keep the full persona object so we can generate avatars
     const offline = availablePersonas.map(template => ({
-      id: `offline-${template.id}`,
-      name: template.name,
-      avatar: template.avatar_url || '/avatars/tile000.png',
-      role: template.role || 'Available',
-      color: template.color,
-      avatar_url: template.avatar_url,
-      description: template.description
+      ...template,
+      id: `offline-${template.id}`
     }))
 
     online.forEach(persona => {
@@ -203,13 +199,7 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
           {offlinePersonas.slice(0, 5).map((persona: any) => (
             <div key={persona.id} className="relative group opacity-50">
               <div className="relative">
-                <div className="w-8 h-8 rounded-full overflow-hidden opacity-60">
-                  <img
-                    src={persona.avatar}
-                    alt={persona.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                {renderAvatar(persona, 'small')}
                 <Circle className="absolute bottom-0 right-0 w-2.5 h-2.5 fill-gray-400 text-gray-400" />
               </div>
 
@@ -329,13 +319,7 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
                   style={{ borderColor: 'var(--color-surface-border)' }}
                 >
                   <div className="relative opacity-60">
-                    <div className="w-8 h-8 rounded-full overflow-hidden">
-                      <img
-                        src={persona.avatar}
-                        alt={persona.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                    {renderAvatar(persona, 'small')}
                     <Circle className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 fill-gray-400 text-gray-400" />
                   </div>
 

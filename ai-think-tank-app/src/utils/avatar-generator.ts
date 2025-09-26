@@ -120,18 +120,18 @@ export const generateAvatarUrl = (persona: Persona): string => {
   const params = new URLSearchParams();
   params.append("seed", seed);
 
-  // Use persona color as background (convert hex to no-hash format)
-  if (persona.color) {
-    const cleanColor = persona.color.replace("#", "");
-    params.append("backgroundColor", cleanColor);
-  } else {
+
     // Default pastel colors if no persona color
-    params.append("backgroundColor", "b6e3f4,c0aede,d1d4f9");
-  }
+  params.append("backgroundColor", "b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf");
   params.append("backgroundType", "solid");
 
   // Set radius to 10 for rounded corners (controlled from API)
   params.append("radius", "25");
+
+  // Set radius to 10 for rounded corners (controlled from API)
+  params.append("scale", "110");
+
+  // Set radius to 10 for rounded corners (controlled from API)
 
   // Apply gender-based parameters if available
   if (persona.demographics?.gender) {
@@ -144,6 +144,7 @@ export const generateAvatarUrl = (persona: Persona): string => {
       // Female characteristics for Miniavs
       params.append("hair", "curly,ponyTail,long");
       params.append("mustacheProbability", "0");
+      params.append("translateX", "7");
     } else if (gender === "male" || gender === "man") {
       // Male characteristics for Miniavs
       if (age > 50) {
@@ -155,6 +156,7 @@ export const generateAvatarUrl = (persona: Persona): string => {
         params.append("hair", "classic01,classic02,elvis,stylish,curly");
       }
       params.append("mustacheProbability", "40");
+      params.append("translateX", "2");
     }
   }
 
