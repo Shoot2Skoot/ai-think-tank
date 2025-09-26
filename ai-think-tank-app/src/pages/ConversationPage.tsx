@@ -42,6 +42,7 @@ export const ConversationPage: React.FC = () => {
   const [conversationMode, setConversationMode] = useState<ConversationType>('planning')
   const [typingPersonaIds, setTypingPersonaIds] = useState<string[]>([])
   const [replyToMessageId, setReplyToMessageId] = useState<string | null>(null)
+  const [optimisticPinnedIds, setOptimisticPinnedIds] = useState<Set<string>>(new Set())
 
   // Load conversations list on mount
   useEffect(() => {
@@ -135,19 +136,29 @@ export const ConversationPage: React.FC = () => {
     const message = messages.find(m => m.id === messageId)
     if (!message) return
 
-    const isPinned = message.is_pinned || false
+    const isPinned = message.is_pinned || optimisticPinnedIds.has(messageId)
     const newPinnedState = !isPinned
 
-    console.log('Pinning message:', {
-      messageId,
-      currentPinned: isPinned,
-      newPinned: newPinnedState,
-      userId: user.id
+    // Optimistic update - update UI immediately
+    setOptimisticPinnedIds(prev => {
+      const newSet = new Set(prev)
+      if (newPinnedState) {
+        newSet.add(messageId)
+      } else {
+        newSet.delete(messageId)
+      }
+      return newSet
     })
 
+    // Update conversation manager immediately for AI context
+    const currentPinnedIds = messages
+      .filter(m => m.is_pinned || (m.id === messageId ? newPinnedState : false))
+      .map(m => m.id)
+    conversationManager.setPinnedMessages(activeConversation.id, currentPinnedIds)
+
     try {
-      // Update the database
-      const { data, error } = await supabase
+      // Update the database in the background
+      const { error } = await supabase
         .from('messages')
         .update({
           is_pinned: newPinnedState,
@@ -155,17 +166,26 @@ export const ConversationPage: React.FC = () => {
           pinned_by: newPinnedState ? user.id : null
         })
         .eq('id', messageId)
-        .select()
 
       if (error) {
         console.error('Database update error:', error)
+        // Revert optimistic update on error
+        setOptimisticPinnedIds(prev => {
+          const newSet = new Set(prev)
+          if (newPinnedState) {
+            newSet.delete(messageId)
+          } else {
+            newSet.add(messageId)
+          }
+          return newSet
+        })
         throw error
       }
 
-      console.log('Database update result:', data)
-
-      // Update local state by reloading the conversation
+      // Reload conversation to sync with database
       await loadConversation(activeConversation.id)
+      // Clear optimistic state after successful reload
+      setOptimisticPinnedIds(new Set())
     } catch (error) {
       console.error('Failed to pin/unpin message:', error)
     }
@@ -237,7 +257,10 @@ export const ConversationPage: React.FC = () => {
           conversationId={activeConversation?.id}
           onPinMessage={handlePinMessage}
           onReplyMessage={handleReplyMessage}
-          pinnedMessageIds={messages.filter(m => m.is_pinned).map(m => m.id)}
+          pinnedMessageIds={[
+            ...messages.filter(m => m.is_pinned).map(m => m.id),
+            ...Array.from(optimisticPinnedIds)
+          ]}
         />
 
         {/* Input */}

@@ -128,6 +128,7 @@ interface ContextMenuItemProps {
   shortcut?: string
   danger?: boolean
   disabled?: boolean
+  closeOnClick?: boolean
 }
 
 export const ContextMenuItem: React.FC<ContextMenuItemProps> = ({
@@ -137,12 +138,16 @@ export const ContextMenuItem: React.FC<ContextMenuItemProps> = ({
   icon,
   shortcut,
   danger = false,
-  disabled = false
+  disabled = false,
+  closeOnClick = true
 }) => {
   const handleClick = (e: React.MouseEvent) => {
-    if (disabled) return
-    e.stopPropagation()
+    if (disabled) {
+      e.stopPropagation() // Only stop propagation for disabled items
+      return
+    }
     onClick?.()
+    // Don't stop propagation - let it bubble up to close the menu
   }
 
   return (

@@ -47,12 +47,21 @@ export const MessageList: React.FC<MessageListProps> = ({
   pinnedMessageIds = []
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
   const [reactions, setReactions] = useState<Record<string, ReactionCount[]>>({})
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null)
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Only auto-scroll if user is already near the bottom
+    if (scrollContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100 // Within 100px of bottom
+
+      if (isNearBottom) {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
   }, [messages, streamingContent])
 
   // Load reactions for messages
@@ -307,7 +316,7 @@ export const MessageList: React.FC<MessageListProps> = ({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto message-list-container">
+    <div className="flex-1 overflow-y-auto message-list-container" ref={scrollContainerRef}>
       <div className="py-4">
         {messages.map((message, index) => {
           const prevMessage = index > 0 ? messages[index - 1] : null

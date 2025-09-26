@@ -28,6 +28,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content)
+    setIsPopoverOpen(false)
   }
 
   const trigger = (
@@ -61,7 +62,10 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
 
           {onReply && (
             <button
-              onClick={onReply}
+              onClick={() => {
+                onReply()
+                setIsPopoverOpen(false)
+              }}
               className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
             >
               <Reply className="h-4 w-4" />
@@ -71,7 +75,10 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
 
           {onPin && (
             <button
-              onClick={onPin}
+              onClick={() => {
+                onPin()
+                setIsPopoverOpen(false)
+              }}
               className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
             >
               <Pin className="h-4 w-4" />
@@ -83,7 +90,10 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
             <>
               <div className="border-t border-surface-border my-1" />
               <button
-                onClick={onEdit}
+                onClick={() => {
+                  onEdit()
+                  setIsPopoverOpen(false)
+                }}
                 className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
               >
                 <Edit3 className="h-4 w-4" />
@@ -94,7 +104,10 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
 
           {isOwn && onDelete && (
             <button
-              onClick={onDelete}
+              onClick={() => {
+                onDelete()
+                setIsPopoverOpen(false)
+              }}
               className="w-full flex items-center space-x-2 px-3 py-2 text-sm hover:bg-red-50 rounded text-error"
             >
               <Trash2 className="h-4 w-4" />
