@@ -19,6 +19,7 @@ export class ConversationManager {
   private conversationPersonas: Map<string, Persona[]> = new Map()
   private conversationMessages: Map<string, Message[]> = new Map()
   private streamCallbacks: Map<string, (chunk: string) => void> = new Map()
+  private pinnedMessages: Map<string, string[]> = new Map() // conversationId -> messageIds
 
   async createConversation(
     userId: string,
@@ -202,6 +203,7 @@ export class ConversationManager {
       const conversation = this.activeConversations.get(conversationId)
       const personas = this.conversationPersonas.get(conversationId)
       const messages = this.conversationMessages.get(conversationId) || []
+      const pinnedIds = this.pinnedMessages.get(conversationId) || []
       const persona = personas?.find(p => p.id === personaId)
 
       if (!persona) throw new Error('Persona not found')
@@ -225,8 +227,8 @@ export class ConversationManager {
         providerManager.setConversationId(conversationId)
       }
 
-      // Convert messages to LangChain format
-      const langchainMessages = this.convertToLangChainMessages(messages)
+      // Convert messages to LangChain format, including pinned messages context
+      const langchainMessages = this.convertToLangChainMessages(messages, pinnedIds)
 
       // Generate response using provider manager
       const response = await providerManager.generateResponse(
@@ -400,19 +402,42 @@ export class ConversationManager {
     this.streamCallbacks.set(conversationId, callback)
   }
 
-  private convertToLangChainMessages(messages: Message[]): BaseMessage[] {
-    return messages.map(msg => {
+  setPinnedMessages(conversationId: string, messageIds: string[]): void {
+    this.pinnedMessages.set(conversationId, messageIds)
+  }
+
+  private convertToLangChainMessages(messages: Message[], pinnedIds: string[] = []): BaseMessage[] {
+    const result: BaseMessage[] = []
+
+    // Add pinned messages context at the beginning if any
+    if (pinnedIds.length > 0) {
+      const pinnedMessages = messages.filter(m => pinnedIds.includes(m.id))
+      if (pinnedMessages.length > 0) {
+        const pinnedContext = pinnedMessages.map(m =>
+          `[PINNED] ${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`
+        ).join('\n')
+        result.push(new SystemMessage(`Important pinned messages for context:\n${pinnedContext}`))
+      }
+    }
+
+    // Add regular messages
+    messages.forEach(msg => {
       switch (msg.role) {
         case 'user':
-          return new HumanMessage(msg.content)
+          result.push(new HumanMessage(msg.content))
+          break
         case 'assistant':
-          return new AIMessage(msg.content)
+          result.push(new AIMessage(msg.content))
+          break
         case 'system':
-          return new SystemMessage(msg.content)
+          result.push(new SystemMessage(msg.content))
+          break
         default:
-          return new HumanMessage(msg.content)
+          result.push(new HumanMessage(msg.content))
       }
     })
+
+    return result
   }
 
   private generateSystemPrompt(config: PersonaConfig): string {

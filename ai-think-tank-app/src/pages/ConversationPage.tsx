@@ -11,6 +11,7 @@ import { PersonaPresencePanel } from '@/components/conversation/PersonaPresenceP
 import { useConversationStore } from '@/stores/conversation-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useAIReactions } from '@/hooks/useAIReactions'
+import { conversationManager } from '@/services/conversation/conversation-manager'
 import type { ConversationType } from '@/types'
 
 export const ConversationPage: React.FC = () => {
@@ -39,6 +40,8 @@ export const ConversationPage: React.FC = () => {
   const [streamingContent, setStreamingContent] = useState<Record<string, string>>({})
   const [conversationMode, setConversationMode] = useState<ConversationType>('planning')
   const [typingPersonaIds, setTypingPersonaIds] = useState<string[]>([])
+  const [pinnedMessageIds, setPinnedMessageIds] = useState<string[]>([])
+  const [replyToMessageId, setReplyToMessageId] = useState<string | null>(null)
 
   // Load conversations list on mount
   useEffect(() => {
@@ -106,11 +109,47 @@ export const ConversationPage: React.FC = () => {
   const handleSendMessage = async (message: string, mentionedPersona?: string) => {
     if (!message.trim() || !user || !activeConversation) return
 
-    await sendMessage(message, user.id, mentionedPersona)
+    // Add reply context if replying to a message
+    let finalMessage = message
+    if (replyToMessageId) {
+      const replyToMessage = messages.find(m => m.id === replyToMessageId)
+      if (replyToMessage) {
+        const persona = personas.find(p => p.id === replyToMessage.persona_id)
+        const authorName = replyToMessage.role === 'user' ? 'You' : persona?.name || 'AI Assistant'
+        finalMessage = `> Replying to ${authorName}: ${replyToMessage.content.slice(0, 100)}${replyToMessage.content.length > 100 ? '...' : ''}\n\n${message}`
+      }
+      setReplyToMessageId(null) // Clear reply after sending
+    }
+
+    await sendMessage(finalMessage, user.id, mentionedPersona)
 
     // If in manual mode and a persona was mentioned, trigger their response
     if (activeConversation.mode === 'manual' && mentionedPersona) {
       await triggerResponse(mentionedPersona)
+    }
+  }
+
+  const handlePinMessage = (messageId: string) => {
+    setPinnedMessageIds(prev => {
+      const newPinnedIds = prev.includes(messageId)
+        ? prev.filter(id => id !== messageId)
+        : [...prev, messageId]
+
+      // Update conversation manager with pinned messages
+      if (activeConversation?.id) {
+        conversationManager.setPinnedMessages(activeConversation.id, newPinnedIds)
+      }
+
+      return newPinnedIds
+    })
+  }
+
+  const handleReplyMessage = (messageId: string) => {
+    setReplyToMessageId(messageId)
+    // Focus the input
+    const input = document.querySelector('textarea[placeholder*="Type a message"]') as HTMLTextAreaElement
+    if (input) {
+      input.focus()
     }
   }
 
@@ -169,21 +208,41 @@ export const ConversationPage: React.FC = () => {
           typingPersonas={typingPersonaIds.map(id => personas.find(p => p.id === id)!).filter(Boolean)}
           currentUserId={user?.id}
           conversationId={activeConversation?.id}
+          onPinMessage={handlePinMessage}
+          onReplyMessage={handleReplyMessage}
+          pinnedMessageIds={pinnedMessageIds}
         />
 
         {/* Input */}
         {activeConversation?.is_active && (
-          <MessageInput
-            onSendMessage={handleSendMessage}
-            personas={personas}
-            disabled={!activeConversation.is_active}
-            loading={loading}
-            placeholder={
-              activeConversation.mode === 'manual'
-                ? 'Type a message... Use @ to mention a persona'
-                : 'Type a message...'
-            }
-          />
+          <>
+            {replyToMessageId && (
+              <div className="px-4 py-2 bg-primary-900 bg-opacity-10 border-t border-surface-border flex items-center justify-between">
+                <div className="text-sm text-text-secondary">
+                  Replying to: {messages.find(m => m.id === replyToMessageId)?.content.slice(0, 100)}...
+                </div>
+                <button
+                  onClick={() => setReplyToMessageId(null)}
+                  className="text-text-tertiary hover:text-text-secondary"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+            <MessageInput
+              onSendMessage={handleSendMessage}
+              personas={personas}
+              disabled={!activeConversation.is_active}
+              loading={loading}
+              placeholder={
+                replyToMessageId
+                  ? 'Type your reply...'
+                  : activeConversation.mode === 'manual'
+                  ? 'Type a message... Use @ to mention a persona'
+                  : 'Type a message...'
+              }
+            />
+          </>
         )}
       </div>
 

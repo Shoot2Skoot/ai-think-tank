@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { formatRelativeTime, cn } from '@/lib/utils'
 import { Avatar } from '@/components/ui/Avatar'
+import { ContextMenu, ContextMenuItem, ContextMenuSeparator } from '@/components/ui/ContextMenu'
 import { ModelBadge } from './ModelSelector'
 import { TypingIndicator } from './TypingIndicator'
 import { MessageContent } from './MessageContent'
@@ -9,7 +10,7 @@ import { SeenIndicator } from './SeenIndicator'
 import { MessageEditor } from './MessageEditor'
 import { MessageActions } from './MessageActions'
 import { MessageReactions, QuickReactionsBar } from './MessageReactions'
-import { Edit3 } from 'lucide-react'
+import { Edit3, Copy, Reply, Pin, Heart, ThumbsUp, Laugh, Frown } from 'lucide-react'
 import { generateAvatarUrl, generateUserAvatarUrl } from '@/utils/avatar-generator'
 import { ReactionService } from '@/services/reaction-service'
 import type { Message, Persona, ReactionCount } from '@/types'
@@ -23,8 +24,11 @@ interface MessageListProps {
   seenStatus?: Record<string, string[]> // messageId -> personaIds who have seen it
   onEditMessage?: (messageId: string, newContent: string) => void
   onDeleteMessage?: (messageId: string) => void
+  onReplyMessage?: (messageId: string) => void
+  onPinMessage?: (messageId: string) => void
   currentUserId?: string
   conversationId?: string
+  pinnedMessageIds?: string[]
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -36,8 +40,11 @@ export const MessageList: React.FC<MessageListProps> = ({
   seenStatus = {},
   onEditMessage,
   onDeleteMessage,
+  onReplyMessage,
+  onPinMessage,
   currentUserId,
-  conversationId
+  conversationId,
+  pinnedMessageIds = []
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
@@ -110,16 +117,74 @@ export const MessageList: React.FC<MessageListProps> = ({
       setEditingMessageId(null)
     }
 
-    return (
-      <div
-        key={message.id}
-        className={cn(
-          'group px-4 py-1 message-item relative',
-          !isSameAuthor && 'mt-4'
+    const handleCopyMessage = () => {
+      navigator.clipboard.writeText(content)
+    }
+
+    const handleReply = () => {
+      if (onReplyMessage) {
+        onReplyMessage(message.id)
+      }
+    }
+
+    const handlePin = () => {
+      if (onPinMessage) {
+        onPinMessage(message.id)
+      }
+    }
+
+    const isPinned = pinnedMessageIds.includes(message.id)
+
+    const contextMenuContent = (
+      <>
+        <ContextMenuItem onClick={handleCopyMessage} icon={<Copy className="h-4 w-4" />}>
+          Copy Message
+        </ContextMenuItem>
+        {onReplyMessage && (
+          <ContextMenuItem onClick={handleReply} icon={<Reply className="h-4 w-4" />}>
+            Reply
+          </ContextMenuItem>
         )}
-        onMouseEnter={() => setHoveredMessageId(message.id)}
-        onMouseLeave={() => setHoveredMessageId(null)}
-      >
+        {onPinMessage && (
+          <ContextMenuItem onClick={handlePin} icon={<Pin className="h-4 w-4" />}>
+            {isPinned ? 'Unpin Message' : 'Pin Message'}
+          </ContextMenuItem>
+        )}
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={() => handleReaction(message.id, '👍')} icon={<ThumbsUp className="h-4 w-4" />}>
+          Add Reaction
+        </ContextMenuItem>
+        {isOwn && onEditMessage && (
+          <>
+            <ContextMenuSeparator />
+            <ContextMenuItem onClick={() => setEditingMessageId(message.id)} icon={<Edit3 className="h-4 w-4" />}>
+              Edit Message
+            </ContextMenuItem>
+          </>
+        )}
+        {isOwn && onDeleteMessage && (
+          <ContextMenuItem
+            onClick={() => onDeleteMessage(message.id)}
+            danger
+          >
+            Delete Message
+          </ContextMenuItem>
+        )}
+      </>
+    )
+
+    return (
+      <ContextMenu menu={contextMenuContent}>
+        <div
+          key={message.id}
+          className={cn(
+            'group px-4 py-1 message-item relative',
+            !isSameAuthor && 'mt-4',
+            isPinned && 'bg-yellow-50 bg-opacity-5 border-l-2 border-yellow-500'
+          )}
+          onMouseEnter={() => setHoveredMessageId(message.id)}
+          onMouseLeave={() => setHoveredMessageId(null)}
+        >
         <div className="flex items-start space-x-3">
           <div className="w-12 flex-shrink-0 pt-1">
             {showAvatar && !isSystem && (
@@ -216,6 +281,7 @@ export const MessageList: React.FC<MessageListProps> = ({
           )}
         </div>
       </div>
+    </ContextMenu>
     )
   }
 
