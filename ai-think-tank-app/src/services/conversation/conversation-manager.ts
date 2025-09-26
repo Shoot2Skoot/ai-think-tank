@@ -50,15 +50,11 @@ export class ConversationManager {
       // Create personas for the conversation
       const personas: Persona[] = []
       for (const personaConfig of config.personas) {
-        const { data: persona, error: personaError } = await supabase
-          .from('personas')
-          .insert({
+        const personaData: any = {
             conversation_id: conversation.id,
             template_id: personaConfig.template_id,
             name: personaConfig.name,
             role: personaConfig.role,
-            avatar: getPersonaAvatar(personaConfig.name),
-            color: getUniqueColor(),
             model: personaConfig.model,
             provider: personaConfig.provider,
             temperature: personaConfig.temperature || 0.7,
@@ -69,7 +65,11 @@ export class ConversationManager {
             personality: personaConfig.personality,
             experience_level: personaConfig.experience_level,
             attitude: personaConfig.attitude
-          })
+        }
+
+        const { data: persona, error: personaError } = await supabase
+          .from('personas')
+          .insert(personaData)
           .select()
           .single()
 

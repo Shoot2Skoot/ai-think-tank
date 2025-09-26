@@ -290,15 +290,13 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
       if (templateError) throw templateError
 
       // Create new persona for this conversation
-      const newPersona = {
+      const newPersona: any = {
         conversation_id: activeConversation.id,
         name: personaName,
         role: template.role || 'AI Assistant',
         model: template.default_model || 'gpt-4',
         provider: template.default_provider || 'openai',
         system_prompt: template.system_prompt,
-        avatar: personaAvatarMap[personaName],
-        color: template.color || '#6366f1',
         created_at: new Date().toISOString()
       }
 
