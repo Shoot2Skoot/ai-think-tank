@@ -28,6 +28,7 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
   const {
     templates,
     selectedTemplates,
+    customPersonas,
     loadTemplates,
     selectTemplate,
     deselectTemplate,
@@ -51,9 +52,13 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
 
   useEffect(() => {
     // Update config with selected personas
-    const personas = getAllPersonasForConversation(usePersonaStore.getState())
+    const personas = getAllPersonasForConversation({
+      selectedTemplates,
+      customPersonas,
+      templates: []
+    } as any)
     setConfig(prev => ({ ...prev, personas }))
-  }, [selectedTemplates])
+  }, [selectedTemplates, customPersonas])
 
   // Format title to channel name format
   const formatToChannelName = (title: string) => {
@@ -61,7 +66,18 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
   }
 
   const handleCreateConversation = async () => {
-    if (!user || !config.title || config.personas.length < 2) return
+    console.log('Creating conversation with config:', config)
+    console.log('Selected templates:', selectedTemplates)
+    console.log('Personas in config:', config.personas)
+
+    if (!user || !config.title || config.personas.length < 2) {
+      console.error('Validation failed:', {
+        hasUser: !!user,
+        hasTitle: !!config.title,
+        personaCount: config.personas.length
+      })
+      return
+    }
 
     setLoading(true)
     try {
@@ -70,12 +86,12 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
         ...config,
         title: formatToChannelName(config.title)
       }
-      await createConversation(user.id, formattedConfig)
+      console.log('Formatted config:', formattedConfig)
+      const conversation = await createConversation(user.id, formattedConfig)
+      console.log('Created conversation:', conversation)
       clearSelections()
-      // The store will set activeConversation, which contains the ID
-      const conversationId = useConversationStore.getState().activeConversation?.id
-      if (conversationId) {
-        onComplete(conversationId)
+      if (conversation?.id) {
+        onComplete(conversation.id)
       }
     } catch (error) {
       console.error('Failed to create conversation:', error)
@@ -92,10 +108,9 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
         ...quickConfig,
         title: formatToChannelName(quickConfig.title)
       }
-      await createConversation(user!.id, formattedConfig)
-      const conversationId = useConversationStore.getState().activeConversation?.id
-      if (conversationId) {
-        onComplete(conversationId)
+      const conversation = await createConversation(user!.id, formattedConfig)
+      if (conversation?.id) {
+        onComplete(conversation.id)
       }
     } catch (error) {
       console.error('Failed to create conversation:', error)

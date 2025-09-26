@@ -23,7 +23,7 @@ interface ConversationState {
   nextSpeaker: TurnDecision | null
 
   // Actions
-  createConversation: (userId: string, config: ConversationConfig) => Promise<void>
+  createConversation: (userId: string, config: ConversationConfig) => Promise<Conversation>
   loadConversation: (conversationId: string) => Promise<void>
   loadConversations: (userId: string) => Promise<void>
   sendMessage: (content: string, userId: string, personaId?: string) => Promise<void>
@@ -68,6 +68,9 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
 
       // Subscribe to real-time updates
       get().subscribeToConversation(conversation.id)
+
+      // Return the conversation so the caller can get the ID
+      return conversation
     } catch (error: any) {
       set({
         error: error.message || 'Failed to create conversation',
