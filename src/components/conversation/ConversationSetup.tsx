@@ -9,6 +9,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Avatar } from '@/components/ui/Avatar'
 import { Tabs } from '@/components/ui/Tabs'
+import { QuickStartSetup } from './QuickStartSetup'
 import { useConversationStore } from '@/stores/conversation-store'
 import { usePersonaStore, getAllPersonasForConversation } from '@/stores/persona-store'
 import { useAuthStore } from '@/stores/auth-store'
@@ -33,7 +34,7 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
   } = usePersonaStore()
 
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState('templates')
+  const [activeTab, setActiveTab] = useState('quickstart')
   const [config, setConfig] = useState<ConversationConfig>({
     title: '',
     topic: '',
@@ -72,56 +73,26 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
     }
   }
 
+  const handleQuickStart = async (quickConfig: ConversationConfig) => {
+    setLoading(true)
+    try {
+      await createConversation(user!.id, quickConfig)
+      const conversationId = useConversationStore.getState().activeConversation?.id
+      if (conversationId) {
+        onComplete(conversationId)
+      }
+    } catch (error) {
+      console.error('Failed to create conversation:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const tabs = [
     {
-      id: 'templates',
+      id: 'quickstart',
       label: 'Quick Start',
-      content: (
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600">
-            Choose from pre-configured conversation templates with recommended personas
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {templates.slice(0, 6).map((template) => (
-              <Card
-                key={template.id}
-                className="cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => {
-                  // Pre-fill config from template
-                  setConfig({
-                    title: template.name,
-                    topic: template.description || '',
-                    mode: 'auto',
-                    conversation_type: 'ideation',
-                    speed: 5,
-                    personas: []
-                  })
-                  // Select template personas
-                  clearSelections()
-                  templates
-                    .filter(t => template.expertise_areas?.includes(t.name))
-                    .forEach(t => selectTemplate(t))
-                }}
-              >
-                <CardHeader>
-                  <CardTitle className="text-base">{template.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 mb-2">{template.role}</p>
-                  <div className="flex items-center justify-between">
-                    <Badge size="sm" className={getProviderColor(template.default_provider)}>
-                      {template.default_provider}
-                    </Badge>
-                    {template.is_premium && (
-                      <Badge variant="warning" size="sm">Premium</Badge>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )
+      content: <QuickStartSetup onStart={handleQuickStart} loading={loading} />
     },
     {
       id: 'custom',
