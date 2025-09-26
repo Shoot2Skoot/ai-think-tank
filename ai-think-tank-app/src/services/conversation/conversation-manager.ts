@@ -2,6 +2,8 @@ import { BaseMessage, HumanMessage, AIMessage, SystemMessage } from '@langchain/
 import { providerManager } from '../providers/provider-manager-edge'
 import { turnOrchestrator } from '../orchestration/turn-orchestrator'
 import { supabase } from '@/lib/supabase'
+import { getUniqueAvatarUrl, resetUsedAvatars } from '@/utils/avatars'
+import { getUniqueColor, resetUsedColors } from '@/utils/colors'
 import type {
   Conversation,
   Persona,
@@ -42,6 +44,10 @@ export class ConversationManager {
 
       if (convError) throw convError
 
+      // Reset avatar and color pools for new conversation
+      resetUsedAvatars()
+      resetUsedColors()
+
       // Create personas for the conversation
       const personas: Persona[] = []
       for (const personaConfig of config.personas) {
@@ -52,6 +58,8 @@ export class ConversationManager {
             template_id: personaConfig.template_id,
             name: personaConfig.name,
             role: personaConfig.role,
+            avatar: getUniqueAvatarUrl(),
+            color: getUniqueColor(),
             model: personaConfig.model,
             provider: personaConfig.provider,
             temperature: personaConfig.temperature || 0.7,

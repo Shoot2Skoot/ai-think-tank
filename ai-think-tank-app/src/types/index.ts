@@ -38,6 +38,7 @@ export interface PersonaTemplate {
   name: string
   role: string
   description?: string
+  avatar?: string
   avatar_url?: string
   system_prompt: string
   default_model: string
@@ -59,6 +60,8 @@ export interface Persona {
   template_id?: string
   name: string
   role: string
+  avatar?: string
+  color?: string
   model: string
   provider: Provider
   temperature: number

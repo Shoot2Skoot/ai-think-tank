@@ -36,7 +36,7 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
         <div className="flex items-center space-x-2">
           {selectedPersona ? (
             <>
-              <Avatar fallback={selectedPersona.name} size="sm" />
+              <Avatar src={selectedPersona.avatar} fallback={selectedPersona.name} size="sm" />
               <span className="truncate">{selectedPersona.name}</span>
             </>
           ) : (
@@ -90,7 +90,7 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
                 onClick={() => handleSelect(persona.id)}
               >
                 <div className="flex items-start space-x-3">
-                  <Avatar fallback={persona.name} size="md" />
+                  <Avatar src={persona.avatar} fallback={persona.name} size="md" />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-text-primary">{persona.name}</p>
                     <p className="text-sm text-text-secondary">{persona.role}</p>

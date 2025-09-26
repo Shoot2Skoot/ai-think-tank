@@ -25,6 +25,7 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({ typingPersonas
         {typingPersonas.slice(0, 3).map((persona) => (
           <Avatar
             key={persona.id}
+            src={persona.avatar}
             fallback={persona.name}
             size="xs"
             className="ring-2 ring-surface-primary animate-pulse"

@@ -76,6 +76,32 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
       .slice(0, 2)
   }
 
+  const renderAvatar = (persona: Persona, size: 'small' | 'medium' = 'medium') => {
+    const sizeClasses = size === 'small' ? 'w-10 h-10' : 'w-12 h-12'
+    const textSize = size === 'small' ? 'text-xs' : 'text-sm'
+
+    if (persona.avatar) {
+      return (
+        <div className={`${sizeClasses} rounded-full overflow-hidden`}>
+          <img
+            src={persona.avatar}
+            alt={persona.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )
+    }
+
+    return (
+      <div
+        className={`${sizeClasses} rounded-full flex items-center justify-center text-white font-medium ${textSize}`}
+        style={{ backgroundColor: persona.color || '#6366f1' }}
+      >
+        {getInitials(persona.name)}
+      </div>
+    )
+  }
+
   const getPresenceColor = (lastActive: Date | null) => {
     if (!lastActive) return 'bg-gray-400'
 
@@ -126,11 +152,10 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
               <div key={persona.id} className="relative group">
                 <div className="relative">
                   <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-medium cursor-pointer hover:ring-2 hover:ring-primary-500 transition-all"
-                    style={{ backgroundColor: persona.color || '#6366f1' }}
+                    className="cursor-pointer hover:ring-2 hover:ring-primary-500 transition-all rounded-full"
                     onClick={() => setSelectedPersonaId(persona.id)}
                   >
-                    {getInitials(persona.name)}
+                    {renderAvatar(persona, 'small')}
                   </div>
                   <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${presenceColor}`} />
                   {stats && stats.messageCount > 0 && (
@@ -185,12 +210,7 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
               >
                 <div className="flex items-start space-x-3">
                   <div className="relative">
-                    <div
-                      className="w-12 h-12 rounded-full flex items-center justify-center text-white font-medium"
-                      style={{ backgroundColor: persona.color || '#6366f1' }}
-                    >
-                      {getInitials(persona.name)}
-                    </div>
+                    {renderAvatar(persona, 'medium')}
                     <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${presenceColor}`} />
                   </div>
 

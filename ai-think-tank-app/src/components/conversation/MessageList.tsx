@@ -81,6 +81,7 @@ export const MessageList: React.FC<MessageListProps> = ({
           <div className="w-10 flex-shrink-0">
             {showAvatar && (
               <Avatar
+                src={persona?.avatar}
                 fallback={isUser ? 'You' : persona?.name || 'AI'}
                 size="sm"
                 className={isUser ? 'bg-blue-600' : ''}
