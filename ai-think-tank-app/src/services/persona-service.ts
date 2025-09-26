@@ -87,7 +87,6 @@ export class PersonaService {
       return null
     }
   }
-}
 
   /**
    * Get all personas in a conversation
