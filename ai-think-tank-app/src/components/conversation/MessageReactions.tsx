@@ -26,6 +26,7 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
 }) => {
   const [quickReactions, setQuickReactions] = useState<string[]>([])
   const [showQuickReactions, setShowQuickReactions] = useState(false)
+  const [isPickerOpen, setIsPickerOpen] = useState(false)
 
   useEffect(() => {
     // Load quick reactions
@@ -86,8 +87,8 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
         </div>
       )}
 
-      {/* Floating reaction bar on hover - absolute positioned */}
-      {isMessageHovered && (
+      {/* Floating reaction bar on hover OR when picker is open */}
+      {(isMessageHovered || isPickerOpen) && (
         <div
           className="absolute top-full mt-1 left-0 flex items-center gap-1 px-2 py-1 rounded-lg shadow-lg border animate-fadeIn z-10 pointer-events-auto"
           style={{
@@ -117,6 +118,7 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
           {/* Add reaction button */}
           <ReactionPicker
             onSelect={handleReactionClick}
+            onOpenChange={setIsPickerOpen}
             trigger={
               <div className="p-1 rounded transition-all hover:bg-opacity-20">
                 <Smile className="h-4 w-4" style={{ color: 'var(--color-text-tertiary)' }} />

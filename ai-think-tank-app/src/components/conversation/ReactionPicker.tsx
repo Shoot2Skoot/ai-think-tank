@@ -6,6 +6,7 @@ interface ReactionPickerProps {
   onSelect: (emoji: string) => void
   className?: string
   trigger?: React.ReactNode
+  onOpenChange?: (open: boolean) => void
 }
 
 const EMOJI_CATEGORIES = {
@@ -20,17 +21,23 @@ const EMOJI_CATEGORIES = {
 export const ReactionPicker: React.FC<ReactionPickerProps> = ({
   onSelect,
   className,
-  trigger
+  trigger,
+  onOpenChange
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState('Smileys')
   const [searchQuery, setSearchQuery] = useState('')
   const pickerRef = useRef<HTMLDivElement>(null)
 
+  const handleSetOpen = (open: boolean) => {
+    setIsOpen(open)
+    onOpenChange?.(open)
+  }
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
+        handleSetOpen(false)
       }
     }
 
@@ -42,7 +49,7 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
 
   const handleEmojiSelect = (emoji: string) => {
     onSelect(emoji)
-    setIsOpen(false)
+    handleSetOpen(false)
     setSearchQuery('')
   }
 
@@ -63,7 +70,7 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
   return (
     <div className="relative" ref={pickerRef}>
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => handleSetOpen(!isOpen)}
         className={cn(
           "p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors",
           className
