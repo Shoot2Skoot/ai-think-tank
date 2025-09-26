@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { MoreVertical, Edit2, Copy, Trash2, Reply } from 'lucide-react'
+import React from 'react'
+import { MoreVertical, Edit3, Copy, Trash2, Reply, Pin, ThumbsUp } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Popover } from '@/components/ui/Popover'
 
@@ -7,24 +7,27 @@ interface MessageActionsProps {
   messageId: string
   content: string
   isOwn: boolean
+  isPinned?: boolean
   onEdit?: () => void
   onDelete?: () => void
   onReply?: () => void
-  onCopy?: () => void
+  onPin?: () => void
+  onReact?: (emoji: string) => void
 }
 
 export const MessageActions: React.FC<MessageActionsProps> = ({
   messageId,
   content,
   isOwn,
+  isPinned = false,
   onEdit,
   onDelete,
   onReply,
-  onCopy
+  onPin,
+  onReact
 }) => {
   const handleCopy = () => {
     navigator.clipboard.writeText(content)
-    if (onCopy) onCopy()
   }
 
   const trigger = (
@@ -45,7 +48,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
         >
           <Copy className="h-4 w-4" />
-          <span>Copy</span>
+          <span>Copy Message</span>
         </button>
 
         {onReply && (
@@ -58,28 +61,49 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           </button>
         )}
 
-        {isOwn && onEdit && (
+        {onPin && (
           <button
-            onClick={onEdit}
+            onClick={onPin}
             className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
           >
-            <Edit2 className="h-4 w-4" />
-            <span>Edit</span>
+            <Pin className="h-4 w-4" />
+            <span>{isPinned ? 'Unpin Message' : 'Pin Message'}</span>
           </button>
         )}
 
-        {isOwn && onDelete && (
+        <div className="border-t border-surface-border my-1" />
+
+        {onReact && (
+          <button
+            onClick={() => onReact('👍')}
+            className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
+          >
+            <ThumbsUp className="h-4 w-4" />
+            <span>Add Reaction</span>
+          </button>
+        )}
+
+        {isOwn && onEdit && (
           <>
-            <div className="border-t my-1" />
+            <div className="border-t border-surface-border my-1" />
             <button
-              onClick={onDelete}
-              className="w-full flex items-center space-x-2 px-3 py-2 text-sm hover:bg-red-50 rounded"
-              style={{ color: 'var(--color-error)' }}
+              onClick={onEdit}
+              className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
             >
-              <Trash2 className="h-4 w-4" />
-              <span>Delete</span>
+              <Edit3 className="h-4 w-4" />
+              <span>Edit Message</span>
             </button>
           </>
+        )}
+
+        {isOwn && onDelete && (
+          <button
+            onClick={onDelete}
+            className="w-full flex items-center space-x-2 px-3 py-2 text-sm hover:bg-red-50 rounded text-error"
+          >
+            <Trash2 className="h-4 w-4" />
+            <span>Delete Message</span>
+          </button>
         )}
       </div>
     </Popover>

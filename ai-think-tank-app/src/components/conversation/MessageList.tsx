@@ -10,7 +10,7 @@ import { SeenIndicator } from './SeenIndicator'
 import { MessageEditor } from './MessageEditor'
 import { MessageActions } from './MessageActions'
 import { MessageReactions, QuickReactionsBar } from './MessageReactions'
-import { Edit3, Copy, Reply, Pin, Heart, ThumbsUp, Laugh, Frown } from 'lucide-react'
+import { Edit3, Copy, Reply, Pin, ThumbsUp } from 'lucide-react'
 import { generateAvatarUrl, generateUserAvatarUrl } from '@/utils/avatar-generator'
 import { ReactionService } from '@/services/reaction-service'
 import type { Message, Persona, ReactionCount } from '@/types'
@@ -274,8 +274,12 @@ export const MessageList: React.FC<MessageListProps> = ({
                 messageId={message.id}
                 content={content}
                 isOwn={isOwn}
+                isPinned={isPinned}
                 onEdit={isOwn ? () => setEditingMessageId(message.id) : undefined}
                 onDelete={isOwn && onDeleteMessage ? () => onDeleteMessage(message.id) : undefined}
+                onReply={onReplyMessage ? () => handleReply() : undefined}
+                onPin={onPinMessage ? () => handlePin() : undefined}
+                onReact={handleReaction ? (emoji) => handleReaction(message.id, emoji) : undefined}
               />
             </div>
           )}
