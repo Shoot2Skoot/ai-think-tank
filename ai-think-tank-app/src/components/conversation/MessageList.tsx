@@ -8,9 +8,11 @@ import { TimeDivider } from './TimeDivider'
 import { SeenIndicator } from './SeenIndicator'
 import { MessageEditor } from './MessageEditor'
 import { MessageActions } from './MessageActions'
+import { MessageReactions, QuickReactionsBar } from './MessageReactions'
 import { Edit3 } from 'lucide-react'
 import { generateAvatarUrl, generateUserAvatarUrl } from '@/utils/avatar-generator'
-import type { Message, Persona } from '@/types'
+import { ReactionService } from '@/services/reaction-service'
+import type { Message, Persona, ReactionCount } from '@/types'
 
 interface MessageListProps {
   messages: Message[]
@@ -22,6 +24,7 @@ interface MessageListProps {
   onEditMessage?: (messageId: string, newContent: string) => void
   onDeleteMessage?: (messageId: string) => void
   currentUserId?: string
+  conversationId?: string
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -33,14 +36,50 @@ export const MessageList: React.FC<MessageListProps> = ({
   seenStatus = {},
   onEditMessage,
   onDeleteMessage,
-  currentUserId
+  currentUserId,
+  conversationId
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
+  const [reactions, setReactions] = useState<Record<string, ReactionCount[]>>({})
+  const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, streamingContent])
+
+  // Load reactions for messages
+  useEffect(() => {
+    if (messages.length > 0) {
+      const messageIds = messages.map(m => m.id)
+      ReactionService.getReactionCounts(messageIds).then(setReactions)
+    }
+  }, [messages])
+
+  // Subscribe to reaction updates
+  useEffect(() => {
+    if (!conversationId) return
+
+    const subscription = ReactionService.subscribeToReactions(
+      conversationId,
+      (payload) => {
+        // Reload reactions when they change
+        const messageIds = messages.map(m => m.id)
+        ReactionService.getReactionCounts(messageIds).then(setReactions)
+      }
+    )
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [conversationId, messages])
+
+  const handleReaction = async (messageId: string, emoji: string) => {
+    // Optimistically update UI
+    const messageIds = messages.map(m => m.id)
+    const newReactions = await ReactionService.getReactionCounts(messageIds)
+    setReactions(newReactions)
+  }
 
   const renderMessage = (message: Message & { edited_at?: string }, index: number) => {
     const persona = personas.find(p => p.id === message.persona_id)
@@ -75,9 +114,11 @@ export const MessageList: React.FC<MessageListProps> = ({
       <div
         key={message.id}
         className={cn(
-          'group px-4 py-1 message-item',
+          'group px-4 py-1 message-item relative',
           !isSameAuthor && 'mt-4'
         )}
+        onMouseEnter={() => setHoveredMessageId(message.id)}
+        onMouseLeave={() => setHoveredMessageId(null)}
       >
         <div className="flex items-start space-x-3">
           <div className="w-12 flex-shrink-0 pt-1">
@@ -149,7 +190,26 @@ export const MessageList: React.FC<MessageListProps> = ({
                     }
                   />
                 )}
+                {/* Message reactions */}
+                {(reactions[message.id]?.length > 0 || hoveredMessageId === message.id) && (
+                  <MessageReactions
+                    messageId={message.id}
+                    reactions={reactions[message.id] || []}
+                    currentUserId={currentUserId}
+                    personas={personas}
+                    onReact={(emoji) => handleReaction(message.id, emoji)}
+                  />
+                )}
               </>
+            )}
+            {/* Quick reactions bar on hover */}
+            {hoveredMessageId === message.id && !reactions[message.id]?.length && (
+              <QuickReactionsBar
+                messageId={message.id}
+                currentUserId={currentUserId}
+                onReact={(emoji) => handleReaction(message.id, emoji)}
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+              />
             )}
           </div>
           {!isEditing && (

@@ -90,6 +90,24 @@ export interface Message {
   cost?: number
   created_at: string
   metadata?: any
+  reactions?: MessageReaction[]
+}
+
+export interface MessageReaction {
+  id: string
+  message_id: string
+  user_id?: string
+  persona_id?: string
+  emoji: string
+  created_at: string
+}
+
+export interface ReactionCount {
+  emoji: string
+  count: number
+  reacted_by_user: boolean
+  user_reactions: string[]
+  persona_reactions: string[]
 }
 
 export interface Demographics {

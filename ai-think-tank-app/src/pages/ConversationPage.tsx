@@ -10,6 +10,7 @@ import { ConversationModeSelector } from '@/components/conversation/Conversation
 import { PersonaPresencePanel } from '@/components/conversation/PersonaPresencePanel'
 import { useConversationStore } from '@/stores/conversation-store'
 import { useAuthStore } from '@/stores/auth-store'
+import { useAIReactions } from '@/hooks/useAIReactions'
 import type { ConversationType } from '@/types'
 
 export const ConversationPage: React.FC = () => {
@@ -94,6 +95,14 @@ export const ConversationPage: React.FC = () => {
     }
   }, [loading, activeConversation?.mode, personas])
 
+  // Enable AI reactions
+  useAIReactions({
+    messages,
+    personas,
+    enabled: activeConversation?.mode === 'auto',
+    conversationId: activeConversation?.id
+  })
+
   const handleSendMessage = async (message: string, mentionedPersona?: string) => {
     if (!message.trim() || !user || !activeConversation) return
 
@@ -158,6 +167,8 @@ export const ConversationPage: React.FC = () => {
           streamingContent={streamingContent}
           loading={loading}
           typingPersonas={typingPersonaIds.map(id => personas.find(p => p.id === id)!).filter(Boolean)}
+          currentUserId={user?.id}
+          conversationId={activeConversation?.id}
         />
 
         {/* Input */}
