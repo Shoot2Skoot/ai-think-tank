@@ -198,6 +198,7 @@ export const MessageList: React.FC<MessageListProps> = ({
                   personas={personas}
                   onReact={(emoji) => handleReaction(message.id, emoji)}
                   isMessageHovered={hoveredMessageId === message.id}
+                  isLastMessage={index >= messages.length - 2}
                 />
               </div>
             )}

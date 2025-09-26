@@ -13,6 +13,7 @@ interface MessageReactionsProps {
   onReact?: (emoji: string) => void
   className?: string
   isMessageHovered?: boolean
+  isLastMessage?: boolean
 }
 
 export const MessageReactions: React.FC<MessageReactionsProps> = ({
@@ -22,7 +23,8 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
   personas,
   onReact,
   className,
-  isMessageHovered = false
+  isMessageHovered = false,
+  isLastMessage = false
 }) => {
   const [quickReactions, setQuickReactions] = useState<string[]>([])
   const [showQuickReactions, setShowQuickReactions] = useState(false)
@@ -90,7 +92,10 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
       {/* Floating reaction bar on hover OR when picker is open */}
       {(isMessageHovered || isPickerOpen) && (
         <div
-          className="absolute top-full mt-1 left-0 flex items-center gap-1 px-2 py-1 rounded-lg shadow-lg border animate-fadeIn z-10 pointer-events-auto"
+          className={cn(
+            "absolute left-0 flex items-center gap-1 px-2 py-1 rounded-lg shadow-lg border animate-fadeIn z-10 pointer-events-auto",
+            isLastMessage ? "bottom-full mb-1" : "top-full mt-1"
+          )}
           style={{
             backgroundColor: 'var(--color-surface-primary)',
             borderColor: 'var(--color-surface-border)'
