@@ -286,23 +286,28 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
 
     set({ loading: true, error: null })
     try {
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
       // Try to get persona template data from service
       const template = await personaService.getPersonaByName(personaName)
 
       let persona
 
-      // Check if we already have this persona (non-template) in the database
+      // Check if we already have this persona for this user (non-template)
       const { data: existingPersona } = await supabase
         .from('personas')
         .select('*')
         .eq('name', personaName)
         .eq('is_template', false)
+        .eq('user_id', user.id)
         .maybeSingle()
 
       if (existingPersona) {
         persona = existingPersona
       } else {
-        // Create new persona instance based on template
+        // Create new user-specific persona instance based on template
         const newPersona: any = {
           name: personaName,
           role: template?.role || 'AI Assistant',
@@ -321,7 +326,8 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
           category: template?.category,
           description: template?.description,
           expertise_areas: template?.expertise_areas,
-          is_template: false,  // This is a conversation persona, not a template
+          is_template: false,  // This is a user persona instance, not a template
+          user_id: user.id,  // Link to the user
           created_at: new Date().toISOString()
         }
 

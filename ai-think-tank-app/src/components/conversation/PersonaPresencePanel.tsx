@@ -47,10 +47,11 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
     return statuses
   })
 
-  // Fetch available personas from database
+  // Fetch available persona templates from database
   useEffect(() => {
     const fetchAvailablePersonas = async () => {
       if (activeConversation?.id) {
+        // Get global templates that aren't already in the conversation
         const available = await personaService.getAvailablePersonas(activeConversation.id)
         setAvailablePersonas(available)
       }
@@ -65,14 +66,15 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
     // Online personas are those in the current conversation
     const online = personas.filter(p => p.id !== 'user')
 
-    // Offline personas are those available but not in the current conversation
+    // Offline personas are those templates available but not in the current conversation
     const offline = availablePersonas.map(template => ({
       id: `offline-${template.id}`,
       name: template.name,
       avatar: template.avatar_url || '/avatars/tile000.png',
       role: template.role || 'Available',
       color: template.color,
-      avatar_url: template.avatar_url
+      avatar_url: template.avatar_url,
+      description: template.description
     }))
 
     online.forEach(persona => {

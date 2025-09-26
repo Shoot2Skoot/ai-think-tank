@@ -23,6 +23,26 @@ export class PersonaService {
   }
 
   /**
+   * Get all user-specific personas (non-templates)
+   */
+  async getUserPersonas(userId: string): Promise<Persona[]> {
+    try {
+      const { data, error } = await supabase
+        .from('personas')
+        .select('*')
+        .eq('is_template', false)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('Error fetching user personas:', error)
+      return []
+    }
+  }
+
+  /**
    * Get persona templates not in a specific conversation
    */
   async getAvailablePersonas(conversationId: string): Promise<Persona[]> {
@@ -86,6 +106,25 @@ export class PersonaService {
     } catch (error) {
       console.error('Error fetching conversation personas:', error)
       return []
+    }
+  }
+
+  /**
+   * Check if a user already has a persona with a given name
+   */
+  async userHasPersona(userId: string, personaName: string): Promise<boolean> {
+    try {
+      const { data, error } = await supabase
+        .from('personas')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('name', personaName)
+        .eq('is_template', false)
+        .single()
+
+      return !error && !!data
+    } catch (error) {
+      return false
     }
   }
 }

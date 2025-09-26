@@ -63,7 +63,7 @@ export class ConversationManager {
             .single()
 
           if (template) {
-            // Create persona instance from template
+            // Create user-specific persona instance from template
             const personaData: any = {
               name: personaConfig.name || template.name,
               role: personaConfig.role || template.role,
@@ -82,7 +82,8 @@ export class ConversationManager {
               category: template.category,
               description: template.description,
               expertise_areas: template.expertise_areas,
-              is_template: false
+              is_template: false,
+              user_id: userId  // Link persona to user
             }
 
             const { data: newPersona, error: personaError } = await supabase
@@ -97,7 +98,7 @@ export class ConversationManager {
             throw new Error(`Template ${personaConfig.template_id} not found`)
           }
         } else {
-          // Create custom persona
+          // Create custom user-specific persona
           const personaData: any = {
             name: personaConfig.name,
             role: personaConfig.role,
@@ -111,7 +112,8 @@ export class ConversationManager {
             personality: personaConfig.personality,
             experience_level: personaConfig.experience_level,
             attitude: personaConfig.attitude,
-            is_template: false
+            is_template: false,
+            user_id: userId  // Link persona to user
           }
 
           const { data: newPersona, error: personaError } = await supabase
