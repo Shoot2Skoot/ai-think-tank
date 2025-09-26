@@ -85,7 +85,7 @@ export const MessageList: React.FC<MessageListProps> = ({
                 className="rounded-full"
                 style={{
                   background: isUser ? '#2563eb' : (persona?.color || 'transparent'),
-                  padding: isUser || persona?.color ? '2px' : '0'
+                  padding: isUser || persona?.color ? '1.5px' : '0'
                 }}
               >
                 <Avatar
