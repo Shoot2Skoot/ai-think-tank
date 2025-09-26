@@ -21,29 +21,29 @@ export const SeenIndicator: React.FC<SeenIndicatorProps> = ({
     return (
       <div className="flex items-center space-x-1 mt-1">
         {messageStatus === 'sent' && (
-          <Check className="h-3 w-3 text-gray-400" />
+          <Check className="h-3 w-3 text-text-tertiary" />
         )}
         {messageStatus === 'delivered' && (
-          <CheckCheck className="h-3 w-3 text-gray-400" />
+          <CheckCheck className="h-3 w-3 text-text-tertiary" />
         )}
         {messageStatus === 'seen' && (
-          <CheckCheck className="h-3 w-3 text-blue-500" />
+          <CheckCheck className="h-3 w-3 text-primary-400" />
         )}
         {seenBy.length > 0 && (
           <div className="flex items-center space-x-1 ml-2">
-            <span className="text-xs text-gray-500">Seen by</span>
+            <span className="text-xs text-text-tertiary">Seen by</span>
             <div className="flex -space-x-1">
               {seenBy.slice(0, 3).map((persona) => (
                 <Avatar
                   key={persona.id}
                   fallback={persona.name}
                   size="xs"
-                  className="ring-1 ring-white"
+                  className="ring-1 ring-surface-primary"
                 />
               ))}
               {seenBy.length > 3 && (
-                <div className="flex items-center justify-center w-4 h-4 rounded-full bg-gray-300 ring-1 ring-white">
-                  <span className="text-xs text-gray-700">
+                <div className="flex items-center justify-center w-4 h-4 rounded-full bg-surface-tertiary ring-1 ring-surface-primary">
+                  <span className="text-xs text-text-secondary">
                     +{seenBy.length - 3}
                   </span>
                 </div>
@@ -59,8 +59,8 @@ export const SeenIndicator: React.FC<SeenIndicatorProps> = ({
   if (seenBy.length > 0) {
     return (
       <div className="flex items-center space-x-1 mt-1">
-        <Eye className="h-3 w-3 text-gray-400" />
-        <span className="text-xs text-gray-500">
+        <Eye className="h-3 w-3 text-text-tertiary" />
+        <span className="text-xs text-text-tertiary">
           Seen by {seenBy.map(p => p.name).join(', ')}
         </span>
       </div>

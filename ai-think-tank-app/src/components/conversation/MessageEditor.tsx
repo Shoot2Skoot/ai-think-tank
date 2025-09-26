@@ -44,11 +44,11 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center space-x-2 text-xs text-gray-500">
+      <div className="flex items-center space-x-2 text-xs text-text-tertiary">
         <span>Editing message</span>
         <button
           onClick={() => setShowPreview(!showPreview)}
-          className="flex items-center space-x-1 hover:text-gray-700"
+          className="flex items-center space-x-1 hover:text-text-secondary"
         >
           <Eye className="h-3 w-3" />
           <span>{showPreview ? 'Edit' : 'Preview'}</span>
@@ -56,8 +56,8 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       </div>
 
       {showPreview ? (
-        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="text-sm font-medium text-gray-600 mb-2">Preview:</div>
+        <div className="p-3 bg-opacity-10 bg-primary-900 rounded-lg border border-surface-border">
+          <div className="text-sm font-medium text-text-secondary mb-2">Preview:</div>
           <MessageContent content={content} />
         </div>
       ) : (
@@ -66,16 +66,16 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="w-full p-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-400"
           rows={Math.min(10, content.split('\n').length + 1)}
           placeholder="Edit your message..."
         />
       )}
 
       <div className="flex items-center justify-between">
-        <div className="text-xs text-gray-500">
-          Press <kbd className="px-1 py-0.5 bg-gray-100 rounded">Ctrl+Enter</kbd> to save,{' '}
-          <kbd className="px-1 py-0.5 bg-gray-100 rounded">Esc</kbd> to cancel
+        <div className="text-xs text-text-tertiary">
+          Press <kbd className="px-1 py-0.5 bg-surface-secondary rounded">Ctrl+Enter</kbd> to save,{' '}
+          <kbd className="px-1 py-0.5 bg-surface-secondary rounded">Esc</kbd> to cancel
         </div>
         <div className="flex items-center space-x-2">
           <Button

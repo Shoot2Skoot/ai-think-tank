@@ -35,8 +35,8 @@ export const DashboardPage: React.FC = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-text-primary">Dashboard</h1>
+            <p className="mt-1 text-sm text-text-tertiary">
               Welcome back! Here's your AI Think Tank overview.
             </p>
           </div>
@@ -55,10 +55,10 @@ export const DashboardPage: React.FC = () => {
             <CardContent className="p-6">
               <div className="flex items-center">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-text-secondary">
                     Total Conversations
                   </p>
-                  <p className="mt-2 text-3xl font-semibold text-gray-900">
+                  <p className="mt-2 text-3xl font-semibold text-text-primary">
                     {stats.totalConversations}
                   </p>
                 </div>
@@ -71,10 +71,10 @@ export const DashboardPage: React.FC = () => {
             <CardContent className="p-6">
               <div className="flex items-center">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-text-secondary">
                     Active Conversations
                   </p>
-                  <p className="mt-2 text-3xl font-semibold text-gray-900">
+                  <p className="mt-2 text-3xl font-semibold text-text-primary">
                     {stats.activeConversations}
                   </p>
                 </div>
@@ -87,10 +87,10 @@ export const DashboardPage: React.FC = () => {
             <CardContent className="p-6">
               <div className="flex items-center">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-text-secondary">
                     Monthly Spent
                   </p>
-                  <p className="mt-2 text-3xl font-semibold text-gray-900">
+                  <p className="mt-2 text-3xl font-semibold text-text-primary">
                     {formatCurrency(stats.totalSpent)}
                   </p>
                 </div>
@@ -103,10 +103,10 @@ export const DashboardPage: React.FC = () => {
             <CardContent className="p-6">
               <div className="flex items-center">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-text-secondary">
                     Remaining Budget
                   </p>
-                  <p className="mt-2 text-3xl font-semibold text-gray-900">
+                  <p className="mt-2 text-3xl font-semibold text-text-primary">
                     {formatCurrency(stats.remainingBudget)}
                   </p>
                 </div>
@@ -125,7 +125,7 @@ export const DashboardPage: React.FC = () => {
             {conversations.length === 0 ? (
               <div className="text-center py-8">
                 <MessageSquare className="mx-auto h-12 w-12 text-gray-300" />
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-text-tertiary">
                   No conversations yet. Start your first AI think tank!
                 </p>
                 <Button
@@ -140,18 +140,18 @@ export const DashboardPage: React.FC = () => {
                 {conversations.slice(0, 5).map((conversation) => (
                   <div
                     key={conversation.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-primary-900 hover:bg-opacity-10 cursor-pointer"
                     onClick={() => navigate(`/conversation/${conversation.id}`)}
                   >
                     <div className="flex-1">
-                      <h3 className="text-sm font-medium text-gray-900">
+                      <h3 className="text-sm font-medium text-text-primary">
                         {conversation.title}
                       </h3>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-text-tertiary">
                         {conversation.message_count} messages • {formatCurrency(conversation.total_cost)}
                       </p>
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-text-tertiary">
                       {formatRelativeTime(conversation.created_at)}
                     </div>
                   </div>

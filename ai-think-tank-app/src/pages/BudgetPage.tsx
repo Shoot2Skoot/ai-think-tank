@@ -57,8 +57,8 @@ export const BudgetPage: React.FC = () => {
     <AppLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Budget Management</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-text-primary">Budget Management</h1>
+          <p className="mt-1 text-sm text-text-tertiary">
             Monitor and control your AI conversation spending
           </p>
         </div>
@@ -67,7 +67,7 @@ export const BudgetPage: React.FC = () => {
         {alerts.length > 0 && (
           <div className="space-y-2">
             {alerts.map((alert) => (
-              <Card key={alert.id} className="border-yellow-200 bg-yellow-50">
+              <Card key={alert.id} className="border-yellow-200 bg-primary-900 bg-opacity-20">
                 <CardContent className="p-4">
                   <div className="flex items-start">
                     <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
@@ -102,20 +102,20 @@ export const BudgetPage: React.FC = () => {
             <CardContent className="space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600">Today's Spending</span>
+                  <span className="text-sm text-text-secondary">Today's Spending</span>
                   <span className="text-sm font-medium">
                     {formatCurrency(budget?.current_daily_spend || 0)} / {formatCurrency(budget?.daily_limit || 1)}
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-surface-tertiary rounded-full h-2">
                   <div
-                    className="bg-blue-600 h-2 rounded-full transition-all"
+                    className="bg-primary-400 h-2 rounded-full transition-all"
                     style={{
                       width: `${Math.min(100, remainingBudget?.dailyPercentage || 0)}%`
                     }}
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-text-tertiary mt-1">
                   {formatCurrency(remainingBudget?.daily || 0)} remaining
                 </p>
               </div>
@@ -129,12 +129,12 @@ export const BudgetPage: React.FC = () => {
             <CardContent className="space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600">This Month</span>
+                  <span className="text-sm text-text-secondary">This Month</span>
                   <span className="text-sm font-medium">
                     {formatCurrency(budget?.current_monthly_spend || 0)} / {formatCurrency(budget?.monthly_limit || 10)}
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-surface-tertiary rounded-full h-2">
                   <div
                     className={`h-2 rounded-full transition-all ${
                       (remainingBudget?.monthlyPercentage || 0) > 80 ? 'bg-yellow-500' : 'bg-green-600'
@@ -144,7 +144,7 @@ export const BudgetPage: React.FC = () => {
                     }}
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-text-tertiary mt-1">
                   {formatCurrency(remainingBudget?.monthly || 0)} remaining • Resets on day {budget?.reset_day}
                 </p>
               </div>
@@ -172,11 +172,11 @@ export const BudgetPage: React.FC = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-text-secondary">
                       Monthly Limit
                     </label>
                     <div className="mt-1 flex items-center space-x-2">
-                      <span className="text-gray-500">$</span>
+                      <span className="text-text-tertiary">$</span>
                       <Input
                         type="number"
                         min="0"
@@ -191,11 +191,11 @@ export const BudgetPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-text-secondary">
                       Daily Limit
                     </label>
                     <div className="mt-1 flex items-center space-x-2">
-                      <span className="text-gray-500">$</span>
+                      <span className="text-text-tertiary">$</span>
                       <Input
                         type="number"
                         min="0"
@@ -223,15 +223,15 @@ export const BudgetPage: React.FC = () => {
                     })}
                     valueLabel="$"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-text-tertiary mt-1">
                     You'll receive a warning when monthly spending reaches ${formData.warning_threshold}
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-700">Auto-stop Conversations</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm font-medium text-text-secondary">Auto-stop Conversations</p>
+                    <p className="text-xs text-text-tertiary">
                       Automatically stop conversations when limits are reached
                     </p>
                   </div>
@@ -245,7 +245,7 @@ export const BudgetPage: React.FC = () => {
                       })}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <div className="w-11 h-6 bg-surface-tertiary peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-primary after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-400"></div>
                   </label>
                 </div>
 
@@ -261,19 +261,19 @@ export const BudgetPage: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-sm text-gray-500">Monthly Limit</p>
+                  <p className="text-sm text-text-tertiary">Monthly Limit</p>
                   <p className="text-lg font-medium">{formatCurrency(budget?.monthly_limit || 10)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Daily Limit</p>
+                  <p className="text-sm text-text-tertiary">Daily Limit</p>
                   <p className="text-lg font-medium">{formatCurrency(budget?.daily_limit || 1)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Warning Threshold</p>
+                  <p className="text-sm text-text-tertiary">Warning Threshold</p>
                   <p className="text-lg font-medium">{formatCurrency(budget?.warning_threshold || 8)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Auto-stop</p>
+                  <p className="text-sm text-text-tertiary">Auto-stop</p>
                   <Badge variant={budget?.auto_stop ? 'success' : 'default'}>
                     {budget?.auto_stop ? 'Enabled' : 'Disabled'}
                   </Badge>

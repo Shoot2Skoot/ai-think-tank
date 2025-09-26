@@ -19,7 +19,7 @@ const modeConfig: Record<ConversationType, {
     label: 'Planning',
     icon: Target,
     description: 'Structured planning and strategy',
-    color: 'text-blue-600 hover:bg-blue-50'
+    color: 'text-primary-400 hover:bg-primary-900 hover:bg-opacity-10'
   },
   ideation: {
     label: 'Ideation',
@@ -55,7 +55,7 @@ const modeConfig: Record<ConversationType, {
     label: 'Casual',
     icon: Coffee,
     description: 'Relaxed, informal discussion',
-    color: 'text-gray-600 hover:bg-gray-50'
+    color: 'text-text-secondary hover:bg-primary-900 hover:bg-opacity-10'
   }
 }
 
@@ -65,9 +65,9 @@ export const ConversationModeSelector: React.FC<ConversationModeSelectorProps> =
   disabled = false
 }) => {
   return (
-    <div className="border-b border-gray-200 bg-gray-50 px-4 py-2">
+    <div className="border-b border-surface-border bg-opacity-10 bg-primary-900 px-4 py-2">
       <div className="flex items-center space-x-2">
-        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Mode:</span>
+        <span className="text-xs font-medium text-text-tertiary uppercase tracking-wider">Mode:</span>
         <div className="flex items-center space-x-1">
           {(Object.keys(modeConfig) as ConversationType[]).map((mode) => {
             const config = modeConfig[mode]
@@ -82,8 +82,8 @@ export const ConversationModeSelector: React.FC<ConversationModeSelectorProps> =
                 className={cn(
                   'group relative flex items-center space-x-1 px-3 py-1.5 rounded-md text-sm font-medium transition-all',
                   isActive
-                    ? `${config.color.split(' ')[0]} bg-white shadow-sm border border-gray-200`
-                    : `text-gray-600 ${config.color.split(' ')[1]} hover:text-gray-900`,
+                    ? `${config.color.split(' ')[0]} bg-surface-primary shadow-sm border border-surface-border`
+                    : `text-text-secondary ${config.color.split(' ')[1]} hover:text-text-primary`,
                   disabled && 'opacity-50 cursor-not-allowed'
                 )}
                 title={config.description}
@@ -92,7 +92,7 @@ export const ConversationModeSelector: React.FC<ConversationModeSelectorProps> =
                 <span>{config.label}</span>
 
                 {/* Tooltip */}
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-text-primary text-surface-primary text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
                   {config.description}
                 </div>
               </button>
@@ -100,7 +100,7 @@ export const ConversationModeSelector: React.FC<ConversationModeSelectorProps> =
           })}
         </div>
 
-        <div className="ml-auto text-xs text-gray-500">
+        <div className="ml-auto text-xs text-text-tertiary">
           {modeConfig[currentMode].description}
         </div>
       </div>

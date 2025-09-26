@@ -42,7 +42,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       <div className="space-y-1">
         <button
           onClick={handleCopy}
-          className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
+          className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
         >
           <Copy className="h-4 w-4" />
           <span>Copy</span>
@@ -51,7 +51,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         {onReply && (
           <button
             onClick={onReply}
-            className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
+            className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
           >
             <Reply className="h-4 w-4" />
             <span>Reply</span>
@@ -61,7 +61,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
         {isOwn && onEdit && (
           <button
             onClick={onEdit}
-            className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
+            className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
           >
             <Edit2 className="h-4 w-4" />
             <span>Edit</span>
@@ -73,7 +73,8 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
             <div className="border-t my-1" />
             <button
               onClick={onDelete}
-              className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded"
+              className="w-full flex items-center space-x-2 px-3 py-2 text-sm hover:bg-red-50 rounded"
+              style={{ color: 'var(--color-error)' }}
             >
               <Trash2 className="h-4 w-4" />
               <span>Delete</span>

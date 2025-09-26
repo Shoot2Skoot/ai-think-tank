@@ -54,8 +54,8 @@ export const DraggableConversationItem: React.FC<DraggableConversationItemProps>
       <button
         onClick={onClick}
         className={cn(
-          'w-full text-left px-2 py-1.5 rounded hover:bg-gray-100 flex items-center space-x-2',
-          isActive && 'bg-blue-50 hover:bg-blue-50',
+          'w-full text-left px-2 py-1.5 rounded hover:bg-primary-900 hover:bg-opacity-10 flex items-center space-x-2',
+          isActive && 'bg-primary-900 bg-opacity-20 hover:bg-primary-900 hover:bg-opacity-20',
           hasUnread && 'font-semibold',
           isDragging && 'cursor-grabbing'
         )}
@@ -66,30 +66,30 @@ export const DraggableConversationItem: React.FC<DraggableConversationItemProps>
           {...listeners}
           className="opacity-0 group-hover:opacity-100 cursor-grab absolute left-0 p-1 transition-opacity"
         >
-          <GripVertical className="h-3 w-3 text-gray-400" />
+          <GripVertical className="h-3 w-3 text-text-tertiary" />
         </div>
 
         <Hash className={cn(
           'h-4 w-4 flex-shrink-0 ml-4',
-          isActive ? 'text-blue-600' : hasUnread ? 'text-gray-700' : 'text-gray-400'
+          isActive ? 'text-primary-400' : hasUnread ? 'text-text-secondary' : 'text-text-tertiary'
         )} />
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2">
             <p className={cn(
               'text-sm truncate',
-              isActive ? 'font-semibold text-blue-900' : hasUnread ? 'font-semibold text-gray-900' : 'text-gray-900'
+              isActive ? 'font-semibold text-primary-400' : hasUnread ? 'font-semibold text-text-primary' : 'text-text-primary'
             )}>
               {formatChannelName(conversation.title)}
             </p>
             {!isCollapsed && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-text-tertiary">
                 {memberCount}
               </span>
             )}
           </div>
           {!isCollapsed && conversation.topic && (
-            <p className="text-xs text-gray-500 truncate">
+            <p className="text-xs text-text-tertiary truncate">
               {conversation.topic}
             </p>
           )}

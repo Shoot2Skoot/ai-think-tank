@@ -30,13 +30,13 @@ export const TimeDivider: React.FC<TimeDividerProps> = ({ date }) => {
 
   return (
     <div className="flex items-center my-4 px-4">
-      <div className="flex-1 border-t border-gray-200"></div>
+      <div className="flex-1 border-t border-surface-border"></div>
       <div className="px-3">
-        <span className="text-xs font-medium text-gray-500 bg-white">
+        <span className="text-xs font-medium text-text-tertiary bg-surface-primary">
           {formatDate(date)}
         </span>
       </div>
-      <div className="flex-1 border-t border-gray-200"></div>
+      <div className="flex-1 border-t border-surface-border"></div>
     </div>
   )
 }

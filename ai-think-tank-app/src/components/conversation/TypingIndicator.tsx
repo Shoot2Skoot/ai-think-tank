@@ -27,16 +27,16 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({ typingPersonas
             key={persona.id}
             fallback={persona.name}
             size="xs"
-            className="ring-2 ring-white animate-pulse"
+            className="ring-2 ring-surface-primary animate-pulse"
           />
         ))}
       </div>
       <div className="flex items-center space-x-1">
-        <span className="text-sm text-gray-500 italic">{getTypingText()}</span>
+        <span className="text-sm text-text-tertiary italic">{getTypingText()}</span>
         <div className="flex space-x-1">
-          <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-          <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-          <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          <div className="w-1.5 h-1.5 bg-text-tertiary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+          <div className="w-1.5 h-1.5 bg-text-tertiary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+          <div className="w-1.5 h-1.5 bg-text-tertiary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
         </div>
       </div>
     </div>

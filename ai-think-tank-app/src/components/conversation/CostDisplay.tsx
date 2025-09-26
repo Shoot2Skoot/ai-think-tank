@@ -13,7 +13,7 @@ interface CostDisplayProps {
 export const CostDisplay: React.FC<CostDisplayProps> = ({ cost, compact = false }) => {
   if (!cost) {
     return (
-      <Badge variant="default" className="bg-gray-100">
+      <Badge variant="default" className="bg-surface-secondary">
         <DollarSign className="h-3 w-3 mr-1" />
         $0.00
       </Badge>
@@ -28,7 +28,7 @@ export const CostDisplay: React.FC<CostDisplayProps> = ({ cost, compact = false 
           {formatCurrency(cost.total)}
         </Badge>
         {cost.cache_savings > 0 && (
-          <Badge variant="success" className="bg-blue-100 text-blue-800">
+          <Badge variant="success" className="bg-primary-900 bg-opacity-20 text-primary-400">
             <Zap className="h-3 w-3 mr-1" />
             Saved {formatCurrency(cost.cache_savings)}
           </Badge>
@@ -48,21 +48,21 @@ export const CostDisplay: React.FC<CostDisplayProps> = ({ cost, compact = false 
           {/* Total Cost */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <DollarSign className="h-5 w-5 text-gray-500" />
+              <DollarSign className="h-5 w-5 text-text-tertiary" />
               <span className="font-medium">Total Cost</span>
             </div>
-            <span className="text-2xl font-bold text-gray-900">
+            <span className="text-2xl font-bold text-text-primary">
               {formatCurrency(cost.total)}
             </span>
           </div>
 
           {/* Cost Breakdown Bar */}
           <div className="space-y-2">
-            <div className="flex justify-between text-sm text-gray-600">
+            <div className="flex justify-between text-sm text-text-secondary">
               <span>Input ({formatPercentage(inputPercentage)})</span>
               <span>Output ({formatPercentage(outputPercentage)})</span>
             </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden flex">
+            <div className="h-2 bg-surface-tertiary rounded-full overflow-hidden flex">
               <div
                 className="bg-blue-500 transition-all"
                 style={{ width: `${inputPercentage}%` }}
@@ -77,23 +77,23 @@ export const CostDisplay: React.FC<CostDisplayProps> = ({ cost, compact = false 
           {/* Detailed Breakdown */}
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-gray-500">Input Cost</p>
+              <p className="text-text-tertiary">Input Cost</p>
               <p className="font-medium">{formatCurrency(cost.input_cost)}</p>
             </div>
             <div>
-              <p className="text-gray-500">Output Cost</p>
+              <p className="text-text-tertiary">Output Cost</p>
               <p className="font-medium">{formatCurrency(cost.output_cost)}</p>
             </div>
           </div>
 
           {/* Cache Savings */}
           {cost.cache_savings > 0 && (
-            <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+            <div className="flex items-center justify-between p-2 bg-primary-900 bg-opacity-20 rounded-lg">
               <div className="flex items-center space-x-2">
-                <Zap className="h-4 w-4 text-blue-600" />
-                <span className="text-sm text-blue-900">Cache Savings</span>
+                <Zap className="h-4 w-4 text-primary-400" />
+                <span className="text-sm text-primary-400">Cache Savings</span>
               </div>
-              <span className="text-sm font-medium text-blue-900">
+              <span className="text-sm font-medium text-primary-400">
                 {formatCurrency(cost.cache_savings)}
               </span>
             </div>
@@ -102,14 +102,14 @@ export const CostDisplay: React.FC<CostDisplayProps> = ({ cost, compact = false 
           {/* Provider Breakdown */}
           {Object.keys(cost.byProvider).length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-700">By Provider</p>
+              <p className="text-sm font-medium text-text-secondary">By Provider</p>
               <div className="space-y-1">
                 {Object.entries(cost.byProvider).map(([provider, amount]) => (
                   <div key={provider} className="flex items-center justify-between">
                     <Badge size="sm" variant="default">
                       {provider}
                     </Badge>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-text-secondary">
                       {formatCurrency(amount)}
                     </span>
                   </div>
@@ -121,17 +121,17 @@ export const CostDisplay: React.FC<CostDisplayProps> = ({ cost, compact = false 
           {/* Persona Breakdown (if more than 1) */}
           {Object.keys(cost.byPersona).length > 1 && (
             <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-700">By Persona</p>
+              <p className="text-sm font-medium text-text-secondary">By Persona</p>
               <div className="space-y-1 max-h-32 overflow-y-auto">
                 {Object.entries(cost.byPersona)
                   .sort(([, a], [, b]) => b - a)
                   .slice(0, 5)
                   .map(([personaId, amount]) => (
                     <div key={personaId} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 truncate">
+                      <span className="text-sm text-text-secondary truncate">
                         Persona {personaId.slice(0, 8)}...
                       </span>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-text-secondary">
                         {formatCurrency(amount)}
                       </span>
                     </div>

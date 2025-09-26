@@ -31,8 +31,8 @@ export const PersonasPage: React.FC = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Persona Library</h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-text-primary">Persona Library</h1>
+            <p className="mt-1 text-sm text-text-tertiary">
               Browse and manage AI personas for your conversations
             </p>
           </div>
@@ -50,7 +50,7 @@ export const PersonasPage: React.FC = () => {
               placeholder="Search personas..."
               value={searchQuery}
               onChange={(e) => searchTemplates(e.target.value)}
-              icon={<Search className="h-4 w-4 text-gray-400" />}
+              icon={<Search className="h-4 w-4 text-text-tertiary" />}
             />
           </div>
           <Select
@@ -80,12 +80,12 @@ export const PersonasPage: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {persona.description && (
-                  <p className="text-sm text-gray-600">{persona.description}</p>
+                  <p className="text-sm text-text-secondary">{persona.description}</p>
                 )}
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">Provider</span>
+                    <span className="text-text-tertiary">Provider</span>
                     <Badge className={getProviderColor(persona.default_provider)} size="sm">
                       {persona.default_provider}
                     </Badge>
@@ -93,7 +93,7 @@ export const PersonasPage: React.FC = () => {
 
                   {persona.experience_level && (
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Experience</span>
+                      <span className="text-text-tertiary">Experience</span>
                       <span className={getExperienceColor(persona.experience_level)}>
                         {persona.experience_level}
                       </span>
@@ -102,7 +102,7 @@ export const PersonasPage: React.FC = () => {
 
                   {persona.attitude && (
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Attitude</span>
+                      <span className="text-text-tertiary">Attitude</span>
                       <span className={getAttitudeColor(persona.attitude)}>
                         {persona.attitude}
                       </span>
@@ -126,7 +126,7 @@ export const PersonasPage: React.FC = () => {
                 )}
 
                 <div className="flex items-center justify-between pt-2 border-t">
-                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                  <div className="flex items-center space-x-2 text-sm text-text-tertiary">
                     <span>Used {persona.usage_count} times</span>
                     {persona.rating && (
                       <>
@@ -144,7 +144,7 @@ export const PersonasPage: React.FC = () => {
         {filteredTemplates.length === 0 && (
           <Card>
             <CardContent className="text-center py-12">
-              <p className="text-gray-500">No personas found matching your search.</p>
+              <p className="text-text-tertiary">No personas found matching your search.</p>
             </CardContent>
           </Card>
         )}

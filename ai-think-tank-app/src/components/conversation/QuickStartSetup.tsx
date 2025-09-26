@@ -73,7 +73,7 @@ export const QuickStartSetup: React.FC<QuickStartSetupProps> = ({ onStart, loadi
           <Zap className="h-5 w-5 mr-2 text-yellow-500" />
           Quick Start Templates
         </h3>
-        <p className="text-sm text-gray-600 mb-4">
+        <p className="text-sm text-text-secondary mb-4">
           Select a pre-configured conversation template to get started quickly
         </p>
       </div>
@@ -84,8 +84,8 @@ export const QuickStartSetup: React.FC<QuickStartSetupProps> = ({ onStart, loadi
             key={template.id}
             className={`cursor-pointer transition-all hover:shadow-lg ${
               selectedTemplate === template.id
-                ? 'ring-2 ring-blue-500 bg-blue-50'
-                : 'hover:bg-gray-50'
+                ? 'ring-2 ring-primary-400 bg-primary-900 bg-opacity-20'
+                : 'hover:bg-primary-900 hover:bg-opacity-10'
             }`}
             onClick={() => setSelectedTemplate(template.id)}
           >
@@ -100,9 +100,9 @@ export const QuickStartSetup: React.FC<QuickStartSetupProps> = ({ onStart, loadi
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="text-sm text-gray-600">{template.description}</p>
+              <p className="text-sm text-text-secondary">{template.description}</p>
 
-              <div className="flex items-center space-x-4 text-xs text-gray-500">
+              <div className="flex items-center space-x-4 text-xs text-text-tertiary">
                 <div className="flex items-center">
                   <Users className="h-3 w-3 mr-1" />
                   {template.personas.length} personas
@@ -119,7 +119,7 @@ export const QuickStartSetup: React.FC<QuickStartSetupProps> = ({ onStart, loadi
 
               {selectedTemplate === template.id && (
                 <div className="pt-3 border-t">
-                  <div className="text-xs font-medium text-gray-700 mb-2">
+                  <div className="text-xs font-medium text-text-secondary mb-2">
                     Includes personas:
                   </div>
                   <div className="flex flex-wrap gap-1">
@@ -145,9 +145,9 @@ export const QuickStartSetup: React.FC<QuickStartSetupProps> = ({ onStart, loadi
       </div>
 
       {selectedTemplate && (
-        <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="space-y-4 p-4 bg-primary-900 bg-opacity-20 rounded-lg border border-primary-400">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-text-secondary mb-2">
               Topic or Context (Optional)
             </label>
             <Input
@@ -156,7 +156,7 @@ export const QuickStartSetup: React.FC<QuickStartSetupProps> = ({ onStart, loadi
               placeholder="Add specific context or modify the topic..."
               className="w-full"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-text-tertiary mt-1">
               Customize the conversation topic or add specific context
             </p>
           </div>

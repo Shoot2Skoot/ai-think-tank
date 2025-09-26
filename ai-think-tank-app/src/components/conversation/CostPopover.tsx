@@ -44,24 +44,24 @@ export const CostPopover: React.FC<CostPopoverProps> = ({ cost, messageCount = 0
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between pb-2 border-b">
-          <h3 className="font-semibold text-gray-900">Cost Breakdown</h3>
-          <span className="text-sm text-gray-500">Current Session</span>
+          <h3 className="font-semibold text-text-primary">Cost Breakdown</h3>
+          <span className="text-sm text-text-tertiary">Current Session</span>
         </div>
 
         {/* Total Cost */}
-        <div className="bg-gray-50 rounded-lg p-3">
+        <div className="bg-opacity-10 bg-primary-900 rounded-lg p-3">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-600">Total Cost</span>
-            <span className="text-lg font-bold text-gray-900">
+            <span className="text-sm text-text-secondary">Total Cost</span>
+            <span className="text-lg font-bold text-text-primary">
               {formatCurrency(totalCost)}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="flex items-center text-gray-500">
+            <div className="flex items-center text-text-tertiary">
               <MessageSquare className="h-3 w-3 mr-1" />
               {formatNumber(messageCount)} messages
             </div>
-            <div className="flex items-center text-gray-500">
+            <div className="flex items-center text-text-tertiary">
               <TrendingUp className="h-3 w-3 mr-1" />
               {formatCurrency(avgCostPerMessage)}/msg
             </div>
@@ -70,22 +70,22 @@ export const CostPopover: React.FC<CostPopoverProps> = ({ cost, messageCount = 0
 
         {/* Token Usage */}
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-gray-700">Token Usage</h4>
+          <h4 className="text-sm font-medium text-text-secondary">Token Usage</h4>
           <div className="space-y-1">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Input Tokens</span>
+              <span className="text-text-secondary">Input Tokens</span>
               <span className="font-mono">{formatNumber(cost.input_tokens || 0)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Output Tokens</span>
+              <span className="text-text-secondary">Output Tokens</span>
               <span className="font-mono">{formatNumber(cost.output_tokens || 0)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Cached Tokens</span>
+              <span className="text-text-secondary">Cached Tokens</span>
               <span className="font-mono">{formatNumber(cost.cached_tokens || 0)}</span>
             </div>
             <div className="flex justify-between text-sm font-medium pt-1 border-t">
-              <span className="text-gray-700">Total Tokens</span>
+              <span className="text-text-secondary">Total Tokens</span>
               <span className="font-mono">
                 {formatNumber((cost.input_tokens || 0) + (cost.output_tokens || 0))}
               </span>
@@ -96,18 +96,18 @@ export const CostPopover: React.FC<CostPopoverProps> = ({ cost, messageCount = 0
         {/* Cost by Model */}
         {cost.by_model && Object.keys(cost.by_model).length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-gray-700">Cost by Model</h4>
+            <h4 className="text-sm font-medium text-text-secondary">Cost by Model</h4>
             <div className="space-y-1">
               {Object.entries(cost.by_model).map(([model, modelCost]) => {
                 const percentage = totalCost > 0 ? (modelCost / totalCost) * 100 : 0
                 return (
                   <div key={model} className="flex items-center justify-between text-sm">
                     <div className="flex items-center">
-                      <Zap className="h-3 w-3 mr-1 text-gray-400" />
-                      <span className="text-gray-600 truncate max-w-[150px]">{model}</span>
+                      <Zap className="h-3 w-3 mr-1 text-text-tertiary" />
+                      <span className="text-text-secondary truncate max-w-[150px]">{model}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="text-gray-500 text-xs">
+                      <span className="text-text-tertiary text-xs">
                         {formatPercentage(percentage)}
                       </span>
                       <span className="font-mono">{formatCurrency(modelCost)}</span>
@@ -122,16 +122,16 @@ export const CostPopover: React.FC<CostPopoverProps> = ({ cost, messageCount = 0
         {/* Cost by Persona */}
         {personaBreakdown.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-gray-700">Cost by Persona</h4>
+            <h4 className="text-sm font-medium text-text-secondary">Cost by Persona</h4>
             <div className="space-y-1">
               {personaBreakdown.slice(0, 5).map((persona) => (
                 <div key={persona.id} className="flex items-center justify-between text-sm">
                   <div className="flex items-center">
-                    <Users className="h-3 w-3 mr-1 text-gray-400" />
-                    <span className="text-gray-600">Persona {persona.id.slice(0, 8)}...</span>
+                    <Users className="h-3 w-3 mr-1 text-text-tertiary" />
+                    <span className="text-text-secondary">Persona {persona.id.slice(0, 8)}...</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-gray-500 text-xs">
+                    <span className="text-text-tertiary text-xs">
                       {formatPercentage(persona.percentage)}
                     </span>
                     <span className="font-mono">{formatCurrency(persona.cost)}</span>
@@ -143,7 +143,7 @@ export const CostPopover: React.FC<CostPopoverProps> = ({ cost, messageCount = 0
         )}
 
         {/* Footer */}
-        <div className="pt-2 border-t text-xs text-gray-500">
+        <div className="pt-2 border-t text-xs text-text-tertiary">
           <div className="flex items-center">
             <Info className="h-3 w-3 mr-1" />
             Costs are estimated based on model pricing

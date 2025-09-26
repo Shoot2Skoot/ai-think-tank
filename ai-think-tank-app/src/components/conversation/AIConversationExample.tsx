@@ -115,22 +115,22 @@ export const AIConversationExample: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h2 className="text-lg font-semibold text-blue-900 mb-2">
+      <div className="bg-primary-900 bg-opacity-20 border border-primary-400 rounded-lg p-4">
+        <h2 className="text-lg font-semibold text-primary-400 mb-2">
           AI Mention System Demo
         </h2>
-        <p className="text-sm text-blue-700">
+        <p className="text-sm text-primary-400">
           This example shows how AI personas can mention each other in conversations.
           The system processes @mentions, highlights them, and can determine who should speak next.
         </p>
         {nextSpeakerId && (
-          <p className="text-sm text-blue-600 mt-2">
+          <p className="text-sm text-primary-400 mt-2">
             Next speaker: {personas.find(p => p.id === nextSpeakerId)?.name}
           </p>
         )}
       </div>
 
-      <div className="border rounded-lg bg-white shadow-sm">
+      <div className="border rounded-lg bg-surface-primary shadow-sm">
         <div className="p-4 border-b">
           <h3 className="font-semibold">Example Conversation with AI Mentions</h3>
         </div>
@@ -142,9 +142,9 @@ export const AIConversationExample: React.FC = () => {
         />
       </div>
 
-      <div className="bg-gray-50 rounded-lg p-4">
-        <h4 className="font-medium text-gray-700 mb-2">How it works:</h4>
-        <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+      <div className="bg-opacity-10 bg-primary-900 rounded-lg p-4">
+        <h4 className="font-medium text-text-secondary mb-2">How it works:</h4>
+        <ul className="text-sm text-text-secondary space-y-1 list-disc list-inside">
           <li>AI personas can use @mentions to reference other participants</li>
           <li>Mentions are automatically highlighted in blue</li>
           <li>The system tracks who was mentioned and can route the conversation accordingly</li>
