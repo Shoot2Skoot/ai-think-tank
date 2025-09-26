@@ -2,7 +2,7 @@
 
 export type Provider = 'openai' | 'anthropic' | 'gemini'
 export type ConversationMode = 'auto' | 'manual'
-export type ConversationType = 'debate' | 'ideation' | 'refinement' | 'planning'
+export type ConversationType = 'planning' | 'ideation' | 'refinement' | 'debate' | 'brainstorm' | 'review' | 'casual'
 export type ExperienceLevel = 'None' | 'Limited' | 'Entry' | 'Senior' | 'Mastery'
 export type Attitude = 'Pessimistic' | 'Skeptical' | 'Neutral' | 'Intrigued' | 'Excited'
 export type MessageRole = 'user' | 'assistant' | 'system'

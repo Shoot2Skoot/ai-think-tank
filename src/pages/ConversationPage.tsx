@@ -21,10 +21,11 @@ import { Modal } from '@/components/ui/Modal'
 import { ConversationSetup } from '@/components/conversation/ConversationSetup'
 import { CostDisplay } from '@/components/conversation/CostDisplay'
 import { PersonaSelector } from '@/components/conversation/PersonaSelector'
+import { ConversationModeSelector } from '@/components/conversation/ConversationModeSelector'
 import { useConversationStore } from '@/stores/conversation-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { formatRelativeTime, getProviderColor, cn } from '@/lib/utils'
-import type { Message, Persona } from '@/types'
+import type { Message, Persona, ConversationType } from '@/types'
 
 export const ConversationPage: React.FC = () => {
   const { id } = useParams()
@@ -48,6 +49,7 @@ export const ConversationPage: React.FC = () => {
   const [selectedPersona, setSelectedPersona] = useState<string | null>(null)
   const [autoMode, setAutoMode] = useState(true)
   const [streamingContent, setStreamingContent] = useState<Record<string, string>>({})
+  const [conversationMode, setConversationMode] = useState<ConversationType>('planning')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -57,6 +59,12 @@ export const ConversationPage: React.FC = () => {
       setIsSetupOpen(true)
     }
   }, [id, loadConversation])
+
+  useEffect(() => {
+    if (activeConversation) {
+      setConversationMode(activeConversation.conversation_type)
+    }
+  }, [activeConversation])
 
   useEffect(() => {
     setStreamCallback((chunk: string) => {
@@ -179,8 +187,8 @@ export const ConversationPage: React.FC = () => {
     <AppLayout>
       <div className="h-full flex flex-col">
         {/* Header */}
-        <div className="border-b pb-4 mb-4">
-          <div className="flex items-center justify-between">
+        <div className="border-b pb-2">
+          <div className="flex items-center justify-between px-4 py-2">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
                 {activeConversation?.title || 'New Conversation'}
@@ -216,6 +224,15 @@ export const ConversationPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Mode Selector */}
+        {activeConversation && (
+          <ConversationModeSelector
+            currentMode={conversationMode}
+            onModeChange={setConversationMode}
+            disabled={!activeConversation.is_active}
+          />
+        )}
 
         {/* Personas Bar */}
         {personas.length > 0 && (

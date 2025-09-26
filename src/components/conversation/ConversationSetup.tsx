@@ -38,7 +38,7 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
     title: '',
     topic: '',
     mode: 'auto',
-    conversation_type: 'ideation',
+    conversation_type: 'planning', // Default to planning, but user can change dynamically
     speed: 5,
     personas: []
   })
