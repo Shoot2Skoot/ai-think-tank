@@ -10,7 +10,7 @@ import { SeenIndicator } from './SeenIndicator'
 import { MessageEditor } from './MessageEditor'
 import { MessageActions } from './MessageActions'
 import { MessageReactions, QuickReactionsBar } from './MessageReactions'
-import { Edit3, Copy, Reply, Pin, ThumbsUp } from 'lucide-react'
+import { Edit3, Copy, Reply, Pin } from 'lucide-react'
 import { generateAvatarUrl, generateUserAvatarUrl } from '@/utils/avatar-generator'
 import { ReactionService } from '@/services/reaction-service'
 import type { Message, Persona, ReactionCount } from '@/types'
@@ -150,10 +150,6 @@ export const MessageList: React.FC<MessageListProps> = ({
             {isPinned ? 'Unpin Message' : 'Pin Message'}
           </ContextMenuItem>
         )}
-        <ContextMenuSeparator />
-        <ContextMenuItem onClick={() => handleReaction(message.id, '👍')} icon={<ThumbsUp className="h-4 w-4" />}>
-          Add Reaction
-        </ContextMenuItem>
         {isOwn && onEditMessage && (
           <>
             <ContextMenuSeparator />
@@ -279,7 +275,6 @@ export const MessageList: React.FC<MessageListProps> = ({
                 onDelete={isOwn && onDeleteMessage ? () => onDeleteMessage(message.id) : undefined}
                 onReply={onReplyMessage ? () => handleReply() : undefined}
                 onPin={onPinMessage ? () => handlePin() : undefined}
-                onReact={handleReaction ? (emoji) => handleReaction(message.id, emoji) : undefined}
               />
             </div>
           )}

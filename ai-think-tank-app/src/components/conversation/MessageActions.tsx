@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-import { MoreVertical, Edit3, Copy, Trash2, Reply, Pin, ThumbsUp, Smile } from 'lucide-react'
+import { MoreVertical, Edit3, Copy, Trash2, Reply, Pin } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Popover } from '@/components/ui/Popover'
-import { ReactionPicker } from './ReactionPicker'
 
 interface MessageActionsProps {
   messageId: string
@@ -13,7 +12,6 @@ interface MessageActionsProps {
   onDelete?: () => void
   onReply?: () => void
   onPin?: () => void
-  onReact?: (emoji: string) => void
 }
 
 export const MessageActions: React.FC<MessageActionsProps> = ({
@@ -24,27 +22,12 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   onEdit,
   onDelete,
   onReply,
-  onPin,
-  onReact
+  onPin
 }) => {
-  const [showReactionPicker, setShowReactionPicker] = useState(false)
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content)
-  }
-
-  const handleReactionClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setShowReactionPicker(true)
-  }
-
-  const handleReactionSelect = (emoji: string) => {
-    if (onReact) {
-      onReact(emoji)
-    }
-    setShowReactionPicker(false)
-    setIsPopoverOpen(false)
   }
 
   const trigger = (
@@ -96,18 +79,6 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
             </button>
           )}
 
-          <div className="border-t border-surface-border my-1" />
-
-          {onReact && (
-            <button
-              onClick={handleReactionClick}
-              className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
-            >
-              <Smile className="h-4 w-4" />
-              <span>Add Reaction</span>
-            </button>
-          )}
-
           {isOwn && onEdit && (
             <>
               <div className="border-t border-surface-border my-1" />
@@ -132,15 +103,6 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           )}
         </div>
       </Popover>
-
-      {showReactionPicker && (
-        <div className="absolute right-0 top-full mt-2 z-[60]">
-          <ReactionPicker
-            onSelect={handleReactionSelect}
-            onOpenChange={setShowReactionPicker}
-          />
-        </div>
-      )}
     </div>
   )
 }
