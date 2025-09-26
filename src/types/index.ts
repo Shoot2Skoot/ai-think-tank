@@ -1,36 +1,15 @@
 // Core types for the application
 
-export type Provider = 'openai' | 'anthropic' | 'gemini'
+export type Provider = 'openai' | 'anthropic' | 'google'
 export type ConversationMode = 'auto' | 'manual'
 export type ConversationType = 'planning' | 'ideation' | 'refinement' | 'debate' | 'brainstorm' | 'review' | 'casual'
 export type ExperienceLevel = 'None' | 'Limited' | 'Entry' | 'Senior' | 'Mastery'
 export type Attitude = 'Pessimistic' | 'Skeptical' | 'Neutral' | 'Intrigued' | 'Excited'
 export type MessageRole = 'user' | 'assistant' | 'system'
 
-// Model types for each provider
-export type OpenAIModel = 'gpt-4-turbo-preview' | 'gpt-4' | 'gpt-3.5-turbo'
-export type AnthropicModel = 'claude-3-opus-20240229' | 'claude-3-sonnet-20240229' | 'claude-3-haiku-20240307'
-export type GeminiModel = 'gemini-1.5-pro' | 'gemini-1.5-flash' | 'gemini-pro'
-
-export type AIModel = OpenAIModel | AnthropicModel | GeminiModel
-
-export const PROVIDER_MODELS: Record<Provider, { value: string; label: string; cost: { input: number; output: number } }[]> = {
-  openai: [
-    { value: 'gpt-4-turbo-preview', label: 'GPT-4 Turbo', cost: { input: 0.01, output: 0.03 } },
-    { value: 'gpt-4', label: 'GPT-4', cost: { input: 0.03, output: 0.06 } },
-    { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', cost: { input: 0.0005, output: 0.0015 } }
-  ],
-  anthropic: [
-    { value: 'claude-3-opus-20240229', label: 'Claude 3 Opus', cost: { input: 0.015, output: 0.075 } },
-    { value: 'claude-3-sonnet-20240229', label: 'Claude 3 Sonnet', cost: { input: 0.003, output: 0.015 } },
-    { value: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku', cost: { input: 0.00025, output: 0.00125 } }
-  ],
-  gemini: [
-    { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro', cost: { input: 0.00125, output: 0.005 } },
-    { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash', cost: { input: 0.00025, output: 0.0005 } },
-    { value: 'gemini-pro', label: 'Gemini Pro', cost: { input: 0.0005, output: 0.0015 } }
-  ]
-}
+// Model types - now imported from models.ts which uses models.yaml
+// Keep these exports for backwards compatibility
+export type AIModel = string // Model IDs are now strings from models.yaml
 
 export interface User {
   id: string

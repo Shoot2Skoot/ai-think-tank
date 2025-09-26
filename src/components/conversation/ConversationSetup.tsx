@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Avatar } from '@/components/ui/Avatar'
 import { Tabs } from '@/components/ui/Tabs'
 import { QuickStartSetup } from './QuickStartSetup'
+import { ModelBadge } from './ModelSelector'
 import { useConversationStore } from '@/stores/conversation-store'
 import { usePersonaStore, getAllPersonasForConversation } from '@/stores/persona-store'
 import { useAuthStore } from '@/stores/auth-store'
@@ -173,10 +174,8 @@ export const ConversationSetup: React.FC<ConversationSetupProps> = ({ onComplete
                         <p className="text-xs text-gray-500 truncate">
                           {template.role}
                         </p>
-                        <div className="flex items-center mt-1 space-x-2">
-                          <Badge size="sm" className={getProviderColor(template.default_provider)}>
-                            {template.default_provider}
-                          </Badge>
+                        <div className="flex flex-col mt-1 space-y-1">
+                          <ModelBadge provider={template.default_provider} model={template.default_model} />
                           {template.experience_level && (
                             <span className={`text-xs ${getExperienceColor(template.experience_level)}`}>
                               {template.experience_level}

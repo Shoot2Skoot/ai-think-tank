@@ -26,7 +26,7 @@ import { ModelBadge } from '@/components/conversation/ModelSelector'
 import { useConversationStore } from '@/stores/conversation-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { formatRelativeTime, getProviderColor, cn } from '@/lib/utils'
-import { PROVIDER_MODELS, type Message, Persona, ConversationType } from '@/types'
+import type { Message, Persona, ConversationType } from '@/types'
 
 export const ConversationPage: React.FC = () => {
   const { id } = useParams()

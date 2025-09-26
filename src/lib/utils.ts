@@ -51,7 +51,7 @@ export function getProviderColor(provider: string): string {
   const colors: Record<string, string> = {
     openai: 'text-green-600 bg-green-100',
     anthropic: 'text-orange-600 bg-orange-100',
-    gemini: 'text-blue-600 bg-blue-100'
+    google: 'text-blue-600 bg-blue-100'
   }
   return colors[provider] || 'text-gray-600 bg-gray-100'
 }
