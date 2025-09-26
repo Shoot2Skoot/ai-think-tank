@@ -30,7 +30,6 @@ export function createLangChainProvider(persona: Persona, config?: Partial<LangC
 
       return new ChatOpenAI({
         modelName: baseConfig.modelName,
-        temperature: baseConfig.temperature,
         maxCompletionTokens: baseConfig.maxTokens,
         streaming: baseConfig.streaming,
         openAIApiKey: apiKey,
@@ -46,7 +45,6 @@ export function createLangChainProvider(persona: Persona, config?: Partial<LangC
 
       return new ChatAnthropic({
         modelName: baseConfig.modelName,
-        temperature: baseConfig.temperature,
         maxTokens: baseConfig.maxTokens,
         streaming: baseConfig.streaming,
         anthropicApiKey: apiKey,
@@ -63,7 +61,6 @@ export function createLangChainProvider(persona: Persona, config?: Partial<LangC
 
       return new ChatGoogleGenerativeAI({
         modelName: baseConfig.modelName,
-        temperature: baseConfig.temperature,
         maxOutputTokens: baseConfig.maxTokens,
         streaming: baseConfig.streaming,
         apiKey: apiKey,
