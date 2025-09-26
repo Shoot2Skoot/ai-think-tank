@@ -38,7 +38,7 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
   const { addPersonaToConversation, removePersonaFromConversation, activeConversation } = useConversationStore()
   const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null)
   const [availablePersonas, setAvailablePersonas] = useState<Persona[]>([])
-  const [personaStatuses] = useState<Record<string, typeof funStatuses[0]>>(() => {
+  const [personaStatuses, setPersonaStatuses] = useState<Record<string, typeof funStatuses[0]>>(() => {
     const statuses: Record<string, typeof funStatuses[0]> = {}
     personas.forEach(persona => {
       if (persona.id !== 'user') {
@@ -47,6 +47,19 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
     })
     return statuses
   })
+
+  // Update persona statuses when personas change
+  useEffect(() => {
+    setPersonaStatuses(prev => {
+      const updated = { ...prev }
+      personas.forEach(persona => {
+        if (persona.id !== 'user' && !updated[persona.id]) {
+          updated[persona.id] = funStatuses[Math.floor(Math.random() * funStatuses.length)]
+        }
+      })
+      return updated
+    })
+  }, [personas])
 
   // Fetch available personas (templates + user personas) from database
   useEffect(() => {
