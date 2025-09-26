@@ -4,7 +4,7 @@ import { HumanMessage, SystemMessage, AIMessage } from 'https://esm.sh/@langchai
 import { z } from 'https://esm.sh/zod@3.22.4'
 import { StructuredOutputParser } from 'https://esm.sh/@langchain/core@0.1.52/output_parsers'
 import { createLangChainProvider } from '../_shared/langchain-factory.ts'
-import type { Persona, Message, TurnOrchestration } from '../_shared/types.ts'
+import { Persona, Message, TurnOrchestration } from '../_shared/types.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

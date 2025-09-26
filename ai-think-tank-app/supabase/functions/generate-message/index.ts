@@ -4,7 +4,7 @@ import { HumanMessage, SystemMessage, AIMessage } from 'https://esm.sh/@langchai
 import { StringOutputParser } from 'https://esm.sh/@langchain/core@0.1.52/output_parsers'
 import { createLangChainProvider } from '../_shared/langchain-factory.ts'
 import { calculateCost, checkUserBudget, estimateCostFromMessages, logCostToDatabase } from '../_shared/cost-calculator.ts'
-import type { ChatRequest, ChatResponse, Persona, TokenUsage, CostRecord } from '../_shared/types.ts'
+import { ChatRequest, ChatResponse, Persona, TokenUsage, CostRecord } from '../_shared/types.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
