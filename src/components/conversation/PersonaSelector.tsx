@@ -4,7 +4,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { getProviderColor, getExperienceColor } from '@/lib/utils'
-import type { Persona } from '@/types'
+import { PROVIDER_MODELS, type Persona } from '@/types'
 
 interface PersonaSelectorProps {
   personas: Persona[]
@@ -93,10 +93,21 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-gray-900">{persona.name}</p>
                     <p className="text-sm text-gray-500">{persona.role}</p>
-                    <div className="flex items-center mt-1 space-x-2">
-                      <Badge size="sm" className={getProviderColor(persona.provider)}>
-                        {persona.provider}
-                      </Badge>
+                    <div className="flex flex-col mt-1 space-y-1">
+                      <div className="flex items-center space-x-2">
+                        <Badge size="sm" className={getProviderColor(persona.provider)}>
+                          {persona.provider}
+                        </Badge>
+                        {(() => {
+                          const models = PROVIDER_MODELS[persona.provider] || []
+                          const modelInfo = models.find(m => m.value === persona.model)
+                          return (
+                            <span className="text-xs font-medium text-gray-600">
+                              {modelInfo?.label || persona.model}
+                            </span>
+                          )
+                        })()}
+                      </div>
                       {persona.experience_level && (
                         <span className={`text-xs ${getExperienceColor(persona.experience_level)}`}>
                           {persona.experience_level}

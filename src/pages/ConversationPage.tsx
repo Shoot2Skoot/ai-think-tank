@@ -22,10 +22,11 @@ import { ConversationSetup } from '@/components/conversation/ConversationSetup'
 import { CostDisplay } from '@/components/conversation/CostDisplay'
 import { PersonaSelector } from '@/components/conversation/PersonaSelector'
 import { ConversationModeSelector } from '@/components/conversation/ConversationModeSelector'
+import { ModelBadge } from '@/components/conversation/ModelSelector'
 import { useConversationStore } from '@/stores/conversation-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { formatRelativeTime, getProviderColor, cn } from '@/lib/utils'
-import type { Message, Persona, ConversationType } from '@/types'
+import { PROVIDER_MODELS, type Message, Persona, ConversationType } from '@/types'
 
 export const ConversationPage: React.FC = () => {
   const { id } = useParams()
@@ -135,12 +136,7 @@ export const ConversationPage: React.FC = () => {
             {persona && (
               <>
                 <span className="text-sm font-medium">{persona.name}</span>
-                <Badge
-                  size="sm"
-                  className={getProviderColor(persona.provider)}
-                >
-                  {persona.provider}
-                </Badge>
+                <ModelBadge provider={persona.provider} model={persona.model} />
               </>
             )}
             {isUser && (
