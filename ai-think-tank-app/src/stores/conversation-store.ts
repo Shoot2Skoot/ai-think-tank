@@ -179,9 +179,15 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         personaId
       )
 
-      // Don't add message to local state - let subscription handle it
-      // This prevents duplicates
-      set({ loading: false })
+      // Add message to local state immediately for better UX
+      if (message) {
+        set((state) => ({
+          messages: [...state.messages, message],
+          loading: false
+        }))
+      } else {
+        set({ loading: false })
+      }
 
       // Update cost breakdown
       await get().updateCostBreakdown()
