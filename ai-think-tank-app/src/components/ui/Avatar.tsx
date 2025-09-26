@@ -38,7 +38,8 @@ export const Avatar: React.FC<AvatarProps> = ({
   return (
     <div
       className={cn(
-        'relative inline-flex items-center justify-center overflow-hidden rounded-full bg-gray-200',
+        'relative inline-flex items-center justify-center overflow-hidden rounded-full',
+        'bg-primary-900 bg-opacity-20',
         sizes[size],
         className
       )}
@@ -51,7 +52,7 @@ export const Avatar: React.FC<AvatarProps> = ({
           className="h-full w-full object-cover"
         />
       ) : (
-        <span className="font-medium text-gray-600">
+        <span className="font-medium text-text-primary">
           {fallback ? getInitials(fallback) : '?'}
         </span>
       )}

@@ -50,6 +50,13 @@ export default {
         'text-inverse': "var(--color-text-inverse)",
         'text-accent': "var(--color-text-accent)",
 
+        // Surface colors
+        'surface-primary': "var(--color-surface-primary)",
+        'surface-secondary': "var(--color-surface-secondary)",
+        'surface-tertiary': "var(--color-surface-tertiary)",
+        'surface-border': "var(--color-surface-border)",
+        'surface-divider': "var(--color-surface-divider)",
+
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
