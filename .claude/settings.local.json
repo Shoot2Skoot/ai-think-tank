@@ -3,7 +3,8 @@
     "allow": [
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs",
-      "mcp__sequential-thinking__sequentialthinking"
+      "mcp__sequential-thinking__sequentialthinking",
+      "mcp__github__create_issue"
     ],
     "deny": [],
     "ask": []
