@@ -93,11 +93,14 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
     const sizeClasses = size === 'small' ? 'w-8 h-8' : 'w-10 h-10'
     const textSize = size === 'small' ? 'text-xs' : 'text-sm'
 
-    if (persona.avatar) {
+    // Try to get avatar from persona object or from the avatar map
+    const avatarUrl = persona.avatar || personaAvatarMap[persona.name]
+
+    if (avatarUrl) {
       return (
         <div className={`${sizeClasses} rounded-full overflow-hidden`}>
           <img
-            src={persona.avatar}
+            src={avatarUrl}
             alt={persona.name}
             className="w-full h-full object-cover"
           />
@@ -105,6 +108,7 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
       )
     }
 
+    // Fallback to initials if no avatar found
     return (
       <div
         className={`${sizeClasses} rounded-full flex items-center justify-center text-white font-medium ${textSize}`}
