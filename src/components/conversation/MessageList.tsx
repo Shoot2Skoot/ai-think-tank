@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { formatRelativeTime, cn } from '@/lib/utils'
 import { Avatar } from '@/components/ui/Avatar'
 import { ModelBadge } from './ModelSelector'
@@ -6,6 +6,9 @@ import { TypingIndicator } from './TypingIndicator'
 import { MessageContent } from './MessageContent'
 import { TimeDivider } from './TimeDivider'
 import { SeenIndicator } from './SeenIndicator'
+import { MessageEditor } from './MessageEditor'
+import { MessageActions } from './MessageActions'
+import { Edit3 } from 'lucide-react'
 import type { Message, Persona } from '@/types'
 
 interface MessageListProps {
@@ -15,6 +18,9 @@ interface MessageListProps {
   loading?: boolean
   typingPersonas?: Persona[]
   seenStatus?: Record<string, string[]> // messageId -> personaIds who have seen it
+  onEditMessage?: (messageId: string, newContent: string) => void
+  onDeleteMessage?: (messageId: string) => void
+  currentUserId?: string
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -23,24 +29,37 @@ export const MessageList: React.FC<MessageListProps> = ({
   streamingContent,
   loading,
   typingPersonas = [],
-  seenStatus = {}
+  seenStatus = {},
+  onEditMessage,
+  onDeleteMessage,
+  currentUserId
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, streamingContent])
 
-  const renderMessage = (message: Message, index: number) => {
+  const renderMessage = (message: Message & { edited_at?: string }, index: number) => {
     const persona = personas.find(p => p.id === message.persona_id)
     const isUser = message.role === 'user'
+    const isOwn = isUser && currentUserId === message.user_id
     const content = streamingContent[message.id] || message.content
     const prevMessage = index > 0 ? messages[index - 1] : null
     const isSameAuthor = prevMessage?.persona_id === message.persona_id && prevMessage?.role === message.role
     const showAvatar = !isSameAuthor || index === 0
+    const isEditing = editingMessageId === message.id
 
     // Extract mentions from content
     const mentions = content.match(/@(\w+)/g)?.map(m => m.slice(1)) || []
+
+    const handleSaveEdit = (newContent: string) => {
+      if (onEditMessage) {
+        onEditMessage(message.id, newContent)
+      }
+      setEditingMessageId(null)
+    }
 
     return (
       <div
@@ -72,28 +91,56 @@ export const MessageList: React.FC<MessageListProps> = ({
                 <span className="text-xs text-gray-500">
                   {formatRelativeTime(message.created_at)}
                 </span>
+                {message.edited_at && (
+                  <span className="text-xs text-gray-400 flex items-center">
+                    <Edit3 className="h-3 w-3 mr-0.5" />
+                    edited
+                  </span>
+                )}
               </div>
             )}
-            <MessageContent content={content} mentions={mentions} />
-            {message.cost && (
-              <span className="text-xs text-gray-500 mt-1 inline-block">
-                Cost: ${message.cost.toFixed(4)}
-              </span>
-            )}
-            {/* Seen indicator */}
-            {seenStatus[message.id] && (
-              <SeenIndicator
-                seenBy={seenStatus[message.id]
-                  .map(id => personas.find(p => p.id === id))
-                  .filter((p): p is Persona => p !== undefined)}
-                isLastMessage={index === messages.length - 1}
-                messageStatus={
-                  seenStatus[message.id].length > 0 ? 'seen' :
-                  index === messages.length - 1 ? 'delivered' : 'sent'
-                }
+
+            {isEditing ? (
+              <MessageEditor
+                originalContent={content}
+                onSave={handleSaveEdit}
+                onCancel={() => setEditingMessageId(null)}
               />
+            ) : (
+              <>
+                <MessageContent content={content} mentions={mentions} />
+                {message.cost && (
+                  <span className="text-xs text-gray-500 mt-1 inline-block">
+                    Cost: ${message.cost.toFixed(4)}
+                  </span>
+                )}
+                {/* Seen indicator */}
+                {seenStatus[message.id] && (
+                  <SeenIndicator
+                    seenBy={seenStatus[message.id]
+                      .map(id => personas.find(p => p.id === id))
+                      .filter((p): p is Persona => p !== undefined)}
+                    isLastMessage={index === messages.length - 1}
+                    messageStatus={
+                      seenStatus[message.id].length > 0 ? 'seen' :
+                      index === messages.length - 1 ? 'delivered' : 'sent'
+                    }
+                  />
+                )}
+              </>
             )}
           </div>
+          {!isEditing && (
+            <div className="flex-shrink-0">
+              <MessageActions
+                messageId={message.id}
+                content={content}
+                isOwn={isOwn}
+                onEdit={isOwn ? () => setEditingMessageId(message.id) : undefined}
+                onDelete={isOwn && onDeleteMessage ? () => onDeleteMessage(message.id) : undefined}
+              />
+            </div>
+          )}
         </div>
       </div>
     )
