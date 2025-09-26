@@ -92,7 +92,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({
             const text = String(children)
             if (text.startsWith('@')) {
               return (
-                <span className="font-semibold text-blue-600 bg-blue-50 px-1 rounded">
+                <span className="font-semibold mention-highlight">
                   {children}
                 </span>
               )

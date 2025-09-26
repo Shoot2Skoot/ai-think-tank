@@ -73,7 +73,7 @@ export const MessageList: React.FC<MessageListProps> = ({
       <div
         key={message.id}
         className={cn(
-          'group hover:bg-gray-50 px-4 py-1',
+          'group px-4 py-1 message-item',
           !isSameAuthor && 'mt-4'
         )}
       >
@@ -90,17 +90,17 @@ export const MessageList: React.FC<MessageListProps> = ({
           <div className="flex-1 min-w-0">
             {showAvatar && (
               <div className="flex items-baseline space-x-2 mb-0.5">
-                <span className="font-semibold text-sm">
+                <span className="font-semibold text-sm message-author">
                   {isUser ? 'You' : persona?.name || 'Unknown'}
                 </span>
                 {persona && !isUser && (
                   <ModelBadge provider={persona.provider} model={persona.model} />
                 )}
-                <span className="text-xs text-gray-500">
+                <span className="text-xs message-timestamp">
                   {formatRelativeTime(message.created_at)}
                 </span>
                 {message.edited_at && (
-                  <span className="text-xs text-gray-400 flex items-center">
+                  <span className="text-xs flex items-center message-timestamp">
                     <Edit3 className="h-3 w-3 mr-0.5" />
                     edited
                   </span>
@@ -118,7 +118,7 @@ export const MessageList: React.FC<MessageListProps> = ({
               <>
                 <MessageContent content={content} mentions={mentions} />
                 {message.cost && (
-                  <span className="text-xs text-gray-500 mt-1 inline-block">
+                  <span className="text-xs mt-1 inline-block message-timestamp">
                     Cost: ${message.cost.toFixed(4)}
                   </span>
                 )}
@@ -168,7 +168,7 @@ export const MessageList: React.FC<MessageListProps> = ({
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center py-12">
-          <p className="text-gray-500">
+          <p className="message-content">
             No messages yet. Start the conversation!
           </p>
         </div>
@@ -177,7 +177,7 @@ export const MessageList: React.FC<MessageListProps> = ({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto message-list-container">
       <div className="py-4">
         {messages.map((message, index) => {
           const prevMessage = index > 0 ? messages[index - 1] : null

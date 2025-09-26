@@ -159,11 +159,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   }
 
   return (
-    <div className="relative border-t bg-white">
+    <div className="relative message-input-container">
       {/* Mention Suggestions */}
       {showMentions && filteredPersonas.length > 0 && (
         <div className="absolute bottom-full left-0 right-0 mb-2 mx-4">
-          <div className="bg-white border rounded-lg shadow-lg py-2 max-h-48 overflow-y-auto">
+          <div className="rounded-lg py-2 max-h-48 overflow-y-auto mention-dropdown">
             <div className="px-3 py-1 text-xs text-gray-500 font-medium">
               Mention a participant
             </div>
@@ -172,8 +172,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 key={persona.id}
                 onClick={() => insertMention(persona)}
                 onMouseEnter={() => setSelectedMentionIndex(index)}
-                className={`w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center space-x-2 ${
-                  index === selectedMentionIndex ? 'bg-gray-100' : ''
+                className={`w-full text-left px-3 py-2 flex items-center space-x-2 mention-dropdown-item ${
+                  index === selectedMentionIndex ? 'selected' : ''
                 }`}
               >
                 <AtSign className="h-4 w-4 text-gray-400" />
@@ -192,7 +192,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             variant="ghost"
             size="sm"
             onClick={() => insertFormatting('**')}
-            className="p-1"
+            className="p-1 btn-ghost"
             disabled={disabled}
           >
             <Bold className="h-4 w-4" />
@@ -201,7 +201,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             variant="ghost"
             size="sm"
             onClick={() => insertFormatting('*')}
-            className="p-1"
+            className="p-1 btn-ghost"
             disabled={disabled}
           >
             <Italic className="h-4 w-4" />
@@ -210,7 +210,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             variant="ghost"
             size="sm"
             onClick={() => insertFormatting('`')}
-            className="p-1"
+            className="p-1 btn-ghost"
             disabled={disabled}
           >
             <Code className="h-4 w-4" />
@@ -233,7 +233,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 }
               }, 0)
             }}
-            className="p-1"
+            className="p-1 btn-ghost"
             disabled={disabled}
           >
             <AtSign className="h-4 w-4" />
@@ -241,7 +241,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            className="p-1"
+            className="p-1 btn-ghost"
             disabled={disabled}
           >
             <Paperclip className="h-4 w-4" />
@@ -249,7 +249,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            className="p-1"
+            className="p-1 btn-ghost"
             disabled={disabled}
           >
             <Smile className="h-4 w-4" />
@@ -266,7 +266,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             placeholder={placeholder}
             disabled={disabled}
             rows={1}
-            className="flex-1 resize-none border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 resize-none rounded-lg px-3 py-2 text-sm focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed message-input"
             style={{ minHeight: '38px', maxHeight: '120px' }}
             onInput={(e) => {
               const target = e.target as HTMLTextAreaElement
@@ -278,6 +278,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             onClick={handleSend}
             disabled={!message.trim() || loading || disabled}
             size="sm"
+            className="btn-primary"
           >
             <Send className="h-4 w-4" />
           </Button>

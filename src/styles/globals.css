@@ -1,0 +1,200 @@
+/* Deep Ocean meets Aurora Theme Global Styles */
+
+:root {
+  /* Primary Colors - Deep Ocean */
+  --color-primary-50: #e6f3f7;
+  --color-primary-100: #c0e2eb;
+  --color-primary-200: #96cfde;
+  --color-primary-300: #6cbcd1;
+  --color-primary-400: #4dadc7;
+  --color-primary-500: #2d9fbd;
+  --color-primary-600: #2891af;
+  --color-primary-700: #227e9c;
+  --color-primary-800: #1c6a89;
+  --color-primary-900: #114968;
+
+  /* Secondary Colors - Aurora Coral */
+  --color-secondary-50: #fff4ed;
+  --color-secondary-100: #ffe4d1;
+  --color-secondary-200: #ffcaa2;
+  --color-secondary-300: #ffa668;
+  --color-secondary-400: #ff7c2c;
+  --color-secondary-500: #ff5a0c;
+  --color-secondary-600: #f03e03;
+  --color-secondary-700: #c72d06;
+  --color-secondary-800: #9e260d;
+  --color-secondary-900: #7f230f;
+
+  /* Background Colors - Midnight Depths */
+  --color-bg-primary: #0a1628;
+  --color-bg-secondary: #0f1f35;
+  --color-bg-tertiary: #142843;
+  --color-bg-hover: #1a3352;
+  --color-bg-selected: #1f3d62;
+
+  /* Surface Colors */
+  --color-surface-primary: #0f1f35;
+  --color-surface-secondary: #142843;
+  --color-surface-tertiary: #1a3352;
+  --color-surface-border: #2a4a6f;
+  --color-surface-divider: #1f3d62;
+
+  /* Text Colors */
+  --color-text-primary: #e8f1f5;
+  --color-text-secondary: #a8c2d3;
+  --color-text-tertiary: #7693a8;
+  --color-text-inverse: #0a1628;
+  --color-text-accent: #4dadc7;
+
+  /* Semantic Colors */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* UI Element Colors */
+  --color-mention: #4dadc7;
+  --color-mention-bg: rgba(77, 173, 199, 0.15);
+  --color-code: #1a3352;
+  --color-code-border: #2a4a6f;
+  --color-online: #22c55e;
+  --color-typing: #a8c2d3;
+  --color-channel: #6cbcd1;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 20px rgba(77, 173, 199, 0.3);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+
+/* Apply theme to body */
+body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+/* Selection colors */
+::selection {
+  background-color: var(--color-primary-500);
+  color: var(--color-text-primary);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-border);
+  border-radius: var(--radius-full);
+  transition: background var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-700);
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--color-primary-400);
+  outline-offset: 2px;
+}
+
+/* Link styles */
+a {
+  color: var(--color-text-accent);
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary-300);
+}
+
+/* Code blocks */
+code {
+  background-color: var(--color-code);
+  border: 1px solid var(--color-code-border);
+  border-radius: var(--radius-sm);
+  padding: 0.125rem 0.25rem;
+  font-family: 'JetBrains Mono', 'Cascadia Code', 'SF Mono', monospace;
+  font-size: 0.875em;
+}
+
+pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+/* Utility classes for the theme */
+.bg-ocean-gradient {
+  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+}
+
+.text-gradient-aurora {
+  background: linear-gradient(135deg, var(--color-primary-400) 0%, var(--color-secondary-400) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow-primary {
+  box-shadow: var(--shadow-glow);
+}
+
+.card-surface {
+  background-color: var(--color-surface-primary);
+  border: 1px solid var(--color-surface-border);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+}
+
+.card-surface:hover {
+  background-color: var(--color-surface-secondary);
+  box-shadow: var(--shadow-md);
+}
+
+/* Animation for subtle aurora effect */
+@keyframes aurora {
+  0%, 100% {
+    opacity: 0.4;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-10px);
+  }
+}
+
+.aurora-animation {
+  animation: aurora 4s ease-in-out infinite;
+}

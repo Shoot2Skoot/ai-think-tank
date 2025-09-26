@@ -10,6 +10,8 @@ import { ConversationPage } from './pages/ConversationPage'
 import { PersonasPage } from './pages/PersonasPage'
 import { BudgetPage } from './pages/BudgetPage'
 import './index.css'
+import './styles/globals.css'
+import './styles/theme-overrides.css'
 
 const queryClient = new QueryClient({
   defaultOptions: {
