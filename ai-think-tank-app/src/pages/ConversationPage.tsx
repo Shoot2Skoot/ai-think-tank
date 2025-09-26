@@ -7,6 +7,7 @@ import { ConversationHeader } from '@/components/conversation/ConversationHeader
 import { MessageList } from '@/components/conversation/MessageList'
 import { MessageInput } from '@/components/conversation/MessageInput'
 import { ConversationModeSelector } from '@/components/conversation/ConversationModeSelector'
+import { PersonaPresencePanel } from '@/components/conversation/PersonaPresencePanel'
 import { useConversationStore } from '@/stores/conversation-store'
 import { useAuthStore } from '@/stores/auth-store'
 import type { ConversationType } from '@/types'
@@ -32,6 +33,7 @@ export const ConversationPage: React.FC = () => {
 
   const [isSetupOpen, setIsSetupOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isPresencePanelCollapsed, setIsPresencePanelCollapsed] = useState(false)
   const [showHeaderDetails, setShowHeaderDetails] = useState(false)
   const [streamingContent, setStreamingContent] = useState<Record<string, string>>({})
   const [conversationMode, setConversationMode] = useState<ConversationType>('planning')
@@ -173,6 +175,16 @@ export const ConversationPage: React.FC = () => {
           />
         )}
       </div>
+
+      {/* Persona Presence Panel */}
+      {activeConversation && (
+        <PersonaPresencePanel
+          personas={personas}
+          messages={messages}
+          isCollapsed={isPresencePanelCollapsed}
+          onToggleCollapse={() => setIsPresencePanelCollapsed(!isPresencePanelCollapsed)}
+        />
+      )}
 
       {/* Setup Modal */}
       <Modal
