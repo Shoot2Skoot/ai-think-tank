@@ -12,6 +12,7 @@ interface MessageReactionsProps {
   personas: Persona[]
   onReact?: (emoji: string) => void
   className?: string
+  isMessageHovered?: boolean
 }
 
 export const MessageReactions: React.FC<MessageReactionsProps> = ({
@@ -20,11 +21,10 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
   currentUserId,
   personas,
   onReact,
-  className
+  className,
+  isMessageHovered = false
 }) => {
-  const [quickReactions, setQuickReactions] = useState<string[]>([])
-  const [showQuickReactions, setShowQuickReactions] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
+  const [quickReactions, setQuickReactions] = useState<string[]>([])  const [showQuickReactions, setShowQuickReactions] = useState(false)
 
   useEffect(() => {
     // Load quick reactions
@@ -61,8 +61,6 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
   return (
     <div
       className={cn("flex items-center gap-1 mt-1", className)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Existing reactions */}
       <div className="flex flex-wrap gap-1">
@@ -88,7 +86,7 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
       </div>
 
       {/* Quick reactions on hover */}
-      {isHovered && quickReactions.length > 0 && (
+      {isMessageHovered && quickReactions.length > 0 && (
         <div className="flex items-center gap-0.5 ml-1 animate-fadeIn">
           {quickReactions
             .filter(emoji => !reactions.find(r => r.emoji === emoji))
@@ -97,7 +95,10 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
               <button
                 key={emoji}
                 onClick={() => handleReactionClick(emoji)}
-                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-all hover:scale-110"
+                className="p-1 rounded transition-all hover:scale-110"
+                style={{ ':hover': { backgroundColor: 'var(--color-surface-hover)' }}}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-hover)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 title={`React with ${emoji}`}
               >
                 <span className="text-lg opacity-60 hover:opacity-100">{emoji}</span>
@@ -107,17 +108,16 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
       )}
 
       {/* Add reaction button */}
-      <ReactionPicker
-        onSelect={handleReactionClick}
-        trigger={
-          <div className={cn(
-            "p-1 rounded transition-all",
-            isHovered ? "opacity-100" : "opacity-0"
-          )}>
-            <Smile className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
-          </div>
-        }
-      />
+      {isMessageHovered && (
+        <ReactionPicker
+          onSelect={handleReactionClick}
+          trigger={
+            <div className="p-1 rounded transition-all opacity-60 hover:opacity-100">
+              <Smile className="h-4 w-4" style={{ color: 'var(--color-text-tertiary)' }} />
+            </div>
+          }
+        />
+      )}
     </div>
   )
 }

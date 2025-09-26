@@ -74,20 +74,25 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-full mb-2 right-0 w-80 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-          <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+        <div className="absolute bottom-full mb-2 right-0 w-80 rounded-lg shadow-lg z-50" style={{ backgroundColor: 'var(--color-surface-primary)', borderColor: 'var(--color-surface-border)', border: '1px solid' }}>
+          <div className="p-3" style={{ borderBottom: '1px solid var(--color-surface-border)' }}>
             <input
               type="text"
               placeholder="Search emojis..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-1.5 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                backgroundColor: 'var(--color-surface-secondary)',
+                color: 'var(--color-text-primary)',
+                border: '1px solid var(--color-surface-border)'
+              }}
               autoFocus
             />
           </div>
 
           {!searchQuery && (
-            <div className="flex gap-1 p-2 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+            <div className="flex gap-1 p-2 overflow-x-auto" style={{ borderBottom: '1px solid var(--color-surface-border)' }}>
               {Object.keys(EMOJI_CATEGORIES).map(category => (
                 <button
                   key={category}
@@ -95,9 +100,16 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
                   className={cn(
                     "px-3 py-1 text-xs rounded-md whitespace-nowrap transition-colors",
                     selectedCategory === category
-                      ? "bg-blue-500 text-white"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                      ? ""
+                      : ""
                   )}
+                  style={{
+                    backgroundColor: selectedCategory === category ? 'var(--color-primary-500)' : 'transparent',
+                    color: selectedCategory === category ? 'white' : 'var(--color-text-secondary)',
+                    ...(selectedCategory !== category && { ':hover': { backgroundColor: 'var(--color-surface-hover)' }})
+                  }}
+                  onMouseEnter={(e) => selectedCategory !== category && (e.currentTarget.style.backgroundColor = 'var(--color-surface-hover)')}
+                  onMouseLeave={(e) => selectedCategory !== category && (e.currentTarget.style.backgroundColor = 'transparent')}
                 >
                   {category}
                 </button>
@@ -110,7 +122,10 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = ({
               <button
                 key={`${emoji}-${index}`}
                 onClick={() => handleEmojiSelect(emoji)}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors text-xl"
+                className="p-2 rounded transition-colors text-xl"
+                style={{ ':hover': { backgroundColor: 'var(--color-surface-hover)' }}}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-hover)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 title={emoji}
               >
                 {emoji}

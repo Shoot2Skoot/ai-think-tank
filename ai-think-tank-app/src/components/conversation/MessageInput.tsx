@@ -267,8 +267,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             disabled={disabled}
             rows={1}
             className="flex-1 resize-none rounded-lg px-3 py-2 text-sm focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed message-input border"
-            style={{ backgroundColor: 'var(--color-surface-secondary)', borderColor: 'var(--color-surface-border)', color: 'var(--color-text-primary)' }}
-            style={{ minHeight: '38px', maxHeight: '120px' }}
+            style={{
+              backgroundColor: 'var(--color-surface-secondary)',
+              borderColor: 'var(--color-surface-border)',
+              color: 'var(--color-text-primary)',
+              minHeight: '38px',
+              maxHeight: '120px'
+            }}
             onInput={(e) => {
               const target = e.target as HTMLTextAreaElement
               target.style.height = 'auto'

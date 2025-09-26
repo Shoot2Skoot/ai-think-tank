@@ -190,26 +190,16 @@ export const MessageList: React.FC<MessageListProps> = ({
                     }
                   />
                 )}
-                {/* Message reactions */}
-                {(reactions[message.id]?.length > 0 || hoveredMessageId === message.id) && (
-                  <MessageReactions
-                    messageId={message.id}
-                    reactions={reactions[message.id] || []}
-                    currentUserId={currentUserId}
-                    personas={personas}
-                    onReact={(emoji) => handleReaction(message.id, emoji)}
-                  />
-                )}
+                {/* Message reactions - always render but control visibility */}
+                <MessageReactions
+                  messageId={message.id}
+                  reactions={reactions[message.id] || []}
+                  currentUserId={currentUserId}
+                  personas={personas}
+                  onReact={(emoji) => handleReaction(message.id, emoji)}
+                  isMessageHovered={hoveredMessageId === message.id}
+                />
               </>
-            )}
-            {/* Quick reactions bar on hover */}
-            {hoveredMessageId === message.id && !reactions[message.id]?.length && (
-              <QuickReactionsBar
-                messageId={message.id}
-                currentUserId={currentUserId}
-                onReact={(emoji) => handleReaction(message.id, emoji)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
-              />
             )}
           </div>
           {!isEditing && (
