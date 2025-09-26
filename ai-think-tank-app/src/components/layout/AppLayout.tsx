@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import {
   MessageSquare,
@@ -10,6 +10,7 @@ import {
   X
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
+import { useConversationStore } from '@/stores/conversation-store'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 
@@ -21,13 +22,32 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, signOut } = useAuthStore()
+  const { conversations, loadConversations } = useConversationStore()
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
 
+  useEffect(() => {
+    if (user && conversations.length === 0) {
+      loadConversations(user.id)
+    }
+  }, [user, conversations.length, loadConversations])
+
+  const handleConversationsClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+
+    // If we have conversations, go to the most recent one
+    if (conversations.length > 0) {
+      navigate(`/conversation/${conversations[0].id}`)
+    } else {
+      // Otherwise go to the conversation page to create a new one
+      navigate('/conversation')
+    }
+  }
+
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'Conversations', href: '/conversation', icon: MessageSquare },
-    { name: 'Personas', href: '/personas', icon: Users },
-    { name: 'Budget', href: '/budget', icon: DollarSign },
+    { name: 'Dashboard', href: '/dashboard', icon: Home, customClick: null },
+    { name: 'Conversations', href: '/conversation', icon: MessageSquare, customClick: handleConversationsClick },
+    { name: 'Personas', href: '/personas', icon: Users, customClick: null },
+    { name: 'Budget', href: '/budget', icon: DollarSign, customClick: null },
   ]
 
   const handleSignOut = async () => {
@@ -48,28 +68,55 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               {navigation.map((item) => {
                 const Icon = item.icon
                 const isActive = location.pathname.startsWith(item.href)
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className={cn(
-                      'group flex items-center px-2 py-2 text-sm font-medium rounded-md',
-                      isActive
-                        ? 'bg-primary-900 bg-opacity-20 text-primary-400'
-                        : 'text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 hover:text-text-primary'
-                    )}
-                  >
-                    <Icon
+
+                if (item.customClick) {
+                  return (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      onClick={item.customClick}
                       className={cn(
-                        'mr-3 h-5 w-5',
+                        'group flex items-center px-2 py-2 text-sm font-medium rounded-md cursor-pointer',
                         isActive
-                          ? 'text-primary-400'
-                          : 'text-text-tertiary group-hover:text-text-secondary'
+                          ? 'bg-primary-900 bg-opacity-20 text-primary-400'
+                          : 'text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 hover:text-text-primary'
                       )}
-                    />
-                    {item.name}
-                  </Link>
-                )
+                    >
+                      <Icon
+                        className={cn(
+                          'mr-3 h-5 w-5',
+                          isActive
+                            ? 'text-primary-400'
+                            : 'text-text-tertiary group-hover:text-text-secondary'
+                        )}
+                      />
+                      {item.name}
+                    </a>
+                  )
+                } else {
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={cn(
+                        'group flex items-center px-2 py-2 text-sm font-medium rounded-md',
+                        isActive
+                          ? 'bg-primary-900 bg-opacity-20 text-primary-400'
+                          : 'text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 hover:text-text-primary'
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          'mr-3 h-5 w-5',
+                          isActive
+                            ? 'text-primary-400'
+                            : 'text-text-tertiary group-hover:text-text-secondary'
+                        )}
+                      />
+                      {item.name}
+                    </Link>
+                  )
+                }
               })}
             </nav>
           </div>
@@ -117,22 +164,45 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               {navigation.map((item) => {
                 const Icon = item.icon
                 const isActive = location.pathname.startsWith(item.href)
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      'flex items-center px-3 py-2 text-base font-medium rounded-md mb-1',
-                      isActive
-                        ? 'bg-primary-900 bg-opacity-20 text-primary-400'
-                        : 'text-text-secondary hover:bg-primary-900 hover:bg-opacity-10'
-                    )}
-                  >
-                    <Icon className="mr-3 h-5 w-5" />
-                    {item.name}
-                  </Link>
-                )
+
+                if (item.customClick) {
+                  return (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      onClick={(e) => {
+                        item.customClick(e)
+                        setMobileMenuOpen(false)
+                      }}
+                      className={cn(
+                        'flex items-center px-3 py-2 text-base font-medium rounded-md mb-1 cursor-pointer',
+                        isActive
+                          ? 'bg-primary-900 bg-opacity-20 text-primary-400'
+                          : 'text-text-secondary hover:bg-primary-900 hover:bg-opacity-10'
+                      )}
+                    >
+                      <Icon className="mr-3 h-5 w-5" />
+                      {item.name}
+                    </a>
+                  )
+                } else {
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        'flex items-center px-3 py-2 text-base font-medium rounded-md mb-1',
+                        isActive
+                          ? 'bg-primary-900 bg-opacity-20 text-primary-400'
+                          : 'text-text-secondary hover:bg-primary-900 hover:bg-opacity-10'
+                      )}
+                    >
+                      <Icon className="mr-3 h-5 w-5" />
+                      {item.name}
+                    </Link>
+                  )
+                }
               })}
               <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--color-surface-divider)' }}>
                 <p className="px-3 text-sm text-text-secondary">{user?.email}</p>
