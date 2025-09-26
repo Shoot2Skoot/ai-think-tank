@@ -150,12 +150,22 @@ serve(async (req) => {
     let langchainMessages: any[]
 
     if (typedPersona.provider === 'anthropic') {
-      // Use Anthropic cache manager to prepare messages with cache control
-      const preparedMessages = AnthropicCacheManager.prepareCachedMessages(
-        messages,
-        typedPersona.system_prompt
-      )
-      langchainMessages = preparedMessages
+      // For Anthropic, we need to properly format messages for LangChain
+      // The cache control is handled via client options in the factory
+      langchainMessages = messages.map(msg => {
+        if (msg.role === 'system') {
+          return new SystemMessage(msg.content)
+        } else if (msg.role === 'assistant') {
+          return new AIMessage(msg.content)
+        } else {
+          return new HumanMessage(msg.content)
+        }
+      })
+
+      // Add persona system prompt if available and not already in messages
+      if (typedPersona.system_prompt && !messages.some(m => m.role === 'system')) {
+        langchainMessages.unshift(new SystemMessage(typedPersona.system_prompt))
+      }
     } else {
       // Convert messages to LangChain format for other providers
       langchainMessages = messages.map(msg => {
@@ -315,6 +325,7 @@ serve(async (req) => {
       await cacheManager.logMetrics(conversationId, userId)
 
       // Prepare response with cache metrics
+      const metrics = cacheManager.getMetrics()
       const chatResponse: ChatResponse = {
         content: responseContent,
         usage: tokenUsage,
@@ -322,7 +333,7 @@ serve(async (req) => {
         provider: typedPersona.provider,
         model: typedPersona.model,
         personaId: personaId,
-        cacheMetrics: cacheManager.getMetrics()
+        ...(metrics && { cacheMetrics: metrics })
       }
 
       return new Response(JSON.stringify(chatResponse), {

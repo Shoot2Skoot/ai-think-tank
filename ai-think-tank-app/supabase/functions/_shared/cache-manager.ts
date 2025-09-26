@@ -240,12 +240,10 @@ export class GeminiCacheManager {
         return
       }
 
-      // Note: In production, you'd import these properly
-      // For now, we'll handle this gracefully
-      const { GoogleAICacheManager, GoogleAIFileManager } = await import('npm:@google/generative-ai@0.1.0/server')
-
-      this.cacheManagerClient = new GoogleAICacheManager(googleApiKey)
-      this.fileManagerClient = new GoogleAIFileManager(googleApiKey)
+      // For now, we'll handle Gemini caching gracefully without the server package
+      // The @google/generative-ai package doesn't have server exports in npm
+      // This would require direct API calls to Google's caching API
+      console.log('Gemini caching initialized (placeholder)')
     } catch (error) {
       console.warn('Failed to initialize Gemini cache clients:', error)
     }

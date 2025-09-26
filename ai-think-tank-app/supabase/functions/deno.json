@@ -7,6 +7,7 @@
     "@langchain/openai": "npm:@langchain/openai@0.2.5",
     "@langchain/anthropic": "npm:@langchain/anthropic@0.2.9",
     "@langchain/google-genai": "npm:@langchain/google-genai@0.0.23",
+    "@google/generative-ai": "npm:@google/generative-ai@0.1.0",
     "@supabase/supabase-js": "npm:@supabase/supabase-js@2.39.0",
     "zod": "npm:zod@3.22.4"
   }
