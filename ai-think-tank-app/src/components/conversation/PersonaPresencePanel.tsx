@@ -140,7 +140,6 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
           src={generatedUrl}
           alt={persona.name}
           className="w-full h-full object-cover"
-          style={{ transform: 'scale(0.8)' }}
         />
       </div>
     )

@@ -93,8 +93,7 @@ export const MessageList: React.FC<MessageListProps> = ({
                   src={persona?.avatar_url}
                   fallback={isUser ? 'You' : persona?.name || 'AI'}
                   size="sm"
-                  className="bg-transparent"
-                  style={{ transform: 'scale(0.75)' }}
+                  className="bg-transparent w-full h-full"
                 />
               </div>
             )}

@@ -86,12 +86,29 @@ export const generateAvatarUrl = (persona: Persona): string => {
   // Get demographic-based options
   const demographicOptions = mapDemographics(persona)
 
-  // Build query parameters - using simpler approach for now
+  // Build query parameters
   const params = new URLSearchParams()
   params.append('seed', seed)
 
   // Set transparent background so we can use persona color as circle background
   params.append('backgroundColor', 'transparent')
+
+  // Set radius to 50% for perfect circle cropping
+  params.append('radius', '50')
+
+  // Apply gender-based parameters if available
+  if (persona.demographics?.gender) {
+    const gender = persona.demographics.gender.toLowerCase()
+    if (gender === 'female' || gender === 'woman') {
+      // Female characteristics for Miniavs
+      params.append('hair', 'long01,long02,long03,long04,long05')
+      params.append('eyebrows', 'up,eyelashesUp')
+    } else if (gender === 'male' || gender === 'man') {
+      // Male characteristics for Miniavs
+      params.append('hair', 'short01,short02,short03,short04,short05,curly01,curly02')
+      params.append('eyebrows', 'down,up')
+    }
+  }
 
   return `${baseUrl}?${params.toString()}`
 }
@@ -102,6 +119,7 @@ export const generateUserAvatarUrl = (name: string = 'User'): string => {
   const params = new URLSearchParams()
   params.append('seed', name)
   params.append('backgroundColor', 'transparent') // Transparent so we can use blue circle
+  params.append('radius', '50') // Perfect circle cropping
 
   return `${baseUrl}?${params.toString()}`
 }

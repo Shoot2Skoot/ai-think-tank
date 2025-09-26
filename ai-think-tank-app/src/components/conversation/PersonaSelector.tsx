@@ -45,8 +45,7 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
                   generatedUrl={generateAvatarUrl(selectedPersona)}
                   fallback={selectedPersona.name}
                   size="xs"
-                  className="bg-transparent"
-                  style={{ transform: 'scale(0.8)' }}
+                  className="bg-transparent w-full h-full"
                 />
               </div>
               <span className="truncate">{selectedPersona.name}</span>
@@ -110,8 +109,7 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
                       generatedUrl={generateAvatarUrl(persona)}
                       fallback={persona.name}
                       size="sm"
-                      className="bg-transparent"
-                      style={{ transform: 'scale(0.8)' }}
+                      className="bg-transparent w-full h-full"
                     />
                   </div>
                   <div className="flex-1 min-w-0">

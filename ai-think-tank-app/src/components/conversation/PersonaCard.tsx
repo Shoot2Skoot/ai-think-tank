@@ -64,8 +64,7 @@ export const PersonaCard: React.FC<PersonaCardProps> = ({
               generatedUrl={generateAvatarUrl(template)}
               fallback={template.name}
               size="sm"
-              className="bg-transparent"
-              style={{ transform: 'scale(0.8)' }}
+              className="bg-transparent w-full h-full"
             />
           </div>
           <div className="flex-1 min-w-0">
