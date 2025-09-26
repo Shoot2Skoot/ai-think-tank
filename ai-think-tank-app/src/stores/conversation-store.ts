@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { conversationManager } from '@/services/conversation/conversation-manager'
 import { supabase } from '@/lib/supabase'
 import { personaService } from '@/services/persona-service'
+import { soundManager } from '@/lib/soundManager'
 import type {
   Conversation,
   Message,
@@ -193,6 +194,18 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
           messages: [...state.messages, message],
           loading: false
         }))
+
+        // Play send sound effect
+        soundManager.playMessageSend()
+
+        // Check if message contains @mention
+        if (content.includes('@')) {
+          const mentionPattern = /@(\w+)/g
+          const match = mentionPattern.exec(content)
+          if (match) {
+            soundManager.playMention()
+          }
+        }
       } else {
         set({ loading: false })
       }
@@ -385,6 +398,9 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         loading: false
       }))
 
+      // Play join sound
+      soundManager.playUserJoin()
+
       // Refresh conversation manager's persona list
       await conversationManager.refreshPersonas(activeConversation.id)
     } catch (error: any) {
@@ -447,6 +463,9 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         loading: false
       }))
 
+      // Play leave sound
+      soundManager.playUserLeave()
+
       // Refresh conversation manager's persona list
       await conversationManager.refreshPersonas(activeConversation.id)
     } catch (error: any) {
@@ -479,6 +498,18 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
             if (messageExists) {
               return state  // Don't add duplicate
             }
+
+            // Play sound for received messages (not our own)
+            const currentUser = state.activeConversation?.user_id
+            if (newMessage.user_id !== currentUser || newMessage.persona_id) {
+              soundManager.playMessageReceive()
+
+              // Check if message mentions current user
+              if (newMessage.content?.includes('@')) {
+                soundManager.playMention()
+              }
+            }
+
             return {
               messages: [...state.messages, newMessage]
             }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { ReactionPicker } from './ReactionPicker'
 import { ReactionService } from '@/services/reaction-service'
+import { soundManager } from '@/lib/soundManager'
 import type { ReactionCount, Persona } from '@/types'
 import { Smile } from 'lucide-react'
 
@@ -46,6 +47,8 @@ export const MessageReactions: React.FC<MessageReactionsProps> = ({
 
     if (result && onReact) {
       onReact(emoji)
+      // Play reaction sound
+      soundManager.playReaction()
     }
   }
 
@@ -167,6 +170,8 @@ export const QuickReactionsBar: React.FC<QuickReactionsBarProps> = ({
 
     if (result && onReact) {
       onReact(emoji)
+      // Play reaction sound
+      soundManager.playReaction()
     }
   }
 

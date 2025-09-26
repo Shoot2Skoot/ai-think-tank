@@ -1,9 +1,10 @@
-import React from 'react'
-import { Hash, Users, Settings, X, ChevronDown, Info } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Hash, Users, Settings, X, ChevronDown, Info, Volume2, VolumeX } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Avatar } from '@/components/ui/Avatar'
 import { CostPopover } from './CostPopover'
+import { soundManager } from '@/lib/soundManager'
 import type { Conversation, Persona, CostBreakdown } from '@/types'
 
 interface ConversationHeaderProps {
@@ -25,6 +26,18 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
   onToggleDetails,
   showDetails = false
 }) => {
+  const [soundEnabled, setSoundEnabled] = useState(soundManager.isEnabled())
+
+  useEffect(() => {
+    setSoundEnabled(soundManager.isEnabled())
+  }, [])
+
+  const toggleSound = () => {
+    const newEnabled = !soundEnabled
+    setSoundEnabled(newEnabled)
+    soundManager.setEnabled(newEnabled)
+  }
+
   if (!conversation) return null
 
   return (
@@ -61,6 +74,18 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
             {conversation.is_active ? 'Active' : 'Ended'}
           </Badge>
           <div className="flex items-center space-x-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleSound}
+              title={soundEnabled ? 'Mute sounds' : 'Unmute sounds'}
+            >
+              {soundEnabled ? (
+                <Volume2 className="h-4 w-4" />
+              ) : (
+                <VolumeX className="h-4 w-4" />
+              )}
+            </Button>
             <Button variant="ghost" size="sm">
               <Info className="h-4 w-4" />
             </Button>
