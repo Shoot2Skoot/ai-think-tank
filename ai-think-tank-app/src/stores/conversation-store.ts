@@ -280,24 +280,29 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
 
     set({ loading: true, error: null })
     try {
-      // Get persona template data
-      const { data: template, error: templateError } = await supabase
+      // Try to get persona template data, but it's optional
+      const { data: template } = await supabase
         .from('persona_templates')
         .select('*')
         .eq('name', personaName)
-        .single()
-
-      if (templateError) throw templateError
+        .maybeSingle()
 
       // Create new persona for this conversation
       const newPersona: any = {
         conversation_id: activeConversation.id,
         name: personaName,
-        role: template.role || 'AI Assistant',
-        model: template.default_model || 'gpt-4',
-        provider: template.default_provider || 'openai',
-        system_prompt: template.system_prompt,
+        role: template?.role || 'AI Assistant',
+        model: template?.default_model || 'gpt-4',
+        provider: template?.default_provider || 'openai',
+        system_prompt: template?.system_prompt || `You are ${personaName}, a helpful AI assistant participating in this conversation.`,
+        temperature: template?.temperature || 0.7,
+        max_tokens: template?.max_tokens || 1000,
         created_at: new Date().toISOString()
+      }
+
+      // Add template_id if we found a template
+      if (template?.id) {
+        newPersona.template_id = template.id
       }
 
       const { data: persona, error: personaError } = await supabase
