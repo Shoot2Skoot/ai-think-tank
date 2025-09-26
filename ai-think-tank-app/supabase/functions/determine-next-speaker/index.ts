@@ -185,13 +185,13 @@ ${formatInstructions}
 Available persona IDs: ${availablePersonaIds.join(', ')}
 ${currentSpeaker ? `Current speaker ID: ${currentSpeaker}` : ''}`
 
-    const messages = [
+    const langchainMessages = [
       new SystemMessage(systemPrompt),
       new HumanMessage(prompt)
     ]
 
     try {
-      const response = await model.invoke(messages)
+      const response = await model.invoke(langchainMessages)
       const parsedResponse = await parser.parse(response.content as string)
 
       // Validate the selected ID
