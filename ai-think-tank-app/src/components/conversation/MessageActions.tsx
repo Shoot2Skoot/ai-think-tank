@@ -1,7 +1,8 @@
-import React from 'react'
-import { MoreVertical, Edit3, Copy, Trash2, Reply, Pin, ThumbsUp } from 'lucide-react'
+import React, { useState } from 'react'
+import { MoreVertical, Edit3, Copy, Trash2, Reply, Pin, ThumbsUp, Smile } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Popover } from '@/components/ui/Popover'
+import { ReactionPicker } from './ReactionPicker'
 
 interface MessageActionsProps {
   messageId: string
@@ -26,8 +27,24 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   onPin,
   onReact
 }) => {
+  const [showReactionPicker, setShowReactionPicker] = useState(false)
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false)
+
   const handleCopy = () => {
     navigator.clipboard.writeText(content)
+  }
+
+  const handleReactionClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setShowReactionPicker(true)
+  }
+
+  const handleReactionSelect = (emoji: string) => {
+    if (onReact) {
+      onReact(emoji)
+    }
+    setShowReactionPicker(false)
+    setIsPopoverOpen(false)
   }
 
   const trigger = (
@@ -35,77 +52,95 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       variant="ghost"
       size="sm"
       className="opacity-0 group-hover:opacity-100 transition-opacity p-1"
+      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
     >
       <MoreVertical className="h-4 w-4" />
     </Button>
   )
 
   return (
-    <Popover trigger={trigger} placement="bottom" className="w-48 p-1">
-      <div className="space-y-1">
-        <button
-          onClick={handleCopy}
-          className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
-        >
-          <Copy className="h-4 w-4" />
-          <span>Copy Message</span>
-        </button>
-
-        {onReply && (
+    <div className="relative">
+      <Popover
+        trigger={trigger}
+        placement="bottom"
+        className="w-48 p-1"
+        isOpen={isPopoverOpen}
+        onOpenChange={setIsPopoverOpen}
+      >
+        <div className="space-y-1">
           <button
-            onClick={onReply}
+            onClick={handleCopy}
             className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
           >
-            <Reply className="h-4 w-4" />
-            <span>Reply</span>
+            <Copy className="h-4 w-4" />
+            <span>Copy Message</span>
           </button>
-        )}
 
-        {onPin && (
-          <button
-            onClick={onPin}
-            className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
-          >
-            <Pin className="h-4 w-4" />
-            <span>{isPinned ? 'Unpin Message' : 'Pin Message'}</span>
-          </button>
-        )}
-
-        <div className="border-t border-surface-border my-1" />
-
-        {onReact && (
-          <button
-            onClick={() => onReact('👍')}
-            className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
-          >
-            <ThumbsUp className="h-4 w-4" />
-            <span>Add Reaction</span>
-          </button>
-        )}
-
-        {isOwn && onEdit && (
-          <>
-            <div className="border-t border-surface-border my-1" />
+          {onReply && (
             <button
-              onClick={onEdit}
+              onClick={onReply}
               className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
             >
-              <Edit3 className="h-4 w-4" />
-              <span>Edit Message</span>
+              <Reply className="h-4 w-4" />
+              <span>Reply</span>
             </button>
-          </>
-        )}
+          )}
 
-        {isOwn && onDelete && (
-          <button
-            onClick={onDelete}
-            className="w-full flex items-center space-x-2 px-3 py-2 text-sm hover:bg-red-50 rounded text-error"
-          >
-            <Trash2 className="h-4 w-4" />
-            <span>Delete Message</span>
-          </button>
-        )}
-      </div>
-    </Popover>
+          {onPin && (
+            <button
+              onClick={onPin}
+              className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
+            >
+              <Pin className="h-4 w-4" />
+              <span>{isPinned ? 'Unpin Message' : 'Pin Message'}</span>
+            </button>
+          )}
+
+          <div className="border-t border-surface-border my-1" />
+
+          {onReact && (
+            <button
+              onClick={handleReactionClick}
+              className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
+            >
+              <Smile className="h-4 w-4" />
+              <span>Add Reaction</span>
+            </button>
+          )}
+
+          {isOwn && onEdit && (
+            <>
+              <div className="border-t border-surface-border my-1" />
+              <button
+                onClick={onEdit}
+                className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-text-secondary hover:bg-primary-900 hover:bg-opacity-10 rounded"
+              >
+                <Edit3 className="h-4 w-4" />
+                <span>Edit Message</span>
+              </button>
+            </>
+          )}
+
+          {isOwn && onDelete && (
+            <button
+              onClick={onDelete}
+              className="w-full flex items-center space-x-2 px-3 py-2 text-sm hover:bg-red-50 rounded text-error"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span>Delete Message</span>
+            </button>
+          )}
+        </div>
+      </Popover>
+
+      {showReactionPicker && (
+        <div className="absolute right-0 top-full mt-2 z-[60]">
+          <ReactionPicker
+            onSelect={handleReactionSelect}
+            onOpenChange={setShowReactionPicker}
+          />
+        </div>
+      )}
+    </div>
   )
 }

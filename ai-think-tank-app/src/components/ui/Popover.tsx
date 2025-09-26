@@ -8,6 +8,8 @@ interface PopoverProps {
   placement?: 'top' | 'bottom' | 'left' | 'right'
   className?: string
   offset?: number
+  isOpen?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 export const Popover: React.FC<PopoverProps> = ({
@@ -15,12 +17,23 @@ export const Popover: React.FC<PopoverProps> = ({
   children,
   placement = 'bottom',
   className,
-  offset = 8
+  offset = 8,
+  isOpen: controlledIsOpen,
+  onOpenChange
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [internalIsOpen, setInternalIsOpen] = useState(false)
   const [position, setPosition] = useState({ top: 0, left: 0 })
   const triggerRef = useRef<HTMLDivElement>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
+
+  // Use controlled state if provided, otherwise use internal state
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen
+  const setIsOpen = (open: boolean) => {
+    if (controlledIsOpen === undefined) {
+      setInternalIsOpen(open)
+    }
+    onOpenChange?.(open)
+  }
 
   useEffect(() => {
     if (isOpen && triggerRef.current && popoverRef.current) {
@@ -87,11 +100,17 @@ export const Popover: React.FC<PopoverProps> = ({
     }
   }, [isOpen])
 
+  const handleTriggerClick = () => {
+    if (controlledIsOpen === undefined) {
+      setIsOpen(!isOpen)
+    }
+  }
+
   return (
     <>
       <div
         ref={triggerRef}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleTriggerClick}
         className="inline-block"
       >
         {trigger}
