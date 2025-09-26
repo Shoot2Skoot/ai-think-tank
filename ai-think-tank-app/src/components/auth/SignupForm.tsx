@@ -51,11 +51,11 @@ export const SignupForm: React.FC = () => {
           <CardTitle>Check Your Email</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center space-x-2 text-green-600">
+          <div className="flex items-center space-x-2" style={{ color: 'var(--color-success)' }}>
             <CheckCircle className="h-5 w-5" />
             <span>Account created successfully!</span>
           </div>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
             We've sent you a confirmation email. Please check your inbox and click the link to verify your account.
           </p>
         </CardContent>
@@ -82,7 +82,7 @@ export const SignupForm: React.FC = () => {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {(error || validationError) && (
-            <div className="flex items-center space-x-2 text-red-600 text-sm">
+            <div className="flex items-center space-x-2 text-sm" style={{ color: 'var(--color-error)' }}>
               <AlertCircle className="h-4 w-4" />
               <span>{error || validationError}</span>
             </div>
@@ -94,7 +94,7 @@ export const SignupForm: React.FC = () => {
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            icon={<Mail className="h-4 w-4 text-gray-400" />}
+            icon={<Mail className="h-4 w-4" style={{ color: 'var(--color-text-tertiary)' }} />}
             required
           />
 
@@ -104,7 +104,7 @@ export const SignupForm: React.FC = () => {
             placeholder="Create a password (min 6 characters)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            icon={<Lock className="h-4 w-4 text-gray-400" />}
+            icon={<Lock className="h-4 w-4" style={{ color: 'var(--color-text-tertiary)' }} />}
             required
           />
 
@@ -114,7 +114,7 @@ export const SignupForm: React.FC = () => {
             placeholder="Confirm your password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            icon={<Lock className="h-4 w-4 text-gray-400" />}
+            icon={<Lock className="h-4 w-4" style={{ color: 'var(--color-text-tertiary)' }} />}
             required
           />
         </CardContent>

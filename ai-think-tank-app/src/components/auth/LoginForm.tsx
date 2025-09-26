@@ -33,7 +33,7 @@ export const LoginForm: React.FC = () => {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {error && (
-            <div className="flex items-center space-x-2 text-red-600 text-sm">
+            <div className="flex items-center space-x-2 text-sm" style={{ color: 'var(--color-error)' }}>
               <AlertCircle className="h-4 w-4" />
               <span>{error}</span>
             </div>
@@ -45,7 +45,7 @@ export const LoginForm: React.FC = () => {
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            icon={<Mail className="h-4 w-4 text-gray-400" />}
+            icon={<Mail className="h-4 w-4" style={{ color: 'var(--color-text-tertiary)' }} />}
             required
           />
 
@@ -55,7 +55,7 @@ export const LoginForm: React.FC = () => {
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            icon={<Lock className="h-4 w-4 text-gray-400" />}
+            icon={<Lock className="h-4 w-4" style={{ color: 'var(--color-text-tertiary)' }} />}
             required
           />
         </CardContent>
