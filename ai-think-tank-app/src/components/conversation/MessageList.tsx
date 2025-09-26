@@ -80,17 +80,17 @@ export const MessageList: React.FC<MessageListProps> = ({
         )}
       >
         <div className="flex items-start space-x-3">
-          <div className="w-10 flex-shrink-0">
+          <div className="w-12 flex-shrink-0 pt-1">
             {showAvatar && !isSystem && (
               <Avatar
                 generatedUrl={isUser ? generateUserAvatarUrl('You') : (persona ? generateAvatarUrl(persona) : undefined)}
                 src={persona?.avatar_url}
                 fallback={isUser ? 'You' : persona?.name || 'AI'}
-                size="sm"
+                size="md"
               />
             )}
             {showAvatar && isSystem && (
-              <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-gray-500 flex items-center justify-center">
                 <span className="text-white text-xs font-bold">S</span>
               </div>
             )}

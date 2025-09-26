@@ -131,7 +131,7 @@ export const generateAvatarUrl = (persona: Persona): string => {
   params.append("backgroundType", "solid");
 
   // Set radius to 10 for rounded corners (controlled from API)
-  params.append("radius", "10");
+  params.append("radius", "25");
 
   // Apply gender-based parameters if available
   if (persona.demographics?.gender) {
@@ -168,7 +168,7 @@ export const generateUserAvatarUrl = (name: string = "User"): string => {
   params.append("seed", name);
   params.append("backgroundColor", "2563eb"); // Blue background for users
   params.append("backgroundType", "solid");
-  params.append("radius", "10"); // Controlled rounding from API
+  params.append("radius", "50"); // Controlled rounding from API
 
   return `${baseUrl}?${params.toString()}`;
 };
