@@ -81,12 +81,20 @@ export const MessageList: React.FC<MessageListProps> = ({
         <div className="flex items-start space-x-3">
           <div className="w-10 flex-shrink-0">
             {showAvatar && !isSystem && (
-              <Avatar
-                src={persona?.avatar}
-                fallback={isUser ? 'You' : persona?.name || 'AI'}
-                size="sm"
-                className={isUser ? 'bg-blue-600' : ''}
-              />
+              <div
+                className="rounded-full"
+                style={{
+                  background: isUser ? '#2563eb' : (persona?.color || 'transparent'),
+                  padding: isUser || persona?.color ? '2px' : '0'
+                }}
+              >
+                <Avatar
+                  src={persona?.avatar_url}
+                  fallback={isUser ? 'You' : persona?.name || 'AI'}
+                  size="sm"
+                  className={isUser ? 'bg-blue-600' : ''}
+                />
+              </div>
             )}
             {showAvatar && isSystem && (
               <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center">
