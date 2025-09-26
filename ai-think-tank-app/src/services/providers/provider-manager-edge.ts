@@ -101,12 +101,7 @@ export class ProviderManagerEdge {
     } catch (error) {
       console.error(`Error generating response for persona ${persona.name}:`, error)
 
-      // Fallback to mock if Edge Function fails in development
-      if (import.meta.env.DEV) {
-        console.warn('Falling back to mock provider due to Edge Function error')
-        return this.generateMockResponse(persona, messages, onStream)
-      }
-
+      // Don't fallback - throw the error so it's clear what's happening
       throw error
     }
   }
