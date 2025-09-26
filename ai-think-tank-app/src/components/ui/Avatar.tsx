@@ -43,8 +43,9 @@ export const Avatar: React.FC<AvatarProps> = ({
   return (
     <div
       className={cn(
-        'relative inline-flex items-center justify-center overflow-hidden rounded-full',
-        'bg-primary-800',
+        'relative inline-flex items-center justify-center overflow-hidden',
+        // Only round if not using generated avatar (let API control shape)
+        !generatedUrl && 'rounded-full bg-primary-800',
         sizes[size],
         className
       )}
