@@ -100,7 +100,7 @@ export const PersonaPresencePanel: React.FC<PersonaPresencePanelProps> = ({
     })
 
     return { onlinePersonas: online, offlinePersonas: offline, personaStats: stats }
-  }, [personas, messages])
+  }, [personas, messages, availablePersonas])
 
   const getInitials = (name: string) => {
     return name

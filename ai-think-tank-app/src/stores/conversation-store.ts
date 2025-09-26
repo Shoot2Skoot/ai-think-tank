@@ -370,6 +370,9 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         personas: [...state.personas, persona],
         loading: false
       }))
+
+      // Refresh conversation manager's persona list
+      await conversationManager.refreshPersonas(activeConversation.id)
     } catch (error: any) {
       set({
         error: error.message || 'Failed to add persona',
@@ -429,6 +432,9 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         personas: state.personas.filter(p => p.id !== personaId),
         loading: false
       }))
+
+      // Refresh conversation manager's persona list
+      await conversationManager.refreshPersonas(activeConversation.id)
     } catch (error: any) {
       set({
         error: error.message || 'Failed to remove persona',

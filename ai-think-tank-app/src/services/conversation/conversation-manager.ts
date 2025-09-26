@@ -207,6 +207,18 @@ export class ConversationManager {
       if (!persona) throw new Error('Persona not found')
       if (!conversation) throw new Error('Conversation not found')
 
+      // Check if persona is still active in the conversation
+      const { data: activeCheck } = await supabase
+        .from('conversation_personas')
+        .select('is_active')
+        .eq('conversation_id', conversationId)
+        .eq('persona_id', personaId)
+        .single()
+
+      if (!activeCheck || !activeCheck.is_active) {
+        throw new Error('Persona is no longer active in this conversation')
+      }
+
       // Ensure provider manager is initialized
       if (!providerManager.isUsingMockProviders()) {
         await providerManager.initialize(conversation.user_id)
@@ -294,6 +306,18 @@ export class ConversationManager {
 
     if (!conversation || conversation.mode !== 'manual') {
       throw new Error('Conversation not in manual mode')
+    }
+
+    // Check if persona is still active in the conversation
+    const { data: activeCheck } = await supabase
+      .from('conversation_personas')
+      .select('is_active')
+      .eq('conversation_id', conversationId)
+      .eq('persona_id', personaId)
+      .single()
+
+    if (!activeCheck || !activeCheck.is_active) {
+      throw new Error('Persona is no longer active in this conversation')
     }
 
     const streamCallback = this.streamCallbacks.get(conversationId)
@@ -487,13 +511,16 @@ export class ConversationManager {
 
       if (convError) throw convError
 
-      // Load personas
-      const { data: personas, error: personaError } = await supabase
-        .from('personas')
-        .select('*')
+      // Load personas via junction table
+      const { data: personaRelations, error: personaError } = await supabase
+        .from('conversation_personas')
+        .select('personas(*)')
         .eq('conversation_id', conversationId)
+        .eq('is_active', true)
 
       if (personaError) throw personaError
+
+      const personas = personaRelations?.map(rel => rel.personas).filter(Boolean) || []
 
       // Load messages
       const { data: messages, error: msgError } = await supabase
@@ -510,6 +537,26 @@ export class ConversationManager {
       this.conversationMessages.set(conversationId, messages || [])
     } catch (error) {
       console.error('Error loading conversation:', error)
+      throw error
+    }
+  }
+
+  // Refresh personas list for a conversation
+  async refreshPersonas(conversationId: string): Promise<void> {
+    try {
+      // Load personas via junction table
+      const { data: personaRelations, error: personaError } = await supabase
+        .from('conversation_personas')
+        .select('personas(*)')
+        .eq('conversation_id', conversationId)
+        .eq('is_active', true)
+
+      if (personaError) throw personaError
+
+      const personas = personaRelations?.map(rel => rel.personas).filter(Boolean) || []
+      this.conversationPersonas.set(conversationId, personas)
+    } catch (error) {
+      console.error('Error refreshing personas:', error)
       throw error
     }
   }
