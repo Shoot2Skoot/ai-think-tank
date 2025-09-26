@@ -1,7 +1,7 @@
-import { ChatOpenAI } from 'https://esm.sh/@langchain/openai@0.0.34'
-import { ChatAnthropic } from 'https://esm.sh/@langchain/anthropic@0.1.0'
-import { ChatGoogleGenerativeAI } from 'https://esm.sh/@langchain/google-genai@0.0.16'
-import { BaseLanguageModel } from 'https://esm.sh/@langchain/core@0.1.52/language_models/base'
+import { ChatOpenAI } from 'https://esm.sh/@langchain/openai@0.0.28'
+import { ChatAnthropic } from 'https://esm.sh/@langchain/anthropic@0.1.16'
+import { ChatGoogleGenerativeAI } from 'https://esm.sh/@langchain/google-genai@0.0.14'
+import { BaseLanguageModel } from 'https://esm.sh/@langchain/core@0.1.61/language_models/base'
 import { Persona } from './types.ts'
 
 export interface LangChainConfig {

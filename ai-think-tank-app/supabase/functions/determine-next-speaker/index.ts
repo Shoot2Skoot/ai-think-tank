@@ -1,8 +1,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
-import { HumanMessage, SystemMessage, AIMessage } from 'https://esm.sh/@langchain/core@0.1.52/messages'
+import { HumanMessage, SystemMessage, AIMessage } from 'https://esm.sh/@langchain/core@0.1.61/messages'
 import { z } from 'https://esm.sh/zod@3.22.4'
-import { StructuredOutputParser } from 'https://esm.sh/@langchain/core@0.1.52/output_parsers'
+import { StructuredOutputParser } from 'https://esm.sh/@langchain/core@0.1.61/output_parsers'
 import { createLangChainProvider } from '../_shared/langchain-factory.ts'
 import { Persona, Message, TurnOrchestration } from '../_shared/types.ts'
 
