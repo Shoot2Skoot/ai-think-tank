@@ -34,7 +34,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({
   const processedContent = highlightMentions(content)
 
   return (
-    <div className={cn('prose prose-sm max-w-none', className)}>
+    <div className={cn('prose prose-sm max-w-none text-gray-100 prose-p:text-gray-100', className)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
