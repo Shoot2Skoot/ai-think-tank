@@ -3,6 +3,7 @@ import { conversationManager } from '@/services/conversation/conversation-manage
 import { supabase } from '@/lib/supabase'
 import { personaService } from '@/services/persona-service'
 import { soundManager } from '@/lib/soundManager'
+import { rafThrottle } from '@/lib/performanceUtils'
 import type {
   Conversation,
   Message,
@@ -479,6 +480,43 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
 
   // Private methods (not exposed in interface)
   subscribeToConversation: (conversationId: string) => {
+    // Create throttled message handler to prevent performance issues
+    const handleNewMessage = rafThrottle((payload: any) => {
+      const newMessage = payload.new as Message
+      console.log('[ConversationStore] Received message via subscription:', {
+        id: newMessage.id,
+        role: newMessage.role,
+        persona_id: newMessage.persona_id,
+        user_id: newMessage.user_id,
+        contentPreview: newMessage.content?.substring(0, 100)
+      })
+
+      set((state) => {
+        // Check if message already exists (by ID)
+        const messageExists = state.messages.some(m => m.id === newMessage.id)
+        if (messageExists) {
+          return state  // Don't add duplicate
+        }
+
+        // Schedule sound playback in next idle callback to avoid blocking
+        requestIdleCallback(() => {
+          const currentUser = state.activeConversation?.user_id
+          if (newMessage.user_id !== currentUser || newMessage.persona_id) {
+            soundManager.playMessageReceive()
+
+            // Check if message mentions current user
+            if (newMessage.content?.includes('@')) {
+              soundManager.playMention()
+            }
+          }
+        }, { timeout: 100 })
+
+        return {
+          messages: [...state.messages, newMessage]
+        }
+      })
+    })
+
     const unsubscribe = supabase
       .channel(`conversation:${conversationId}`)
       .on(
@@ -489,39 +527,7 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`
         },
-        (payload) => {
-          // Add new message to state if it doesn't already exist
-          const newMessage = payload.new as Message
-          console.log('[ConversationStore] Received message via subscription:', {
-            id: newMessage.id,
-            role: newMessage.role,
-            persona_id: newMessage.persona_id,
-            user_id: newMessage.user_id,
-            contentPreview: newMessage.content?.substring(0, 100)
-          })
-          set((state) => {
-            // Check if message already exists (by ID)
-            const messageExists = state.messages.some(m => m.id === newMessage.id)
-            if (messageExists) {
-              return state  // Don't add duplicate
-            }
-
-            // Play sound for received messages (not our own)
-            const currentUser = state.activeConversation?.user_id
-            if (newMessage.user_id !== currentUser || newMessage.persona_id) {
-              soundManager.playMessageReceive()
-
-              // Check if message mentions current user
-              if (newMessage.content?.includes('@')) {
-                soundManager.playMention()
-              }
-            }
-
-            return {
-              messages: [...state.messages, newMessage]
-            }
-          })
-        }
+        handleNewMessage
       )
       .on(
         'postgres_changes',

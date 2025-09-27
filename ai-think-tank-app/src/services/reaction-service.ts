@@ -212,19 +212,27 @@ export class ReactionService {
     emoji: string
   ): Promise<string | null> {
     try {
+      // Use direct insert instead of RPC function to avoid RLS issues
       const { data, error } = await supabase
-        .rpc('add_persona_reaction', {
-          p_message_id: messageId,
-          p_persona_id: personaId,
-          p_emoji: emoji
+        .from('message_reactions')
+        .insert({
+          message_id: messageId,
+          persona_id: personaId,
+          emoji
         })
+        .select('id')
+        .single()
 
       if (error) {
+        // Ignore duplicate key errors (reaction already exists)
+        if (error.code === '23505') {
+          return null
+        }
         console.error('Error adding persona reaction:', error)
         return null
       }
 
-      return data
+      return data?.id || null
     } catch (error) {
       console.error('Error adding persona reaction:', error)
       return null
