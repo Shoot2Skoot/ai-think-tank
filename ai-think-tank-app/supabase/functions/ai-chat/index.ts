@@ -45,19 +45,30 @@ async function callOpenAI(model: string, messages: any[], temperature: number, m
   console.log('Calling OpenAI with:', { model, messageCount: messages.length, temperature, maxTokens })
   const apiKey = Deno.env.get('OPENAI_API_KEY')!
 
+  // Use max_completion_tokens for newer models (gpt-4o-mini, gpt-5-mini, etc.)
+  const useNewParam = model.includes('gpt-4o') || model.includes('gpt-5')
+
+  const requestBody: any = {
+    model,
+    messages,
+    temperature,
+    stream: false, // Streaming not yet implemented
+  }
+
+  // Add the appropriate max tokens parameter based on model
+  if (useNewParam) {
+    requestBody.max_completion_tokens = maxTokens
+  } else {
+    requestBody.max_tokens = maxTokens
+  }
+
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({
-      model,
-      messages,
-      temperature,
-      max_tokens: maxTokens,
-      stream: false, // Streaming not yet implemented
-    }),
+    body: JSON.stringify(requestBody),
   })
 
   if (!response.ok) {
@@ -66,12 +77,7 @@ async function callOpenAI(model: string, messages: any[], temperature: number, m
       status: response.status,
       statusText: response.statusText,
       body: errorBody,
-      requestBody: {
-        model,
-        messages,
-        temperature,
-        max_tokens: maxTokens
-      }
+      requestBody: requestBody
     })
     throw new Error(`OpenAI API error: ${response.statusText} - ${errorBody}`)
   }
