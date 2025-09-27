@@ -51,8 +51,17 @@ async function callOpenAI(model: string, messages: any[], temperature: number, m
   const requestBody: any = {
     model,
     messages,
-    temperature,
     stream: false, // Streaming not yet implemented
+  }
+
+  // Newer models (gpt-5-mini, etc.) only support default temperature (1.0)
+  // Only add temperature parameter if it's not a restricted model or if it's the default value
+  if (model.includes('gpt-5')) {
+    // gpt-5 models only support temperature = 1 (the default)
+    // Don't include temperature parameter to use default
+  } else {
+    // Other models support custom temperature
+    requestBody.temperature = temperature
   }
 
   // Add the appropriate max tokens parameter based on model
