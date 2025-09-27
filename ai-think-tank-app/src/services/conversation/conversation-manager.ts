@@ -478,6 +478,7 @@ export class ConversationManager {
 
     // Build conversation context system message
     if (conversation && personas) {
+      const currentPersona = personas.find(p => p.id === currentPersonaId)
       const otherParticipants = personas
         .filter(p => p.id !== currentPersonaId)
         .map(p => `${p.name} (${p.role})`)
@@ -491,7 +492,12 @@ Mode: ${conversation.mode}
 
 Other participants: ${otherParticipants}
 
-Remember to stay in character and respond naturally to the conversation.`
+Remember to stay in character and respond naturally to the conversation.
+
+Your character and role:
+${currentPersona?.system_prompt || 'You are an AI assistant participating in this conversation.'}
+
+IMPORTANT: Do NOT prefix your responses with your name. Just respond directly as yourself.`
 
       result.push(new SystemMessage(contextMessage))
     }
@@ -507,13 +513,27 @@ Remember to stay in character and respond naturally to the conversation.`
       result.push(new SystemMessage(`Important pinned messages for context:\n${pinnedContext}`))
     }
 
-    // Add regular messages with speaker names
+    // Add regular messages properly typed
     messages.forEach(msg => {
       const speaker = this.getSpeakerName(msg, personas)
-      const contentWithSpeaker = `${speaker}: ${msg.content}`
 
-      // Use HumanMessage format but include the actual speaker name
-      result.push(new HumanMessage(contentWithSpeaker))
+      // For context, include who said it, but use proper message types
+      if (msg.role === 'user') {
+        // User messages
+        result.push(new HumanMessage(`${speaker}: ${msg.content}`))
+      } else if (msg.role === 'assistant') {
+        // AI messages - include speaker info for context but use AIMessage type
+        if (msg.persona_id === currentPersonaId) {
+          // This persona's own previous messages - no speaker prefix needed
+          result.push(new AIMessage(msg.content))
+        } else {
+          // Other AI participants' messages - include their name for context
+          result.push(new HumanMessage(`${speaker}: ${msg.content}`))
+        }
+      } else {
+        // System messages or unknown
+        result.push(new SystemMessage(msg.content))
+      }
     })
 
     return result
