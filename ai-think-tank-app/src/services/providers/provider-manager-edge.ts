@@ -139,38 +139,36 @@ export class ProviderManagerEdge {
   }
 
   private convertMessages(messages: BaseMessage[], persona: Persona): any[] {
-    // Add persona context to system message
-    const systemMessage = {
-      role: 'system' as const,
-      content: `${persona.system_prompt}\n\npersona_id: ${persona.id}`
-    }
+    // Extract system messages (conversation context)
+    const systemMessages = messages.filter(msg => msg._getType() === 'system')
 
-    // Convert LangChain messages to simple format
-    const simpleMessages = messages.map(msg => {
-      let role: 'system' | 'user' | 'assistant'
+    // Combine conversation context with persona system prompt
+    let combinedSystemPrompt = ''
 
-      switch (msg._getType()) {
-        case 'human':
-          role = 'user'
-          break
-        case 'ai':
-          role = 'assistant'
-          break
-        case 'system':
-          role = 'system'
-          break
-        default:
-          role = 'user'
-      }
-
-      return {
-        role,
-        content: msg.content.toString()
-      }
+    // Add conversation context first
+    systemMessages.forEach(msg => {
+      combinedSystemPrompt += msg.content.toString() + '\n\n'
     })
 
-    // Ensure system message is first
-    return [systemMessage, ...simpleMessages.filter(m => m.role !== 'system'), ...simpleMessages.filter(m => m.role === 'system' && m.content !== systemMessage.content)]
+    // Then add persona-specific system prompt
+    combinedSystemPrompt += `Your character and role:\n${persona.system_prompt}`
+
+    const systemMessage = {
+      role: 'system' as const,
+      content: combinedSystemPrompt
+    }
+
+    // Convert non-system messages to simple format
+    // All conversation messages are now in HumanMessage format with speaker names
+    const conversationMessages = messages
+      .filter(msg => msg._getType() !== 'system')
+      .map(msg => ({
+        role: 'user' as 'system' | 'user' | 'assistant',
+        content: msg.content.toString()
+      }))
+
+    // Return system message first, then conversation messages
+    return [systemMessage, ...conversationMessages]
   }
 
   // Switch between mock and real providers

@@ -228,8 +228,14 @@ export class ConversationManager {
         providerManager.setConversationId(conversationId)
       }
 
-      // Convert messages to LangChain format, including pinned messages context
-      const langchainMessages = this.convertToLangChainMessages(messages, pinnedIds)
+      // Convert messages to LangChain format with full conversation context
+      const langchainMessages = this.convertToLangChainMessages(
+        messages,
+        pinnedIds,
+        conversation,
+        personas,
+        personaId
+      )
 
       // Generate response using provider manager
       const response = await providerManager.generateResponse(
@@ -422,37 +428,71 @@ export class ConversationManager {
     this.pinnedMessages.set(conversationId, messageIds)
   }
 
-  private convertToLangChainMessages(messages: Message[], pinnedIds: string[] = []): BaseMessage[] {
+  private convertToLangChainMessages(
+    messages: Message[],
+    pinnedIds: string[] = [],
+    conversation?: Conversation,
+    personas?: Persona[],
+    currentPersonaId?: string
+  ): BaseMessage[] {
     const result: BaseMessage[] = []
 
-    // Add pinned messages context at the beginning if any
-    // First check for database-persisted pinned messages
+    // Build conversation context system message
+    if (conversation && personas) {
+      const otherParticipants = personas
+        .filter(p => p.id !== currentPersonaId)
+        .map(p => `${p.name} (${p.role})`)
+        .join(', ')
+
+      const contextMessage = `You are participating in a conversation.
+Title: ${conversation.title}
+Topic: ${conversation.topic}
+Type: ${conversation.conversation_type}
+Mode: ${conversation.mode}
+
+Other participants: ${otherParticipants}
+
+Remember to stay in character and respond naturally to the conversation.`
+
+      result.push(new SystemMessage(contextMessage))
+    }
+
+    // Add pinned messages context if any
     const pinnedMessages = messages.filter(m => m.is_pinned || pinnedIds.includes(m.id))
     if (pinnedMessages.length > 0) {
-      const pinnedContext = pinnedMessages.map(m =>
-        `[PINNED] ${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`
-      ).join('\n')
+      const pinnedContext = pinnedMessages.map(m => {
+        // Get the actual name of who said it
+        const speaker = this.getSpeakerName(m, personas)
+        return `[PINNED] ${speaker}: ${m.content}`
+      }).join('\n')
       result.push(new SystemMessage(`Important pinned messages for context:\n${pinnedContext}`))
     }
 
-    // Add regular messages
+    // Add regular messages with speaker names
     messages.forEach(msg => {
-      switch (msg.role) {
-        case 'user':
-          result.push(new HumanMessage(msg.content))
-          break
-        case 'assistant':
-          result.push(new AIMessage(msg.content))
-          break
-        case 'system':
-          result.push(new SystemMessage(msg.content))
-          break
-        default:
-          result.push(new HumanMessage(msg.content))
-      }
+      const speaker = this.getSpeakerName(msg, personas)
+      const contentWithSpeaker = `${speaker}: ${msg.content}`
+
+      // Use HumanMessage format but include the actual speaker name
+      result.push(new HumanMessage(contentWithSpeaker))
     })
 
     return result
+  }
+
+  private getSpeakerName(message: Message, personas?: Persona[]): string {
+    if (message.role === 'user') {
+      return 'User'
+    }
+
+    if (message.persona_id && personas) {
+      const persona = personas.find(p => p.id === message.persona_id)
+      if (persona) {
+        return persona.name
+      }
+    }
+
+    return 'Unknown'
   }
 
   private generateSystemPrompt(config: PersonaConfig): string {
