@@ -99,7 +99,8 @@ export class BudgetStatisticsService {
     const start = startDate || subDays(new Date(), 30)
     const end = endDate || new Date()
 
-    // Fetch all cost records for the user within date range
+    // First check if we're using mock data or real data
+    // If cost_records is empty, we'll fallback to using message costs
     const { data: costRecords, error: costError } = await supabase
       .from('cost_records')
       .select('*')
@@ -108,38 +109,55 @@ export class BudgetStatisticsService {
       .lte('created_at', end.toISOString())
       .order('created_at', { ascending: true })
 
-    if (costError) throw costError
+    if (costError) {
+      console.error('Error fetching cost records:', costError)
+    }
 
-    // Fetch messages with persona info
+    // Fetch messages with persona info through conversations
     const { data: messages, error: msgError } = await supabase
       .from('messages')
       .select(`
         *,
-        personas!inner (
+        personas (
           id,
           name,
           model,
           provider
+        ),
+        conversation:conversations!inner (
+          id,
+          user_id
         )
       `)
-      .eq('personas.conversation_id', userId)
+      .eq('conversation.user_id', userId)
       .gte('created_at', start.toISOString())
       .lte('created_at', end.toISOString())
 
-    if (msgError) throw msgError
+    if (msgError) {
+      console.error('Error fetching messages:', msgError)
+    }
 
     // Fetch conversation stats
     const { data: conversations, error: convError } = await supabase
       .from('conversations')
-      .select('*')
+      .select('*, personas(id, name, model, provider)')
       .eq('user_id', userId)
       .gte('created_at', start.toISOString())
       .lte('created_at', end.toISOString())
 
-    if (convError) throw convError
+    if (convError) {
+      console.error('Error fetching conversations:', convError)
+
+    // If no cost_records exist, create them from messages
+    let finalCostRecords = costRecords || []
+
+    if ((!finalCostRecords || finalCostRecords.length === 0) && messages && messages.length > 0) {
+      // Create cost records from messages for backwards compatibility
+      finalCostRecords = this.createCostRecordsFromMessages(messages)
+    }
 
     return this.aggregateStatistics(
-      costRecords || [],
+      finalCostRecords,
       messages || [],
       conversations || [],
       start,
@@ -213,11 +231,15 @@ export class BudgetStatisticsService {
   private calculateModelStatistics(records: CostRecord[]): ModelStatistics[] {
     const modelMap = new Map<string, ModelStatistics>()
 
+    if (!records || records.length === 0) {
+      return []
+    }
+
     records.forEach(record => {
       const key = `${record.provider}:${record.model}`
       const existing = modelMap.get(key) || {
         model: record.model,
-        provider: record.provider,
+        provider: record.provider as Provider,
         usage_count: 0,
         total_tokens: 0,
         total_cost: 0,
@@ -251,7 +273,7 @@ export class BudgetStatisticsService {
   ): PersonaStatistics[] {
     const personaMap = new Map<string, PersonaStatistics>()
 
-    // Group by persona
+    // First populate from cost records
     records.forEach(record => {
       if (!record.persona_id) return
 
@@ -276,13 +298,41 @@ export class BudgetStatisticsService {
       personaMap.set(record.persona_id, existing)
     })
 
-    // Add persona names from messages
-    messages.forEach(msg => {
-      if (msg.persona_id && personaMap.has(msg.persona_id)) {
-        const stat = personaMap.get(msg.persona_id)!
-        stat.persona_name = msg.personas?.name || 'Unknown'
-      }
-    })
+    // If no records, build from messages
+    if (personaMap.size === 0 && messages.length > 0) {
+      messages.forEach(msg => {
+        if (!msg.persona_id || !msg.personas) return
+
+        const existing = personaMap.get(msg.persona_id) || {
+          persona_id: msg.persona_id,
+          persona_name: msg.personas.name || 'Unknown',
+          total_cost: 0,
+          total_tokens: 0,
+          message_count: 0,
+          avg_tokens_per_message: 0,
+          avg_cost_per_message: 0,
+          model_usage: {},
+          last_used: msg.created_at
+        }
+
+        existing.total_cost += msg.cost || 0
+        existing.total_tokens += (msg.tokens_input || 0) + (msg.tokens_output || 0)
+        existing.message_count++
+        existing.model_usage[msg.personas.model] = (existing.model_usage[msg.personas.model] || 0) + 1
+        existing.last_used = msg.created_at > existing.last_used ? msg.created_at : existing.last_used
+        existing.persona_name = msg.personas.name || 'Unknown'
+
+        personaMap.set(msg.persona_id, existing)
+      })
+    } else {
+      // Add persona names from messages
+      messages.forEach(msg => {
+        if (msg.persona_id && personaMap.has(msg.persona_id) && msg.personas) {
+          const stat = personaMap.get(msg.persona_id)!
+          stat.persona_name = msg.personas.name || 'Unknown'
+        }
+      })
+    }
 
     return Array.from(personaMap.values()).map(stat => ({
       ...stat,
@@ -337,16 +387,19 @@ export class BudgetStatisticsService {
     }
 
     records.forEach(record => {
-      const stats = providers[record.provider]
-      stats.input_tokens += record.input_tokens
-      stats.output_tokens += record.output_tokens
-      stats.cached_tokens += record.cached_tokens
-      stats.cache_write_tokens += record.cache_write_tokens
-      stats.total_tokens += record.input_tokens + record.output_tokens
-      stats.input_cost += record.input_cost
-      stats.output_cost += record.output_cost
-      stats.cache_cost += record.cache_cost
-      stats.total_cost += record.total_cost
+      const provider = record.provider as Provider
+      if (provider in providers) {
+        const stats = providers[provider]
+        stats.input_tokens += record.input_tokens
+        stats.output_tokens += record.output_tokens
+        stats.cached_tokens += record.cached_tokens
+        stats.cache_write_tokens += record.cache_write_tokens
+        stats.total_tokens += record.input_tokens + record.output_tokens
+        stats.input_cost += record.input_cost
+        stats.output_cost += record.output_cost
+        stats.cache_cost += record.cache_cost
+        stats.total_cost += record.total_cost
+      }
     })
 
     return providers
@@ -408,6 +461,30 @@ export class BudgetStatisticsService {
       cache_cost: 0,
       total_cost: 0
     }
+  }
+
+  private createCostRecordsFromMessages(messages: any[]): CostRecord[] {
+    // Create synthetic cost records from message data for backwards compatibility
+    return messages
+      .filter(msg => msg.cost && msg.cost > 0)
+      .map(msg => ({
+        id: msg.id,
+        message_id: msg.id,
+        persona_id: msg.persona_id,
+        conversation_id: msg.conversation_id,
+        user_id: msg.conversation?.user_id || msg.user_id,
+        provider: msg.personas?.provider || 'openai',
+        model: msg.personas?.model || 'gpt-4-turbo',
+        input_tokens: msg.tokens_input || 0,
+        output_tokens: msg.tokens_output || 0,
+        cached_tokens: msg.tokens_cached || 0,
+        cache_write_tokens: 0,
+        input_cost: (msg.cost || 0) * 0.4, // Estimate
+        output_cost: (msg.cost || 0) * 0.6, // Estimate
+        cache_cost: 0,
+        total_cost: msg.cost || 0,
+        created_at: msg.created_at
+      }))
   }
 
   async exportStatistics(statistics: BudgetStatistics, format: 'json' | 'csv'): Promise<string> {
