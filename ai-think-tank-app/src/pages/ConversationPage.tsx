@@ -46,7 +46,7 @@ export const ConversationPage: React.FC = () => {
   const [isPresencePanelCollapsed, setIsPresencePanelCollapsed] = useState(false)
   const [showHeaderDetails, setShowHeaderDetails] = useState(false)
   const [streamingContent, setStreamingContent] = useState<Record<string, string>>({})
-  const [conversationMode, setConversationMode] = useState<ConversationType>('planning')
+  const [conversationType, setConversationType] = useState<ConversationType>('planning')
   const [typingPersonaIds, setTypingPersonaIds] = useState<string[]>([])
   const [replyToMessageId, setReplyToMessageId] = useState<string | null>(null)
   const [optimisticPinnedIds, setOptimisticPinnedIds] = useState<Set<string>>(new Set())
@@ -67,10 +67,10 @@ export const ConversationPage: React.FC = () => {
     }
   }, [id, loadConversation])
 
-  // Update conversation mode when active conversation changes
+  // Update conversation type when active conversation changes
   useEffect(() => {
     if (activeConversation) {
-      setConversationMode(activeConversation.conversation_type)
+      setConversationType(activeConversation.conversation_type)
     }
   }, [activeConversation])
 
