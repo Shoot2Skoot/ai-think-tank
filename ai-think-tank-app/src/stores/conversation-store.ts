@@ -23,6 +23,7 @@ interface ConversationState {
   loading: boolean
   error: string | null
   nextSpeaker: TurnDecision | null
+  isAutoRunning: boolean
 
   // Actions
   createConversation: (userId: string, config: ConversationConfig) => Promise<Conversation>
@@ -36,6 +37,9 @@ interface ConversationState {
   clearError: () => void
   addPersonaToConversation: (personaName: string) => Promise<void>
   removePersonaFromConversation: (personaId: string) => Promise<void>
+  toggleAutoRun: () => void
+  setConversationMode: (mode: 'auto' | 'manual') => Promise<void>
+  setConversationSpeed: (speed: number) => Promise<void>
 }
 
 export const useConversationStore = create<ConversationState>((set, get) => ({
@@ -47,6 +51,7 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
   loading: false,
   error: null,
   nextSpeaker: null,
+  isAutoRunning: true,
 
   createConversation: async (userId, config) => {
     set({ loading: true, error: null })
@@ -555,6 +560,77 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
     if (unsubscribe) {
       unsubscribe()
       delete (window as any).__conversationUnsubscribe
+    }
+  },
+
+  toggleAutoRun: () => {
+    const { activeConversation, isAutoRunning } = get()
+    if (!activeConversation || activeConversation.mode !== 'auto') return
+
+    const newState = !isAutoRunning
+    set({ isAutoRunning: newState })
+
+    // If turning on auto mode, trigger next response
+    if (newState && activeConversation.is_active) {
+      conversationManager.triggerAutoResponses(activeConversation.id)
+    }
+  },
+
+  setConversationMode: async (mode) => {
+    const { activeConversation } = get()
+    if (!activeConversation) return
+
+    try {
+      // Update in database
+      const { error } = await supabase
+        .from('conversations')
+        .update({ mode })
+        .eq('id', activeConversation.id)
+
+      if (error) throw error
+
+      // Update local state
+      set({
+        activeConversation: { ...activeConversation, mode },
+        isAutoRunning: mode === 'auto'  // Reset auto running state
+      })
+
+      // Update conversation manager
+      await conversationManager.updateConversation(activeConversation.id, { mode })
+
+      // If switching to auto mode, start auto responses
+      if (mode === 'auto' && activeConversation.is_active) {
+        conversationManager.triggerAutoResponses(activeConversation.id)
+      }
+    } catch (error) {
+      console.error('Failed to update conversation mode:', error)
+      set({ error: 'Failed to update conversation mode' })
+    }
+  },
+
+  setConversationSpeed: async (speed) => {
+    const { activeConversation } = get()
+    if (!activeConversation) return
+
+    try {
+      // Update in database
+      const { error } = await supabase
+        .from('conversations')
+        .update({ speed })
+        .eq('id', activeConversation.id)
+
+      if (error) throw error
+
+      // Update local state
+      set({
+        activeConversation: { ...activeConversation, speed }
+      })
+
+      // Update conversation manager
+      await conversationManager.updateConversation(activeConversation.id, { speed })
+    } catch (error) {
+      console.error('Failed to update conversation speed:', error)
+      set({ error: 'Failed to update conversation speed' })
     }
   }
 }))

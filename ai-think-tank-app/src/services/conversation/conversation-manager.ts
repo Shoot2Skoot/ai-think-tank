@@ -427,15 +427,25 @@ export class ConversationManager {
         total: 0,
         byPersona: {},
         byProvider: { openai: 0, anthropic: 0, gemini: 0 },
+        by_model: {},
         input_cost: 0,
         output_cost: 0,
-        cache_savings: 0
+        cache_savings: 0,
+        input_tokens: 0,
+        output_tokens: 0,
+        cached_tokens: 0,
+        total_tokens: 0
       }
 
       for (const cost of costs || []) {
         breakdown.total += Number(cost.total_cost)
         breakdown.input_cost += Number(cost.input_cost)
         breakdown.output_cost += Number(cost.output_cost)
+
+        // Add token counts
+        breakdown.input_tokens! += Number(cost.input_tokens || 0)
+        breakdown.output_tokens! += Number(cost.output_tokens || 0)
+        breakdown.cached_tokens! += Number(cost.cached_tokens || 0)
 
         if (cost.persona_id) {
           breakdown.byPersona[cost.persona_id] =
@@ -444,6 +454,11 @@ export class ConversationManager {
 
         breakdown.byProvider[cost.provider as keyof typeof breakdown.byProvider] += Number(cost.total_cost)
 
+        // Track by model
+        if (cost.model) {
+          breakdown.by_model![cost.model] = (breakdown.by_model![cost.model] || 0) + Number(cost.total_cost)
+        }
+
         if (cost.cached_tokens > 0) {
           // Calculate cache savings (cached tokens are typically 90% cheaper)
           const fullCost = (cost.cached_tokens / 1_000_000) * this.getInputPrice(cost.provider, cost.model)
@@ -451,6 +466,13 @@ export class ConversationManager {
           breakdown.cache_savings += (fullCost - cachedCost)
         }
       }
+
+      // Calculate total tokens
+      breakdown.total_tokens = breakdown.input_tokens! + breakdown.output_tokens!
+
+      // Add aliases for compatibility
+      breakdown.total_cost = breakdown.total
+      breakdown.by_persona = breakdown.byPersona
 
       return breakdown
     } catch (error) {
@@ -465,6 +487,19 @@ export class ConversationManager {
 
   setPinnedMessages(conversationId: string, messageIds: string[]): void {
     this.pinnedMessages.set(conversationId, messageIds)
+  }
+
+  async triggerAutoResponses(conversationId: string): Promise<void> {
+    // Public method to trigger auto responses
+    return this.startAutoResponses(conversationId)
+  }
+
+  async updateConversation(conversationId: string, updates: Partial<Conversation>): Promise<void> {
+    const conversation = this.activeConversations.get(conversationId)
+    if (conversation) {
+      // Update in-memory conversation
+      this.activeConversations.set(conversationId, { ...conversation, ...updates })
+    }
   }
 
   private convertToLangChainMessages(
@@ -497,7 +532,12 @@ Remember to stay in character and respond naturally to the conversation.
 Your character and role:
 ${currentPersona?.system_prompt || 'You are an AI assistant participating in this conversation.'}
 
-IMPORTANT: Do NOT prefix your responses with your name. Just respond directly as yourself.`
+IMPORTANT GUIDELINES:
+1. Do NOT prefix your responses with your name. Just respond directly as yourself.
+2. Aim for concise, natural responses (typically 50-100 words / 200-400 tokens).
+3. Occasionally longer responses (up to 150 words / 600 tokens) are fine when complexity demands it.
+4. Focus on quality over quantity - make every word count.
+5. Keep the conversation flowing naturally with appropriately sized contributions.`
 
       result.push(new SystemMessage(contextMessage))
     }

@@ -156,11 +156,19 @@ export interface CostRecord {
 
 export interface CostBreakdown {
   total: number
+  total_cost?: number  // Alias for compatibility
   byPersona: Record<string, number>
+  by_persona?: Record<string, number>  // Alias for compatibility
   byProvider: Record<Provider, number>
+  by_model?: Record<string, number>  // For model-specific costs
   input_cost: number
   output_cost: number
   cache_savings: number
+  // Token counts
+  input_tokens?: number
+  output_tokens?: number
+  cached_tokens?: number
+  total_tokens?: number
 }
 
 export interface UserBudget {

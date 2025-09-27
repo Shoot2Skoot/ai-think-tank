@@ -8,6 +8,7 @@ import { MessageList } from '@/components/conversation/MessageList'
 import { MessageInput } from '@/components/conversation/MessageInput'
 import { ConversationModeSelector } from '@/components/conversation/ConversationModeSelector'
 import { PersonaPresencePanel } from '@/components/conversation/PersonaPresencePanel'
+import { ConversationControls } from '@/components/conversation/ConversationControls'
 import { useConversationStore } from '@/stores/conversation-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useAIReactions } from '@/hooks/useAIReactions'
@@ -28,12 +29,16 @@ export const ConversationPage: React.FC = () => {
     personas,
     costBreakdown,
     loading,
+    isAutoRunning,
     sendMessage,
     triggerResponse,
     loadConversation,
     loadConversations,
     endConversation,
-    setStreamCallback
+    setStreamCallback,
+    toggleAutoRun,
+    setConversationMode,
+    setConversationSpeed
   } = useConversationStore()
 
   const [isSetupOpen, setIsSetupOpen] = useState(false)
@@ -245,15 +250,15 @@ export const ConversationPage: React.FC = () => {
           showDetails={showHeaderDetails}
         />
 
-        {/* Conversation Mode Selector */}
+        {/* Conversation Controls - Mode, Speed, Play/Pause */}
         {activeConversation && (
-          <div className="px-4 py-1 bg-primary-900 bg-opacity-20" style={{ borderBottom: '1px solid var(--color-surface-border)' }}>
-            <ConversationModeSelector
-              currentMode={conversationMode}
-              onModeChange={setConversationMode}
-              disabled={!activeConversation.is_active}
-            />
-          </div>
+          <ConversationControls
+            conversation={activeConversation}
+            isAutoRunning={isAutoRunning}
+            onToggleAutoRun={toggleAutoRun}
+            onModeChange={setConversationMode}
+            onSpeedChange={setConversationSpeed}
+          />
         )}
 
         {/* Messages */}

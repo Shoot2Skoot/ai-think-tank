@@ -471,7 +471,7 @@ serve(async (req) => {
 
   try {
     const request: ChatRequest = await req.json()
-    const { provider, model, messages, temperature = 0.7, maxTokens = 2500, personaId, conversationId, userId, stream = false } = request
+    const { provider, model, messages, temperature = 0.7, maxTokens = 800, personaId, conversationId, userId, stream = false } = request
 
     // Validate required fields
     if (!provider || !model || !messages || !userId) {
