@@ -492,6 +492,13 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         (payload) => {
           // Add new message to state if it doesn't already exist
           const newMessage = payload.new as Message
+          console.log('[ConversationStore] Received message via subscription:', {
+            id: newMessage.id,
+            role: newMessage.role,
+            persona_id: newMessage.persona_id,
+            user_id: newMessage.user_id,
+            contentPreview: newMessage.content?.substring(0, 100)
+          })
           set((state) => {
             // Check if message already exists (by ID)
             const messageExists = state.messages.some(m => m.id === newMessage.id)

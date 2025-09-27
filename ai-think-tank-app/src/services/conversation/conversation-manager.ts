@@ -161,14 +161,15 @@ export class ConversationManager {
     personaId?: string
   ): Promise<Message> {
     try {
-      // Create message - if personaId is provided, it's an assistant message
+      // Create user message
+      // Note: personaId here represents who the user is mentioning/addressing, not who's speaking
       const { data: message, error } = await supabase
         .from('messages')
         .insert({
           conversation_id: conversationId,
           user_id: userId,
-          persona_id: personaId,
-          role: personaId ? 'assistant' : 'user',
+          persona_id: personaId, // This is who the user is addressing (if anyone)
+          role: 'user', // Always 'user' since this method is for user messages
           content
         })
         .select()
@@ -238,18 +239,28 @@ export class ConversationManager {
       )
 
       // Save message to database
+      const messageToInsert = {
+        conversation_id: conversationId,
+        persona_id: personaId,
+        role: 'assistant' as const,
+        content: response.content,
+        tokens_input: response.usage.promptTokens,
+        tokens_output: response.usage.completionTokens,
+        tokens_cached: response.usage.cachedTokens,
+        cost: response.cost
+      }
+
+      console.log('[ConversationManager] Saving AI message:', {
+        conversationId,
+        personaId,
+        personaName: persona.name,
+        role: messageToInsert.role,
+        contentPreview: response.content.substring(0, 100)
+      })
+
       const { data: message, error } = await supabase
         .from('messages')
-        .insert({
-          conversation_id: conversationId,
-          persona_id: personaId,
-          role: 'assistant',
-          content: response.content,
-          tokens_input: response.usage.promptTokens,
-          tokens_output: response.usage.completionTokens,
-          tokens_cached: response.usage.cachedTokens,
-          cost: response.cost
-        })
+        .insert(messageToInsert)
         .select()
         .single()
 
