@@ -72,7 +72,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({
           },
           // Custom paragraph rendering
           p({ children }) {
-            return <p className="mb-2 last:mb-0">{children}</p>
+            return <p className="mb-1.5 last:mb-0">{children}</p>
           },
           // Custom link rendering
           a({ href, children }) {
@@ -128,13 +128,13 @@ export const MessageContent: React.FC<MessageContentProps> = ({
           },
           // Lists
           ul({ children }) {
-            return <ul className="list-disc list-inside ml-2 mb-2">{children}</ul>
+            return <ul className="list-disc list-inside ml-2 my-1">{children}</ul>
           },
           ol({ children }) {
-            return <ol className="list-decimal list-inside ml-2 mb-2">{children}</ol>
+            return <ol className="list-decimal list-inside ml-2 my-1">{children}</ol>
           },
           li({ children }) {
-            return <li className="mb-1">{children}</li>
+            return <li className="leading-snug">{children}</li>
           },
           // Blockquotes
           blockquote({ children }) {
