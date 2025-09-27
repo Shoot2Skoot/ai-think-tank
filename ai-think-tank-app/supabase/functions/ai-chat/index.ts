@@ -64,6 +64,15 @@ async function callOpenAI(model: string, messages: any[], temperature: number, m
 
   const data = await response.json()
 
+  // Check for OpenAI errors
+  if (data.error) {
+    throw new Error(`OpenAI API error: ${data.error.message || JSON.stringify(data.error)}`)
+  }
+
+  if (!data.choices || data.choices.length === 0) {
+    throw new Error('OpenAI API error: No choices returned')
+  }
+
   return {
     content: data.choices[0].message.content,
     usage: {
@@ -112,6 +121,15 @@ async function callAnthropic(model: string, messages: any[], temperature: number
 
   const data = await response.json()
 
+  // Check for Anthropic errors
+  if (data.error) {
+    throw new Error(`Anthropic API error: ${data.error.message || JSON.stringify(data.error)}`)
+  }
+
+  if (!data.content || data.content.length === 0) {
+    throw new Error('Anthropic API error: No content returned')
+  }
+
   return {
     content: data.content[0].text,
     usage: {
@@ -155,6 +173,18 @@ async function callGemini(model: string, messages: any[], temperature: number, m
   }
 
   const data = await response.json()
+
+  // Check if Gemini returned valid candidates
+  if (!data.candidates || data.candidates.length === 0) {
+    console.error('Gemini API returned no candidates:', data)
+    throw new Error(`Gemini API error: ${data.error?.message || 'No candidates returned'}`)
+  }
+
+  // Check if content exists in the response
+  if (!data.candidates[0].content?.parts?.[0]?.text) {
+    console.error('Gemini API returned invalid response structure:', data)
+    throw new Error('Gemini API error: Invalid response structure')
+  }
 
   // Estimate token usage for Gemini (it doesn't provide exact counts)
   const promptTokens = Math.ceil(messages.reduce((acc, m) => acc + m.content.length, 0) / 4)
