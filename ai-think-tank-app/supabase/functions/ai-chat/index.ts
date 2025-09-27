@@ -41,6 +41,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 // Provider-specific API handlers
 async function callOpenAI(model: string, messages: any[], temperature: number, maxTokens: number, stream: boolean) {
+  console.log('Calling OpenAI with:', { model, messageCount: messages.length, temperature, maxTokens })
   const apiKey = Deno.env.get('OPENAI_API_KEY')!
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -59,7 +60,19 @@ async function callOpenAI(model: string, messages: any[], temperature: number, m
   })
 
   if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.statusText}`)
+    const errorBody = await response.text()
+    console.error('OpenAI API Error:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorBody,
+      requestBody: {
+        model,
+        messages,
+        temperature,
+        max_tokens: maxTokens
+      }
+    })
+    throw new Error(`OpenAI API error: ${response.statusText} - ${errorBody}`)
   }
 
   const data = await response.json()
@@ -85,6 +98,7 @@ async function callOpenAI(model: string, messages: any[], temperature: number, m
 }
 
 async function callAnthropic(model: string, messages: any[], temperature: number, maxTokens: number, stream: boolean) {
+  console.log('Calling Anthropic with:', { model, messageCount: messages.length, temperature, maxTokens })
   const apiKey = Deno.env.get('ANTHROPIC_API_KEY')!
 
   // Convert messages to Anthropic format
@@ -117,6 +131,18 @@ async function callAnthropic(model: string, messages: any[], temperature: number
 
   if (!response.ok) {
     const error = await response.text()
+    console.error('Anthropic API Error:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: error,
+      requestBody: {
+        model,
+        messages: anthropicMessages,
+        system: systemMessage,
+        temperature,
+        max_tokens: maxTokens
+      }
+    })
     throw new Error(`Anthropic API error: ${error}`)
   }
 
@@ -143,6 +169,7 @@ async function callAnthropic(model: string, messages: any[], temperature: number
 }
 
 async function callGemini(model: string, messages: any[], temperature: number, maxTokens: number, stream: boolean) {
+  console.log('Calling Gemini with:', { model, messageCount: messages.length, temperature, maxTokens })
   const apiKey = Deno.env.get('GEMINI_API_KEY')!
 
   // Convert messages to Gemini format
@@ -170,6 +197,17 @@ async function callGemini(model: string, messages: any[], temperature: number, m
 
   if (!response.ok) {
     const error = await response.text()
+    console.error('Gemini API Error:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: error,
+      requestBody: {
+        model,
+        messages: geminiMessages,
+        temperature,
+        maxOutputTokens: maxTokens
+      }
+    })
     throw new Error(`Gemini API error: ${error}`)
   }
 

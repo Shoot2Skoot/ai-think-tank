@@ -262,6 +262,17 @@ export class ConversationManager {
       // Record cost
       await this.recordCost(conversationId, personaId, response)
 
+      // Continue auto responses if in auto mode
+      if (conversation.mode === 'auto' && conversation.is_active) {
+        // Calculate delay based on conversation speed (1-10, where 10 is fastest)
+        const delayMs = (11 - conversation.speed) * 1000 // 1s to 10s delay
+
+        // Don't await this - let it run in the background
+        setTimeout(() => {
+          this.startAutoResponses(conversationId)
+        }, delayMs)
+      }
+
       return message
     } catch (error) {
       console.error('Error generating response:', error)
@@ -285,18 +296,12 @@ export class ConversationManager {
     )
 
     if (decision.next_persona_id) {
-      // Add delay based on conversation speed (1-10, where 10 is fastest)
-      const delayMs = (11 - conversation.speed) * 1000 // 1s to 10s delay
-      await new Promise(resolve => setTimeout(resolve, delayMs))
-
       // Generate response from selected persona
       const streamCallback = this.streamCallbacks.get(conversationId)
       await this.generateResponse(conversationId, decision.next_persona_id, streamCallback)
 
-      // Continue auto responses if conversation is still active
-      if (conversation.is_active && messages.length < 100) { // Limit to 100 messages
-        this.startAutoResponses(conversationId)
-      }
+      // generateResponse will handle the continuation with proper delay
+      // No need to call startAutoResponses here as generateResponse will do it
     }
   }
 
