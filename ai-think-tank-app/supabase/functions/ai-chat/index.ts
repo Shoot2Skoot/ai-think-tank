@@ -282,7 +282,7 @@ async function callGemini(model: string, messages: any[], temperature: number, m
 
   // Check if content exists in the response
   if (!data.candidates[0].content?.parts?.[0]?.text) {
-    console.warn('Gemini response missing text, checking for safety ratings', data)
+    console.warn('Gemini response missing text, checking for finish reason', data)
 
     // Check if content was filtered
     if (data.candidates[0].finishReason === 'SAFETY') {
@@ -290,10 +290,29 @@ async function callGemini(model: string, messages: any[], temperature: number, m
       return {
         content: "I need to consider that more carefully.",
         usage: {
-          promptTokens: Math.ceil(messages.reduce((acc, m) => acc + m.content.length, 0) / 4),
+          promptTokens: data.usageMetadata?.promptTokenCount || Math.ceil(messages.reduce((acc, m) => acc + m.content.length, 0) / 4),
           completionTokens: 10,
-          totalTokens: Math.ceil(messages.reduce((acc, m) => acc + m.content.length, 0) / 4) + 10,
-          cachedTokens: 0,
+          totalTokens: (data.usageMetadata?.totalTokenCount || Math.ceil(messages.reduce((acc, m) => acc + m.content.length, 0) / 4)) + 10,
+          cachedTokens: data.usageMetadata?.cachedContentTokenCount || 0,
+        },
+      }
+    }
+
+    // Check if hit max tokens limit
+    if (data.candidates[0].finishReason === 'MAX_TOKENS') {
+      console.warn('Gemini hit max tokens limit, returning truncated response')
+      // Try to get any partial content if available
+      const partialContent = data.candidates[0].content?.parts?.[0]?.text ||
+                            "I was about to say more, but reached the response limit. Let me continue with a shorter response."
+      return {
+        content: partialContent,
+        usage: {
+          promptTokens: data.usageMetadata?.promptTokenCount || Math.ceil(messages.reduce((acc, m) => acc + m.content.length, 0) / 4),
+          completionTokens: data.usageMetadata?.totalTokenCount ?
+            data.usageMetadata.totalTokenCount - data.usageMetadata.promptTokenCount :
+            maxTokens,
+          totalTokens: data.usageMetadata?.totalTokenCount || (Math.ceil(messages.reduce((acc, m) => acc + m.content.length, 0) / 4) + maxTokens),
+          cachedTokens: data.usageMetadata?.cachedContentTokenCount || 0,
         },
       }
     }
@@ -302,10 +321,10 @@ async function callGemini(model: string, messages: any[], temperature: number, m
     return {
       content: "Let me approach this differently.",
       usage: {
-        promptTokens: Math.ceil(messages.reduce((acc, m) => acc + m.content.length, 0) / 4),
+        promptTokens: data.usageMetadata?.promptTokenCount || Math.ceil(messages.reduce((acc, m) => acc + m.content.length, 0) / 4),
         completionTokens: 10,
-        totalTokens: Math.ceil(messages.reduce((acc, m) => acc + m.content.length, 0) / 4) + 10,
-        cachedTokens: 0,
+        totalTokens: data.usageMetadata?.totalTokenCount || (Math.ceil(messages.reduce((acc, m) => acc + m.content.length, 0) / 4) + 10),
+        cachedTokens: data.usageMetadata?.cachedContentTokenCount || 0,
       },
     }
   }
@@ -452,7 +471,7 @@ serve(async (req) => {
 
   try {
     const request: ChatRequest = await req.json()
-    const { provider, model, messages, temperature = 0.7, maxTokens = 1000, personaId, conversationId, userId, stream = false } = request
+    const { provider, model, messages, temperature = 0.7, maxTokens = 2500, personaId, conversationId, userId, stream = false } = request
 
     // Validate required fields
     if (!provider || !model || !messages || !userId) {
