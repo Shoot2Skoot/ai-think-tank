@@ -14,6 +14,8 @@ import { useAIReactions } from '@/hooks/useAIReactions'
 import { conversationManager } from '@/services/conversation/conversation-manager'
 import { supabase } from '@/lib/supabase'
 import type { ConversationType } from '@/types'
+import { DebugPanel } from '@/components/debug/DebugPanel'
+import { debugInterceptor } from '@/lib/debug-interceptor'
 
 export const ConversationPage: React.FC = () => {
   const { id } = useParams()
@@ -106,6 +108,14 @@ export const ConversationPage: React.FC = () => {
     enabled: activeConversation?.mode === 'auto',
     conversationId: activeConversation?.id
   })
+
+  // Enable debug interceptor in development
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      debugInterceptor.enable()
+      return () => debugInterceptor.disable()
+    }
+  }, [])
 
   const handleSendMessage = async (message: string, mentionedPersona?: string) => {
     if (!message.trim() || !user || !activeConversation) return
@@ -325,6 +335,9 @@ export const ConversationPage: React.FC = () => {
           }}
         />
       </Modal>
+
+      {/* Debug Panel - only in development */}
+      {import.meta.env.DEV && <DebugPanel />}
     </div>
   )
 }

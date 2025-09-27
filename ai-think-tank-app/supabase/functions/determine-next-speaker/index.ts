@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { StructuredOutputParser } from '@langchain/core/output_parsers'
 import { createLangChainProvider } from '../_shared/langchain-factory.ts'
 import { Persona, Message, TurnOrchestration } from '../_shared/types.ts'
+import { DebugLogger } from '../_shared/debug-logger.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -51,6 +52,8 @@ const TurnDecisionSchema = z.object({
   })
 })
 
+const logger = new DebugLogger('determine-next-speaker')
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -59,6 +62,13 @@ serve(async (req) => {
 
   try {
     const request: NextSpeakerRequest = await req.json()
+
+    // Log incoming request
+    await logger.log('request', 'received', request, {
+      conversationId: request.conversation_id,
+      userId: request.userId
+    })
+
     const {
       conversation_id,
       recent_messages = [],

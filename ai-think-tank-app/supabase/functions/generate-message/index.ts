@@ -11,6 +11,7 @@ import {
   GeminiCacheManager,
   OpenAICacheManager
 } from '../_shared/cache-manager.ts'
+import { DebugLogger } from '../_shared/debug-logger.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,6 +24,8 @@ interface GenerateMessageRequest extends ChatRequest {
   userId: string
 }
 
+const logger = new DebugLogger('generate-message')
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -31,6 +34,20 @@ serve(async (req) => {
 
   try {
     const request: GenerateMessageRequest = await req.json()
+
+    // Log incoming request
+    await logger.log('request', 'received', {
+      personaId: request.personaId,
+      conversationId: request.conversationId,
+      userId: request.userId,
+      messageCount: request.messages?.length,
+      stream: request.stream
+    }, {
+      conversationId: request.conversationId,
+      personaId: request.personaId,
+      userId: request.userId
+    })
+
     const {
       messages,
       personaId,
@@ -58,6 +75,12 @@ serve(async (req) => {
       .select('*')
       .eq('id', personaId)
       .single()
+
+    await logger.log('internal', 'persona-loaded', persona, {
+      conversationId,
+      personaId,
+      userId
+    })
 
     if (personaError || !persona) {
       return new Response(
