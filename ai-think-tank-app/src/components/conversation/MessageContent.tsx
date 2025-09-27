@@ -128,13 +128,13 @@ export const MessageContent: React.FC<MessageContentProps> = ({
           },
           // Lists
           ul({ children }) {
-            return <ul className="list-disc list-inside ml-2 my-1">{children}</ul>
+            return <ul className="list-disc list-outside ml-6 my-1">{children}</ul>
           },
           ol({ children }) {
-            return <ol className="list-decimal list-inside ml-2 my-1">{children}</ol>
+            return <ol className="list-decimal list-outside ml-6 my-1">{children}</ol>
           },
           li({ children }) {
-            return <li className="leading-snug">{children}</li>
+            return <li className="leading-snug pl-1">{children}</li>
           },
           // Blockquotes
           blockquote({ children }) {
