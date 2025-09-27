@@ -41,7 +41,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { useAuthStore } from '@/stores/auth-store'
 import { useBudgetStore, getRemainingBudget } from '@/stores/budget-store'
-import { budgetStatistics, BudgetStatistics } from '@/services/statistics/budget-statistics'
+import { budgetStatistics } from '@/services/statistics/budget-statistics'
+import type { BudgetStatistics } from '@/services/statistics/budget-statistics'
 import { formatCurrency, formatPercentage } from '@/lib/utils'
 
 const COLORS = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#6366f1']
