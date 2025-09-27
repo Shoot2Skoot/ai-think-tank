@@ -96,7 +96,9 @@ export class ProviderManagerEdge {
         usage: data.usage,
         cost: data.cost,
         provider: persona.provider,
-        model: persona.model
+        model: persona.model,
+        personaId: persona.id,
+        personaName: persona.name
       }
     } catch (error) {
       console.error(`Error generating response for persona ${persona.name}:`, error)

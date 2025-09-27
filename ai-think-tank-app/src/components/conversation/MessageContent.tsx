@@ -34,7 +34,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({
   const processedContent = highlightMentions(content)
 
   return (
-    <div className={cn('prose prose-sm max-w-none text-gray-100 prose-p:text-gray-100', className)}>
+    <div className={cn('prose prose-sm max-w-none text-gray-100 prose-p:text-gray-100 prose-strong:text-gray-100', className)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
@@ -92,12 +92,12 @@ export const MessageContent: React.FC<MessageContentProps> = ({
             const text = String(children)
             if (text.startsWith('@')) {
               return (
-                <span className="font-semibold mention-highlight">
+                <span className="font-semibold text-current mention-highlight">
                   {children}
                 </span>
               )
             }
-            return <strong className="font-semibold">{children}</strong>
+            return <strong className="font-semibold text-current">{children}</strong>
           },
           // Tables
           table({ children }) {

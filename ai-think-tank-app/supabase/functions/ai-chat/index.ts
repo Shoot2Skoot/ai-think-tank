@@ -32,6 +32,7 @@ interface ChatResponse {
   cost: number
   provider: string
   model: string
+  personaId?: string
 }
 
 // Initialize Supabase client
@@ -490,6 +491,7 @@ serve(async (req) => {
       cost,
       provider,
       model,
+      personaId,
     }
 
     return new Response(JSON.stringify(response), {
