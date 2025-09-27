@@ -54,7 +54,7 @@ async function callOpenAI(model: string, messages: any[], temperature: number, m
       messages,
       temperature,
       max_tokens: maxTokens,
-      stream,
+      stream: false, // Streaming not yet implemented
     }),
   })
 
@@ -96,6 +96,7 @@ async function callAnthropic(model: string, messages: any[], temperature: number
       content: m.content,
     }))
 
+  // Note: Streaming is not yet implemented, always use non-streaming for now
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -110,7 +111,7 @@ async function callAnthropic(model: string, messages: any[], temperature: number
       system: systemMessage,
       temperature,
       max_tokens: maxTokens,
-      stream,
+      stream: false, // Always false for now - streaming requires SSE parsing
     }),
   })
 
