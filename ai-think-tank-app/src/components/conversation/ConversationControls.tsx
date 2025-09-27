@@ -3,7 +3,6 @@ import { Play, Pause, Zap, Hand, Gauge } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Slider } from '@/components/ui/Slider'
 import { Popover } from '@/components/ui/Popover'
-import { Toggle } from '@/components/ui/Toggle'
 import type { Conversation } from '@/types'
 
 interface ConversationControlsProps {
