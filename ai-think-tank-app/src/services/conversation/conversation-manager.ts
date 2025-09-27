@@ -284,10 +284,24 @@ export class ConversationManager {
         // Calculate delay based on conversation speed (1-10, where 10 is fastest)
         const delayMs = (11 - conversation.speed) * 1000 // 1s to 10s delay
 
+        console.log('[ConversationManager] Scheduling next auto response:', {
+          conversationId,
+          delayMs,
+          speed: conversation.speed,
+          mode: conversation.mode,
+          isActive: conversation.is_active
+        })
+
         // Don't await this - let it run in the background
         setTimeout(() => {
+          console.log('[ConversationManager] Auto response timer triggered')
           this.startAutoResponses(conversationId)
         }, delayMs)
+      } else {
+        console.log('[ConversationManager] Not continuing auto responses:', {
+          mode: conversation.mode,
+          isActive: conversation.is_active
+        })
       }
 
       return message
@@ -302,7 +316,24 @@ export class ConversationManager {
     const personas = this.conversationPersonas.get(conversationId)
     const messages = this.conversationMessages.get(conversationId) || []
 
-    if (!conversation || !personas || personas.length === 0) return
+    console.log('[ConversationManager] startAutoResponses called:', {
+      conversationId,
+      hasConversation: !!conversation,
+      personaCount: personas?.length || 0,
+      messageCount: messages.length,
+      mode: conversation?.mode,
+      isActive: conversation?.is_active
+    })
+
+    if (!conversation || !personas || personas.length === 0) {
+      console.log('[ConversationManager] Stopping auto responses - missing data')
+      return
+    }
+
+    if (!conversation.is_active) {
+      console.log('[ConversationManager] Stopping auto responses - conversation not active')
+      return
+    }
 
     // Determine next speaker using turn orchestrator
     const decision = await turnOrchestrator.determineSpeaker(
@@ -312,6 +343,12 @@ export class ConversationManager {
       conversation.mode
     )
 
+    console.log('[ConversationManager] Turn decision:', {
+      nextPersonaId: decision.next_persona_id,
+      reasoning: decision.reasoning,
+      score: decision.priority_score
+    })
+
     if (decision.next_persona_id) {
       // Generate response from selected persona
       const streamCallback = this.streamCallbacks.get(conversationId)
@@ -319,6 +356,8 @@ export class ConversationManager {
 
       // generateResponse will handle the continuation with proper delay
       // No need to call startAutoResponses here as generateResponse will do it
+    } else {
+      console.log('[ConversationManager] No next persona selected by orchestrator')
     }
   }
 

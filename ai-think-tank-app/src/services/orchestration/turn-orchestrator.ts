@@ -26,6 +26,14 @@ export class TurnOrchestrator {
     messages: Message[],
     mode: 'auto' | 'manual' = 'auto'
   ): Promise<TurnDecision> {
+    console.log('[TurnOrchestrator] determineSpeaker called:', {
+      conversationId,
+      personaCount: personas.length,
+      personas: personas.map(p => ({ id: p.id, name: p.name })),
+      messageCount: messages.length,
+      mode
+    })
+
     if (mode === 'manual') {
       // In manual mode, we don't determine speaker automatically
       return {
@@ -49,6 +57,11 @@ export class TurnOrchestrator {
       personas.map(async persona => {
         const factors = await this.calculateFactors(persona, conversationId, messages, personas)
         const totalScore = this.calculateWeightedScore(factors)
+
+        console.log(`[TurnOrchestrator] Score for ${persona.name}:`, {
+          factors,
+          totalScore
+        })
 
         return {
           persona,
@@ -192,10 +205,12 @@ export class TurnOrchestrator {
     conversationId: string,
     messages: Message[]
   ): number {
-    const lastSpeakerId = this.lastSpeaker.get(conversationId)
+    // Get the last AI message (not user message)
+    const lastAIMessage = messages.filter(m => m.persona_id && m.role === 'assistant').pop()
+    const lastSpeakerId = lastAIMessage?.persona_id
 
-    // Avoid same speaker twice in a row
-    if (lastSpeakerId === persona.id) {
+    // Avoid same speaker twice in a row (but only for AI messages)
+    if (lastSpeakerId && lastSpeakerId === persona.id) {
       return 0.1
     }
 
