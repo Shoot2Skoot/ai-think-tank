@@ -246,6 +246,25 @@ export class ConversationManager {
         onStream
       )
 
+      // Log structured response if available
+      if (response.structuredResponse) {
+        console.log('[ConversationManager] Structured response received:', {
+          speaker: response.structuredResponse.speaker,
+          personaName: persona.name,
+          speakerMatch: response.structuredResponse.speaker === persona.name,
+          confidence: response.structuredResponse.confidence,
+          metadata: response.structuredResponse.metadata
+        })
+
+        // Verify speaker attribution
+        if (response.structuredResponse.speaker !== persona.name) {
+          console.warn('[ConversationManager] Speaker mismatch in structured response:', {
+            expected: persona.name,
+            received: response.structuredResponse.speaker
+          })
+        }
+      }
+
       // Save message to database
       const messageToInsert = {
         conversation_id: conversationId,
@@ -263,7 +282,8 @@ export class ConversationManager {
         personaId,
         personaName: persona.name,
         role: messageToInsert.role,
-        contentPreview: response.content.substring(0, 100)
+        contentPreview: response.content.substring(0, 100),
+        hasStructuredResponse: !!response.structuredResponse
       })
 
       const { data: message, error } = await supabase

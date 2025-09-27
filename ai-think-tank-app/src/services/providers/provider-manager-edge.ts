@@ -21,6 +21,20 @@ interface ProviderResponse {
   cost: number
   provider: Provider
   model: string
+  personaId?: string
+  personaName?: string
+  structuredResponse?: {
+    speaker: string
+    content: string
+    confidence?: number
+    reasoning?: string
+    metadata?: {
+      tone?: string
+      isFollowUp?: boolean
+      mentionedSpeakers?: string[]
+      topics?: string[]
+    }
+  }
 }
 
 export class ProviderManagerEdge {
@@ -61,8 +75,8 @@ export class ProviderManagerEdge {
     const simpleMessages = this.convertMessages(messages, persona)
 
     try {
-      // Call Edge Function
-      const { data, error } = await supabase.functions.invoke('ai-chat', {
+      // Call Edge Function with structured output support
+      const { data, error } = await supabase.functions.invoke('ai-chat-structured', {
         body: {
           provider: persona.provider,
           model: persona.model,
@@ -70,15 +84,35 @@ export class ProviderManagerEdge {
           temperature: persona.temperature || 0.7,
           maxTokens: persona.max_tokens || 1000,
           personaId: persona.id,
+          personaName: persona.name, // Required for structured output
           conversationId: this.conversationId,
           userId: this.userId,
-          stream: !!onStream
+          stream: !!onStream,
+          useStructuredOutput: true // Enable structured outputs
         }
       })
 
       if (error) {
         console.error('Edge Function error:', error)
         throw error
+      }
+
+      // Log structured response if available
+      if (data.structuredResponse) {
+        console.log('Received structured response:', {
+          speaker: data.structuredResponse.speaker,
+          contentPreview: data.structuredResponse.content?.substring(0, 100),
+          confidence: data.structuredResponse.confidence,
+          metadata: data.structuredResponse.metadata
+        })
+
+        // Verify the speaker matches the persona
+        if (data.structuredResponse.speaker !== persona.name) {
+          console.warn('Speaker mismatch:', {
+            expected: persona.name,
+            received: data.structuredResponse.speaker
+          })
+        }
       }
 
       // Handle streaming if needed (future enhancement)
@@ -98,7 +132,8 @@ export class ProviderManagerEdge {
         provider: persona.provider,
         model: persona.model,
         personaId: persona.id,
-        personaName: persona.name
+        personaName: persona.name,
+        structuredResponse: data.structuredResponse // Include structured response
       }
     } catch (error) {
       console.error(`Error generating response for persona ${persona.name}:`, error)
