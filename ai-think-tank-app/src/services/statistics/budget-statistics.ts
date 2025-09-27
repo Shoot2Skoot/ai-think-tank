@@ -1,6 +1,26 @@
 import { supabase } from '@/lib/supabase'
-import { Provider, CostRecord, Message, Persona } from '@/types'
+import type { Provider, Message, Persona } from '@/types'
 import { startOfDay, endOfDay, subDays, format, startOfMonth, endOfMonth } from 'date-fns'
+
+// Define CostRecord interface locally to avoid import issues
+interface CostRecord {
+  id: string
+  message_id?: string
+  persona_id?: string
+  conversation_id?: string
+  user_id?: string
+  provider: Provider
+  model: string
+  input_tokens: number
+  output_tokens: number
+  cached_tokens: number
+  cache_write_tokens: number
+  input_cost: number
+  output_cost: number
+  cache_cost: number
+  total_cost: number
+  created_at: string
+}
 
 export interface TokenStatistics {
   input_tokens: number
