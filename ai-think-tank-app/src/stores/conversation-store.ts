@@ -572,7 +572,10 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
 
     // If turning on auto mode, trigger next response
     if (newState && activeConversation.is_active) {
-      conversationManager.triggerAutoResponses(activeConversation.id)
+      conversationManager.resumeAutoResponses(activeConversation.id)
+    } else {
+      // Pause auto responses
+      conversationManager.pauseAutoResponses(activeConversation.id)
     }
   },
 
@@ -600,7 +603,10 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
 
       // If switching to auto mode, start auto responses
       if (mode === 'auto' && activeConversation.is_active) {
-        conversationManager.triggerAutoResponses(activeConversation.id)
+        conversationManager.resumeAutoResponses(activeConversation.id)
+      } else if (mode === 'manual') {
+        // If switching to manual mode, pause auto responses
+        conversationManager.pauseAutoResponses(activeConversation.id)
       }
     } catch (error) {
       console.error('Failed to update conversation mode:', error)

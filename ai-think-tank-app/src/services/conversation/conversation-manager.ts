@@ -20,6 +20,8 @@ export class ConversationManager {
   private conversationMessages: Map<string, Message[]> = new Map()
   private streamCallbacks: Map<string, (chunk: string) => void> = new Map()
   private pinnedMessages: Map<string, string[]> = new Map() // conversationId -> messageIds
+  private autoResponseTimers: Map<string, NodeJS.Timeout> = new Map() // Track timers for cancellation
+  private pausedConversations: Set<string> = new Set() // Track paused conversations
 
   async createConversation(
     userId: string,
@@ -280,7 +282,7 @@ export class ConversationManager {
       await this.recordCost(conversationId, personaId, response)
 
       // Continue auto responses if in auto mode
-      if (conversation.mode === 'auto' && conversation.is_active) {
+      if (conversation.mode === 'auto' && conversation.is_active && !this.pausedConversations.has(conversationId)) {
         // Calculate delay based on conversation speed (1-10, where 10 is fastest)
         const delayMs = (11 - conversation.speed) * 1000 // 1s to 10s delay
 
@@ -289,14 +291,26 @@ export class ConversationManager {
           delayMs,
           speed: conversation.speed,
           mode: conversation.mode,
-          isActive: conversation.is_active
+          isActive: conversation.is_active,
+          isPaused: this.pausedConversations.has(conversationId)
         })
 
+        // Clear any existing timer for this conversation
+        const existingTimer = this.autoResponseTimers.get(conversationId)
+        if (existingTimer) {
+          clearTimeout(existingTimer)
+        }
+
         // Don't await this - let it run in the background
-        setTimeout(() => {
+        const timer = setTimeout(() => {
           console.log('[ConversationManager] Auto response timer triggered')
-          this.startAutoResponses(conversationId)
+          this.autoResponseTimers.delete(conversationId)
+          if (!this.pausedConversations.has(conversationId)) {
+            this.startAutoResponses(conversationId)
+          }
         }, delayMs)
+
+        this.autoResponseTimers.set(conversationId, timer)
       } else {
         console.log('[ConversationManager] Not continuing auto responses:', {
           mode: conversation.mode,
@@ -322,7 +336,8 @@ export class ConversationManager {
       personaCount: personas?.length || 0,
       messageCount: messages.length,
       mode: conversation?.mode,
-      isActive: conversation?.is_active
+      isActive: conversation?.is_active,
+      isPaused: this.pausedConversations.has(conversationId)
     })
 
     if (!conversation || !personas || personas.length === 0) {
@@ -332,6 +347,11 @@ export class ConversationManager {
 
     if (!conversation.is_active) {
       console.log('[ConversationManager] Stopping auto responses - conversation not active')
+      return
+    }
+
+    if (this.pausedConversations.has(conversationId)) {
+      console.log('[ConversationManager] Stopping auto responses - conversation is paused')
       return
     }
 
@@ -491,7 +511,30 @@ export class ConversationManager {
 
   async triggerAutoResponses(conversationId: string): Promise<void> {
     // Public method to trigger auto responses
+    // Remove from paused set when explicitly triggered
+    this.pausedConversations.delete(conversationId)
     return this.startAutoResponses(conversationId)
+  }
+
+  pauseAutoResponses(conversationId: string): void {
+    console.log('[ConversationManager] Pausing auto responses for:', conversationId)
+    this.pausedConversations.add(conversationId)
+    // Clear any pending timer
+    const timer = this.autoResponseTimers.get(conversationId)
+    if (timer) {
+      clearTimeout(timer)
+      this.autoResponseTimers.delete(conversationId)
+    }
+  }
+
+  resumeAutoResponses(conversationId: string): void {
+    console.log('[ConversationManager] Resuming auto responses for:', conversationId)
+    this.pausedConversations.delete(conversationId)
+    // Restart auto responses if conversation is active
+    const conversation = this.activeConversations.get(conversationId)
+    if (conversation?.mode === 'auto' && conversation.is_active) {
+      this.startAutoResponses(conversationId)
+    }
   }
 
   async updateConversation(conversationId: string, updates: Partial<Conversation>): Promise<void> {
